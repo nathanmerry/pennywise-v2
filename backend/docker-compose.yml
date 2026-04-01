@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  app_db:
+    image: postgres:15
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: pennywise
+      POSTGRES_PASSWORD: pennywise
+      POSTGRES_DB: pennywise_db
