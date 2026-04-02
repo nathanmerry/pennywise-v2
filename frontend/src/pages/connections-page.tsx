@@ -7,6 +7,7 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle2,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ import {
   useDeleteConnection,
   useSyncConnection,
 } from "../hooks/use-connections";
-import { getAuthUrl } from "../lib/api";
+import { getAuthUrl, getReauthUrl } from "../lib/api";
 
 export function ConnectionsPage() {
   const { data: connections = [], isLoading, refetch } = useConnections();
@@ -87,6 +88,17 @@ export function ConnectionsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const { url } = await getReauthUrl(conn.id);
+                      window.location.href = url;
+                    }}
+                  >
+                    <KeyRound className="mr-1 h-3 w-3" />
+                    Re-auth
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

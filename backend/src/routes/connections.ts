@@ -23,17 +23,60 @@ router.get("/auth-url", (_req, res) => {
   res.json({ url });
 });
 
+// GET /api/connections/:id/reauth — get re-auth URL for existing connection
+router.get("/:id/reauth", async (req, res) => {
+  const connection = await prisma.bankConnection.findUnique({ where: { id: req.params.id } });
+  if (!connection) {
+    res.status(404).json({ error: "Connection not found" });
+    return;
+  }
+  const state = JSON.stringify({ reauth: connection.id });
+  const url = truelayer.getAuthUrl(state);
+  res.json({ url });
+});
+
 // GET /api/connections/callback — TrueLayer OAuth callback
 router.get("/callback", async (req, res) => {
   const code = req.query.code as string | undefined;
+  const stateRaw = req.query.state as string | undefined;
 
   if (!code) {
     res.redirect(`${env.FRONTEND_URL}/connections?error=no_code`);
     return;
   }
 
+  // Check if this is a re-auth for an existing connection
+  let reauthConnectionId: string | null = null;
+  if (stateRaw) {
+    try {
+      const parsed = JSON.parse(stateRaw);
+      if (parsed.reauth) reauthConnectionId = parsed.reauth;
+    } catch {
+      // Not a reauth, proceed as new connection
+    }
+  }
+
   try {
     const tokens = await truelayer.exchangeCode(code);
+
+    if (reauthConnectionId) {
+      // Re-auth: update tokens, reset status, clear last_synced_at for full sync
+      await prisma.bankConnection.update({
+        where: { id: reauthConnectionId },
+        data: {
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          status: "active",
+          lastSyncedAt: null,
+          consentExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      res.redirect(`${env.FRONTEND_URL}/connections?reauth=true`);
+      return;
+    }
+
+    // New connection
     const meta = await truelayer.getConnectionMetadata(tokens.access_token);
 
     const connection = await prisma.bankConnection.create({
@@ -43,7 +86,7 @@ router.get("/callback", async (req, res) => {
         refreshToken: tokens.refresh_token,
         institutionName: meta.provider || "Unknown Bank",
         status: "active",
-        consentExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // ~90 days
+        consentExpiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       },
     });
 

@@ -27,6 +27,10 @@ export function deleteConnection(id: string) {
   return request<{ ok: boolean }>(`/connections/${id}`, { method: "DELETE" });
 }
 
+export function getReauthUrl(id: string) {
+  return request<{ url: string }>(`/connections/${id}/reauth`);
+}
+
 // Accounts
 export function fetchAccounts() {
   return request<Account[]>("/accounts");
