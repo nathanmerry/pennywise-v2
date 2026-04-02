@@ -28,13 +28,12 @@ interface TrueLayerTransaction {
   transaction_type: string;
   transaction_category: string;
   transaction_classification: string[];
-  merchant_name?: string;
   running_balance?: { amount: number; currency: string };
-  meta?: Record<string, unknown>;
+  meta?: { provider_merchant_name?: string; [key: string]: unknown };
   status?: string;
 }
 
-export function getAuthUrl(): string {
+export function getAuthUrl(state?: string): string {
   const params = new URLSearchParams({
     response_type: "code",
     client_id: env.TRUELAYER_CLIENT_ID,
@@ -42,6 +41,10 @@ export function getAuthUrl(): string {
     redirect_uri: env.TRUELAYER_REDIRECT_URI,
     providers: "uk-ob-all uk-oauth-all",
   });
+
+  if (state) {
+    params.set("state", state);
+  }
 
   return `${env.TRUELAYER_AUTH_URL}/?${params.toString()}`;
 }

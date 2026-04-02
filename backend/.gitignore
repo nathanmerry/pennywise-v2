@@ -1,4 +1,5 @@
 node_modules/
+db_data/
 dist/
 coverage/
 
@@ -20,6 +21,8 @@ pnpm-debug.log*
 
 prisma/dev.db
 prisma/dev.db-journal
+
+src/generated/
 
 tmp/
 temp/

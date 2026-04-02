@@ -1,0 +1,42 @@
+[
+  {
+    "meta": {
+      "address": "London GB",
+      "provider_id": "T07885723d62bc913a3fdb9600242d236",
+      "transaction_type": "Debit",
+      "provider_category": "DEB",
+      "provider_merchant_name": "Revolut**4283*"
+    },
+    "amount": -110,
+    "currency": "GBP",
+    "timestamp": "2026-03-30T00:00:00Z",
+    "description": "Revolut**4283*",
+    "transaction_id": "667d2618346060230d0d8863aa3b3337",
+    "running_balance": { "amount": 592.15, "currency": "GBP" },
+    "transaction_type": "DEBIT",
+    "transaction_category": "PURCHASE",
+    "provider_transaction_id": "T07885723d62bc913a3fdb9600242d236",
+    "transaction_classification": [],
+    "normalised_provider_transaction_id": "txn-7f1e3577471d140d4"
+  },
+  {
+    "meta": {
+      "address": "GREENWICH GB",
+      "provider_id": "T2b3098d6aae20c269069735a70400f5d",
+      "transaction_type": "Debit",
+      "provider_category": "DEB",
+      "provider_merchant_name": "WAITROSE STORES"
+    },
+    "amount": -17.9,
+    "currency": "GBP",
+    "timestamp": "2026-03-30T00:00:00Z",
+    "description": "WAITROSE STORES",
+    "transaction_id": "851bd5b8329b632b615e45aeefec20f6",
+    "running_balance": { "amount": 702.15, "currency": "GBP" },
+    "transaction_type": "DEBIT",
+    "transaction_category": "PURCHASE",
+    "provider_transaction_id": "T2b3098d6aae20c269069735a70400f5d",
+    "transaction_classification": [],
+    "normalised_provider_transaction_id": "txn-534dd6c2126a79e73"
+  }
+]
