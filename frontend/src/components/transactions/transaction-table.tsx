@@ -35,7 +35,7 @@ import { CreateRuleDialog } from "./create-rule-dialog";
 interface TransactionTableProps {
   transactions: Transaction[];
   categories: Category[];
-  onUpdate: (id: string, data: { note?: string | null; categoryId?: string | null; isIgnored?: boolean }) => void;
+  onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }) => void;
   isUpdating: boolean;
 }
 
@@ -113,18 +113,37 @@ export function TransactionTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {tx.category ? (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs"
-                        style={
-                          tx.category.color
-                            ? { backgroundColor: tx.category.color + "20", color: tx.category.color }
-                            : undefined
-                        }
-                      >
-                        {tx.category.name}
-                      </Badge>
+                    {tx.categories.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {(() => {
+                          // Build parent/child display pairs
+                          const directCats = tx.categories.filter((c) => c.source !== "inherited");
+                          if (directCats.length === 0) return null;
+                          return directCats.map((tc) => {
+                            const parent = tx.categories.find(
+                              (p) => p.categoryId === tc.category.parentId && p.source === "inherited"
+                            );
+                            const label = parent
+                              ? `${parent.category.name} / ${tc.category.name}`
+                              : tc.category.name;
+                            const color = tc.category.color || parent?.category.color;
+                            return (
+                              <Badge
+                                key={tc.id}
+                                variant="secondary"
+                                className="text-xs"
+                                style={
+                                  color
+                                    ? { backgroundColor: color + "20", color }
+                                    : undefined
+                                }
+                              >
+                                {label}
+                              </Badge>
+                            );
+                          });
+                        })()}
+                      </div>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
                     )}
@@ -217,8 +236,8 @@ export function TransactionTable({
           categories={categories}
           open={!!categoryDialog}
           onOpenChange={(open: boolean) => !open && setCategoryDialog(null)}
-          onSave={(categoryId: string | null) => {
-            onUpdate(categoryDialog.id, { categoryId });
+          onSave={(categoryIds: string[]) => {
+            onUpdate(categoryDialog.id, { categoryIds: categoryIds.length > 0 ? categoryIds : null });
             setCategoryDialog(null);
           }}
         />

@@ -5,11 +5,17 @@ import { applyRuleToExistingTransactions } from "../services/rules.js";
 
 const router = Router();
 
+const ruleInclude = {
+  categories: {
+    include: { category: true },
+  },
+} as const;
+
 // GET /api/rules
 router.get("/", async (_req, res) => {
   const rules = await prisma.recurringRule.findMany({
     orderBy: { createdAt: "desc" },
-    include: { category: true },
+    include: ruleInclude,
   });
   res.json(rules);
 });
@@ -18,7 +24,7 @@ router.get("/", async (_req, res) => {
 const createSchema = z.object({
   matchType: z.enum(["merchant", "description"]),
   matchValue: z.string().min(1),
-  categoryId: z.string().nullable().optional(),
+  categoryIds: z.array(z.string()).optional(),
   setIgnored: z.boolean().nullable().optional(),
   applyToExisting: z.boolean().optional(),
 });
@@ -30,11 +36,16 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  const { applyToExisting, ...data } = parsed.data;
+  const { applyToExisting, categoryIds, ...data } = parsed.data;
 
   const rule = await prisma.recurringRule.create({
-    data,
-    include: { category: true },
+    data: {
+      ...data,
+      categories: categoryIds && categoryIds.length > 0
+        ? { create: categoryIds.map((id) => ({ categoryId: id })) }
+        : undefined,
+    },
+    include: ruleInclude,
   });
 
   let applied = 0;
@@ -49,7 +60,7 @@ router.post("/", async (req, res) => {
 const updateSchema = z.object({
   matchType: z.enum(["merchant", "description"]).optional(),
   matchValue: z.string().min(1).optional(),
-  categoryId: z.string().nullable().optional(),
+  categoryIds: z.array(z.string()).nullable().optional(),
   setIgnored: z.boolean().nullable().optional(),
   active: z.boolean().optional(),
 });
@@ -61,12 +72,37 @@ router.patch("/:id", async (req, res) => {
     return;
   }
 
+  const { categoryIds, ...scalarData } = parsed.data;
+
+  // Update scalar fields
   const rule = await prisma.recurringRule.update({
     where: { id: req.params.id },
-    data: parsed.data,
-    include: { category: true },
+    data: scalarData,
   });
-  res.json(rule);
+
+  // Update categories if provided
+  if (categoryIds !== undefined) {
+    // Delete all existing
+    await prisma.recurringRuleCategory.deleteMany({
+      where: { ruleId: rule.id },
+    });
+
+    // Insert new
+    if (categoryIds && categoryIds.length > 0) {
+      await prisma.recurringRuleCategory.createMany({
+        data: categoryIds.map((id) => ({ ruleId: rule.id, categoryId: id })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  // Return with categories
+  const updated = await prisma.recurringRule.findUniqueOrThrow({
+    where: { id: rule.id },
+    include: ruleInclude,
+  });
+
+  res.json(updated);
 });
 
 // DELETE /api/rules/:id

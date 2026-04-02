@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,16 +42,48 @@ export function CreateRuleDialog({
   const [matchValue, setMatchValue] = useState(
     transaction.merchantName || transaction.description
   );
-  const [categoryId, setCategoryId] = useState<string>("none");
+  const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set());
   const [setIgnored, setSetIgnored] = useState(false);
   const [applyToExisting, setApplyToExisting] = useState(true);
+
+  // Build hierarchy
+  const { roots, childMap, catMap } = useMemo(() => {
+    const roots: Category[] = [];
+    const childMap = new Map<string, Category[]>();
+    for (const cat of categories) {
+      if (!cat.parentId) {
+        roots.push(cat);
+      } else {
+        const siblings = childMap.get(cat.parentId) || [];
+        siblings.push(cat);
+        childMap.set(cat.parentId, siblings);
+      }
+    }
+    return { roots, childMap, catMap: new Map(categories.map((c) => [c.id, c])) };
+  }, [categories]);
+
+  const toggleCat = (id: string) => {
+    const next = new Set(selectedCats);
+    if (next.has(id)) {
+      next.delete(id);
+      const children = childMap.get(id) || [];
+      for (const child of children) next.delete(child.id);
+    } else {
+      next.add(id);
+      const cat = catMap.get(id);
+      if (cat?.parentId && !next.has(cat.parentId)) {
+        next.add(cat.parentId);
+      }
+    }
+    setSelectedCats(next);
+  };
 
   const handleSubmit = () => {
     createRule.mutate(
       {
         matchType,
         matchValue,
-        categoryId: categoryId === "none" ? null : categoryId,
+        categoryIds: selectedCats.size > 0 ? Array.from(selectedCats) : undefined,
         setIgnored: setIgnored ? true : null,
         applyToExisting,
       },
@@ -97,22 +129,49 @@ export function CreateRuleDialog({
             />
           </div>
 
-          {/* Category */}
+          {/* Categories (multi-select hierarchical) */}
           <div className="space-y-2">
-            <Label>Assign category</Label>
-            <Select value={categoryId} onValueChange={(val: string) => setCategoryId(val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="No category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No category</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Assign categories</Label>
+            <div className="max-h-48 overflow-y-auto space-y-1 rounded-md border p-2">
+              {roots.map((root) => {
+                const children = childMap.get(root.id) || [];
+                return (
+                  <div key={root.id}>
+                    <label className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted cursor-pointer">
+                      <Checkbox
+                        checked={selectedCats.has(root.id)}
+                        onCheckedChange={() => toggleCat(root.id)}
+                      />
+                      {root.color && (
+                        <span
+                          className="inline-block h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: root.color }}
+                        />
+                      )}
+                      <span className="text-sm font-medium">{root.name}</span>
+                    </label>
+                    {children.map((child) => (
+                      <label
+                        key={child.id}
+                        className="flex items-center gap-2 rounded px-2 py-1.5 pl-8 hover:bg-muted cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={selectedCats.has(child.id)}
+                          onCheckedChange={() => toggleCat(child.id)}
+                        />
+                        {child.color && (
+                          <span
+                            className="inline-block h-3 w-3 rounded-full shrink-0"
+                            style={{ backgroundColor: child.color }}
+                          />
+                        )}
+                        <span className="text-sm">{child.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Ignore */}

@@ -101,11 +101,21 @@ export function TransactionFilterBar({
         <SelectContent>
           <SelectItem value="all">All categories</SelectItem>
           <SelectItem value="uncategorised">Uncategorised</SelectItem>
-          {categories.map((cat) => (
-            <SelectItem key={cat.id} value={cat.id}>
-              {cat.name}
-            </SelectItem>
-          ))}
+          {categories
+            .filter((cat) => !cat.parentId)
+            .map((parent) => {
+              const children = categories.filter((c) => c.parentId === parent.id);
+              return [
+                <SelectItem key={parent.id} value={parent.id}>
+                  {parent.name}
+                </SelectItem>,
+                ...children.map((child) => (
+                  <SelectItem key={child.id} value={child.id}>
+                    &nbsp;&nbsp;{child.name}
+                  </SelectItem>
+                )),
+              ];
+            })}
         </SelectContent>
       </Select>
 

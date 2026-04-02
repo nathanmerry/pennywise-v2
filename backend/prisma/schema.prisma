@@ -44,45 +44,65 @@ model Account {
 }
 
 model Transaction {
-  id                  String    @id @default(cuid())
-  source              String    @default("truelayer")
-  sourceTransactionId String    @map("source_transaction_id")
-  accountId           String    @map("account_id")
-  amount              Decimal   @db.Decimal(12, 2)
-  currency            String    @default("GBP")
-  transactionDate     DateTime  @map("transaction_date")
-  description         String
-  merchantName        String?   @map("merchant_name")
-  pending             Boolean   @default(false)
-  note                String?
-  categoryId          String?   @map("category_id")
-  categorySource      String?   @map("category_source") // manual | rule | null
-  isIgnored           Boolean   @default(false) @map("is_ignored")
-  ignoreSource        String?   @map("ignore_source") // manual | rule | null
-  rawJson             Json?     @map("raw_json")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  id                      String    @id @default(cuid())
+  source                  String    @default("truelayer")
+  sourceTransactionId     String    @map("source_transaction_id")
+  accountId               String    @map("account_id")
+  amount                  Decimal   @db.Decimal(12, 2)
+  currency                String    @default("GBP")
+  transactionDate         DateTime  @map("transaction_date")
+  description             String
+  merchantName            String?   @map("merchant_name")
+  pending                 Boolean   @default(false)
+  note                    String?
+  isIgnored               Boolean   @default(false) @map("is_ignored")
+  ignoreSource            String?   @map("ignore_source") // manual | rule | null
+  categoriesLockedByUser  Boolean   @default(false) @map("categories_locked_by_user")
+  rawJson                 Json?     @map("raw_json")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
 
-  account  Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  account    Account               @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  categories TransactionCategory[]
 
   @@unique([source, sourceTransactionId])
   @@index([accountId])
   @@index([transactionDate])
-  @@index([categoryId])
   @@index([isIgnored])
   @@map("transactions")
+}
+
+model TransactionCategory {
+  id            String   @id @default(cuid())
+  transactionId String   @map("transaction_id")
+  categoryId    String   @map("category_id")
+  source        String   // manual | rule | inherited
+  sourceRuleId  String?  @map("source_rule_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, categoryId])
+  @@index([transactionId])
+  @@index([categoryId])
+  @@map("transaction_categories")
 }
 
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique
   color     String?
+  parentId  String?  @map("parent_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  transactions   Transaction[]
-  recurringRules RecurringRule[]
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
+  transactionCategories TransactionCategory[]
+  ruleCategories        RecurringRuleCategory[]
 
   @@map("categories")
 }
@@ -91,13 +111,27 @@ model RecurringRule {
   id         String   @id @default(cuid())
   matchType  String   @map("match_type") // merchant | description
   matchValue String   @map("match_value")
-  categoryId String?  @map("category_id")
   setIgnored Boolean? @map("set_ignored")
   active     Boolean  @default(true)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categories RecurringRuleCategory[]
 
   @@map("recurring_rules")
+}
+
+model RecurringRuleCategory {
+  id         String   @id @default(cuid())
+  ruleId     String   @map("rule_id")
+  categoryId String   @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  rule     RecurringRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  category Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleId, categoryId])
+  @@index([ruleId])
+  @@index([categoryId])
+  @@map("recurring_rule_categories")
 }

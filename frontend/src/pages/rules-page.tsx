@@ -82,18 +82,23 @@ export function RulesPage() {
                   </TableCell>
                   <TableCell className="font-mono text-sm">{rule.matchValue}</TableCell>
                   <TableCell>
-                    {rule.category ? (
-                      <Badge
-                        variant="secondary"
-                        className="text-xs"
-                        style={
-                          rule.category.color
-                            ? { backgroundColor: rule.category.color + "20", color: rule.category.color }
-                            : undefined
-                        }
-                      >
-                        {rule.category.name}
-                      </Badge>
+                    {rule.categories.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {rule.categories.map((rc) => (
+                          <Badge
+                            key={rc.id}
+                            variant="secondary"
+                            className="text-xs"
+                            style={
+                              rc.category.color
+                                ? { backgroundColor: rc.category.color + "20", color: rc.category.color }
+                                : undefined
+                            }
+                          >
+                            {rc.category.name}
+                          </Badge>
+                        ))}
+                      </div>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
                     )}

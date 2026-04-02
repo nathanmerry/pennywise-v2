@@ -48,7 +48,7 @@ export function TransactionsPage() {
           <TransactionTable
             transactions={data?.data || []}
             categories={categories}
-            onUpdate={(id, updateData) => updateTx.mutate({ id, data: updateData })}
+            onUpdate={(id, data) => updateTx.mutate({ id, data })}
             isUpdating={updateTx.isPending}
           />
 

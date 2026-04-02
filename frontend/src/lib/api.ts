@@ -58,7 +58,7 @@ export function fetchTransactions(filters: TransactionFilters = {}) {
 
 export function updateTransaction(
   id: string,
-  data: { note?: string | null; categoryId?: string | null; isIgnored?: boolean }
+  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }
 ) {
   return request<Transaction>(`/transactions/${id}`, {
     method: "PATCH",
@@ -71,14 +71,14 @@ export function fetchCategories() {
   return request<Category[]>("/categories");
 }
 
-export function createCategory(data: { name: string; color?: string | null }) {
+export function createCategory(data: { name: string; color?: string | null; parentId?: string | null }) {
   return request<Category>("/categories", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function updateCategory(id: string, data: { name?: string; color?: string | null }) {
+export function updateCategory(id: string, data: { name?: string; color?: string | null; parentId?: string | null }) {
   return request<Category>(`/categories/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -97,7 +97,7 @@ export function fetchRules() {
 export function createRule(data: {
   matchType: "merchant" | "description";
   matchValue: string;
-  categoryId?: string | null;
+  categoryIds?: string[];
   setIgnored?: boolean | null;
   applyToExisting?: boolean;
 }) {
@@ -112,7 +112,7 @@ export function updateRule(
   data: Partial<{
     matchType: "merchant" | "description";
     matchValue: string;
-    categoryId: string | null;
+    categoryIds: string[] | null;
     setIgnored: boolean | null;
     active: boolean;
   }>
@@ -164,6 +164,15 @@ export interface Account {
   connection?: { id: string; institutionName: string; status: string };
 }
 
+export interface TransactionCategoryAssignment {
+  id: string;
+  transactionId: string;
+  categoryId: string;
+  source: "manual" | "rule" | "inherited";
+  sourceRuleId: string | null;
+  category: Category;
+}
+
 export interface Transaction {
   id: string;
   source: string;
@@ -176,13 +185,12 @@ export interface Transaction {
   merchantName: string | null;
   pending: boolean;
   note: string | null;
-  categoryId: string | null;
-  categorySource: string | null;
   isIgnored: boolean;
   ignoreSource: string | null;
+  categoriesLockedByUser: boolean;
   createdAt: string;
   updatedAt: string;
-  category: Category | null;
+  categories: TransactionCategoryAssignment[];
   account: Account & {
     connection: { institutionName: string };
   };
@@ -192,19 +200,28 @@ export interface Category {
   id: string;
   name: string;
   color: string | null;
+  parentId: string | null;
   createdAt: string;
-  _count?: { transactions: number };
+  parent?: Category | null;
+  children?: Category[];
+  _count?: { transactionCategories: number };
+}
+
+export interface RuleCategoryAssignment {
+  id: string;
+  ruleId: string;
+  categoryId: string;
+  category: Category;
 }
 
 export interface RecurringRule {
   id: string;
   matchType: "merchant" | "description";
   matchValue: string;
-  categoryId: string | null;
   setIgnored: boolean | null;
   active: boolean;
   createdAt: string;
-  category: Category | null;
+  categories: RuleCategoryAssignment[];
 }
 
 export interface SyncResult {
