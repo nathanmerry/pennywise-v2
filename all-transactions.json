@@ -1,0 +1,3386 @@
+[
+  {
+    "description_group": "000*TRIP.COM",
+    "merchant_name": "000*trip.com",
+    "count": 1,
+    "amount_range": "£83.90-£83.90"
+  },
+  {
+    "description_group": "7 HUNGRY 2",
+    "merchant_name": "7 Hungry 2",
+    "count": 1,
+    "amount_range": "£0.92-£0.92"
+  },
+  {
+    "description_group": "9000 CADDY S",
+    "merchant_name": "9000 Caddy S",
+    "count": 1,
+    "amount_range": "£9.90-£9.90"
+  },
+  {
+    "description_group": "ADAGIO CAFFE WINE BAR",
+    "merchant_name": "Adagio Caffe Wine Bar",
+    "count": 1,
+    "amount_range": "£8.00-£8.00"
+  },
+  {
+    "description_group": "ALBERT SCHLOSS LONDON",
+    "merchant_name": "Albert Schloss London",
+    "count": 3,
+    "amount_range": "£15.00-£30.20"
+  },
+  {
+    "description_group": "ALDI 52285 RECEIPT NO.",
+    "merchant_name": "Aldi 52285 Receipt No.",
+    "count": 1,
+    "amount_range": "£11.12-£11.12"
+  },
+  {
+    "description_group": "ALDI 59470 RECEIPT NO.",
+    "merchant_name": "Aldi 59470 Receipt No.",
+    "count": 1,
+    "amount_range": "£25.86-£25.86"
+  },
+  {
+    "description_group": "ALDI 781 087",
+    "merchant_name": "Aldi Stores",
+    "count": 1,
+    "amount_range": "£6.37-£6.37"
+  },
+  {
+    "description_group": "ALIMENTARI ORTIS",
+    "merchant_name": "Alimentari Ortis",
+    "count": 1,
+    "amount_range": "£6.25-£6.25"
+  },
+  {
+    "description_group": "ALL MY FRIENDS",
+    "merchant_name": "All My Friends",
+    "count": 1,
+    "amount_range": "£12.80-£12.80"
+  },
+  {
+    "description_group": "ALL'ARCO",
+    "merchant_name": "All'arco",
+    "count": 1,
+    "amount_range": "£18.00-£18.00"
+  },
+  {
+    "description_group": "ALLE TERRAZZE",
+    "merchant_name": "Alle Terrazze",
+    "count": 1,
+    "amount_range": "£33.80-£33.80"
+  },
+  {
+    "description_group": "AMAZON EU",
+    "merchant_name": "Amazon Eu",
+    "count": 5,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*gz7903dl5",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*hf9ns89y5",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*hr0k83dz5",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*z13y35ql4",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*zc6yq9374",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON PRIME",
+    "merchant_name": "Amazon Prime*zt6416ve4",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMAZON.UK",
+    "merchant_name": "Amazon Uk* 3v8if1wh5",
+    "count": 1,
+    "amount_range": "£249.00-£249.00"
+  },
+  {
+    "description_group": "AMAZON.UK",
+    "merchant_name": "Amazon Uk* 7u9vn90t5",
+    "count": 1,
+    "amount_range": "£4.75-£4.75"
+  },
+  {
+    "description_group": "AMAZON.UK",
+    "merchant_name": "Amazon Uk* 9b33u1d75",
+    "count": 1,
+    "amount_range": "£199.00-£199.00"
+  },
+  {
+    "description_group": "AMAZON.UK",
+    "merchant_name": "Amazon Uk* X85cw9et5",
+    "count": 1,
+    "amount_range": "£199.00-£199.00"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* 5f3lo2z85",
+    "count": 1,
+    "amount_range": "£20.97-£20.97"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* 5o3b154c5",
+    "count": 1,
+    "amount_range": "£6.99-£6.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Bu5ju65m5",
+    "count": 1,
+    "amount_range": "£89.99-£89.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* G388570t5",
+    "count": 1,
+    "amount_range": "£14.99-£14.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Hc9lk9x05",
+    "count": 1,
+    "amount_range": "£9.99-£9.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Ij1pv86k5",
+    "count": 1,
+    "amount_range": "£23.98-£23.98"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Qs0sn2u35",
+    "count": 1,
+    "amount_range": "£49.16-£49.16"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Rk4d727c4",
+    "count": 1,
+    "amount_range": "£8.49-£8.49"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Rq4622kl5",
+    "count": 1,
+    "amount_range": "£15.97-£15.97"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Uv3k063m5",
+    "count": 1,
+    "amount_range": "£9.99-£9.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Wk0bd4r75",
+    "count": 1,
+    "amount_range": "£9.99-£9.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Z713h43o5",
+    "count": 1,
+    "amount_range": "£14.99-£14.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Zd7wu8g94",
+    "count": 1,
+    "amount_range": "£20.04-£20.04"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon* Zf9zz1un5",
+    "count": 1,
+    "amount_range": "£13.99-£13.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon.co.uk",
+    "count": 1,
+    "amount_range": "£6.99-£6.99"
+  },
+  {
+    "description_group": "AMAZON.CO.UK",
+    "merchant_name": "Amazon.co.uk*z18hz3vx4",
+    "count": 1,
+    "amount_range": "£6.99-£6.99"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*208kl3145",
+    "count": 1,
+    "amount_range": "£9.99-£9.99"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*8d93r04w5",
+    "count": 1,
+    "amount_range": "£13.99-£13.99"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*q00jh4in5",
+    "count": 1,
+    "amount_range": "£14.99-£14.99"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*so35y9sr5",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*xz2h71vr5",
+    "count": 1,
+    "amount_range": "£36.76-£36.76"
+  },
+  {
+    "description_group": "AMZNMKTPLACE",
+    "merchant_name": "Amznmktplace*z87ye5le4",
+    "count": 1,
+    "amount_range": "£23.98-£23.98"
+  },
+  {
+    "description_group": "ANCHOR",
+    "merchant_name": "Anchor",
+    "count": 6,
+    "amount_range": "£12.96-£43.90"
+  },
+  {
+    "description_group": "ANGELI FISH & CHIPS",
+    "merchant_name": "Angeli Fish & Chips",
+    "count": 1,
+    "amount_range": "£3.95-£3.95"
+  },
+  {
+    "description_group": "APPLE PAY PAYMENT BY *9398",
+    "merchant_name": "Apple Pay Payment By *9398",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "APPLE PAY TOP-UP BY *5537",
+    "merchant_name": "Apple Pay Top-Up By *5537",
+    "count": 7,
+    "amount_range": "£10.00-£135.09"
+  },
+  {
+    "description_group": "APPLE PAY TOP-UP BY *6333",
+    "merchant_name": "Apple Pay Top-Up By *6333",
+    "count": 32,
+    "amount_range": "£10.00-£250.00"
+  },
+  {
+    "description_group": "APPLE.COM/BILL",
+    "merchant_name": "Apple.com/bill",
+    "count": 1,
+    "amount_range": "£34.99-£34.99"
+  },
+  {
+    "description_group": "APPROPRIATE",
+    "merchant_name": "Appropriate",
+    "count": 1,
+    "amount_range": "£8.30-£8.30"
+  },
+  {
+    "description_group": "ARENA FOODS MARKET",
+    "merchant_name": "Arena Foods Market",
+    "count": 1,
+    "amount_range": "£0.99-£0.99"
+  },
+  {
+    "description_group": "ARGOS",
+    "merchant_name": "Argos Ltd",
+    "count": 1,
+    "amount_range": "£2.00-£2.00"
+  },
+  {
+    "description_group": "ASDA STORES 4907",
+    "merchant_name": "Asda  Stores 4907",
+    "count": 1,
+    "amount_range": "£1.08-£1.08"
+  },
+  {
+    "description_group": "ASDA EXPRESS ROMFORD",
+    "merchant_name": "Asda Express Romford",
+    "count": 1,
+    "amount_range": "£4.16-£4.16"
+  },
+  {
+    "description_group": "ASDA DEPTFORD",
+    "merchant_name": "Asda Stores",
+    "count": 1,
+    "amount_range": "£5.48-£5.48"
+  },
+  {
+    "description_group": "ASF AUTOLINEE SRL",
+    "merchant_name": "Asf Autolinee",
+    "count": 1,
+    "amount_range": "£3.68-£3.68"
+  },
+  {
+    "description_group": "ASSENHEIMS 56",
+    "merchant_name": "Assenheims 56",
+    "count": 1,
+    "amount_range": "£8.50-£8.50"
+  },
+  {
+    "description_group": "ASTITI ARTSHOP HO",
+    "merchant_name": "Astiti Artshop Ho",
+    "count": 2,
+    "amount_range": "£3.30-£6.60"
+  },
+  {
+    "description_group": "ATRE3",
+    "merchant_name": "Atre3",
+    "count": 1,
+    "amount_range": "£14.50-£14.50"
+  },
+  {
+    "description_group": "AU COIN BIO",
+    "merchant_name": "Au Coin Bio",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "AU DES LISSE",
+    "merchant_name": "Au Des Lisse",
+    "count": 1,
+    "amount_range": "£26.00-£26.00"
+  },
+  {
+    "description_group": "BAILO SUP VENEZIANI",
+    "merchant_name": "Bailo Sup Veneziani",
+    "count": 1,
+    "amount_range": "£2.99-£2.99"
+  },
+  {
+    "description_group": "BALI OM LOUNGE PT HO",
+    "merchant_name": "Bali Om Lounge Pt Ho",
+    "count": 1,
+    "amount_range": "£9.65-£9.65"
+  },
+  {
+    "description_group": "BANILLA CLAUDIA",
+    "merchant_name": "Banilla Claudia      2041",
+    "count": 1,
+    "amount_range": "£10.11-£10.11"
+  },
+  {
+    "description_group": "BAR ROSSI SNC DI BRUSC",
+    "merchant_name": "Bar Rossi Snc Di Brusc",
+    "count": 1,
+    "amount_range": "£9.76-£9.76"
+  },
+  {
+    "description_group": "BAR SANREMO",
+    "merchant_name": "Bar Sanremo",
+    "count": 1,
+    "amount_range": "£15.84-£15.84"
+  },
+  {
+    "description_group": "BARRIO SNC",
+    "merchant_name": "Barrio Snc",
+    "count": 3,
+    "amount_range": "£10.00-£12.20"
+  },
+  {
+    "description_group": "BARROW BOY & BANKER -",
+    "merchant_name": "Barrow Boy And Banker Se1",
+    "count": 1,
+    "amount_range": "£16.65-£16.65"
+  },
+  {
+    "description_group": "BB52 BURGERS CANGGU",
+    "merchant_name": "Bb52 Burgers Canggu",
+    "count": 2,
+    "amount_range": "£4.32-£7.05"
+  },
+  {
+    "description_group": "BERMONDSEY BIER KELLER",
+    "merchant_name": "Bermondsey Bier Keller",
+    "count": 1,
+    "amount_range": "£51.30-£51.30"
+  },
+  {
+    "description_group": "BETMGM.CO.UK",
+    "merchant_name": "Betmgm.co.uk",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "BETUK.COM",
+    "merchant_name": "Betuk.com",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "BILLS - GREENWICH",
+    "merchant_name": "Bills - Greenwich",
+    "count": 1,
+    "amount_range": "£38.03-£38.03"
+  },
+  {
+    "description_group": "BISTROT74",
+    "merchant_name": "Bistrot74",
+    "count": 1,
+    "amount_range": "£18.00-£18.00"
+  },
+  {
+    "description_group": "BLOSSOM BLOOM CREATION",
+    "merchant_name": "Blossom Bloom Creation",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "BODIES IN THE BOOKSHOP",
+    "merchant_name": "Bodies In The Booksho",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "BOLT.EU/O/2504190855",
+    "merchant_name": "Bolt.eu",
+    "count": 1,
+    "amount_range": "£21.20-£21.20"
+  },
+  {
+    "description_group": "BOLT.EUO2506181753",
+    "merchant_name": "Bolt.euo2506181753",
+    "count": 1,
+    "amount_range": "£7.30-£7.30"
+  },
+  {
+    "description_group": "BOLT.EUO2507311122",
+    "merchant_name": "Bolt.euo2507311122",
+    "count": 1,
+    "amount_range": "£7.50-£7.50"
+  },
+  {
+    "description_group": "BOLT.EUO2601172245",
+    "merchant_name": "Bolt.euo2601172245",
+    "count": 1,
+    "amount_range": "£37.84-£37.84"
+  },
+  {
+    "description_group": "BOMBA MIX SNC",
+    "merchant_name": "Bomba Mix Snc",
+    "count": 1,
+    "amount_range": "£3.00-£3.00"
+  },
+  {
+    "description_group": "BOOKING.COM HOTEL",
+    "merchant_name": "Booking.com Hotel",
+    "count": 1,
+    "amount_range": "£266.30-£266.30"
+  },
+  {
+    "description_group": "BOOTS 6232",
+    "merchant_name": "Boots 6232",
+    "count": 1,
+    "amount_range": "£2.70-£2.70"
+  },
+  {
+    "description_group": "BOOTS GREENWICH",
+    "merchant_name": "Boots Greenwich",
+    "count": 1,
+    "amount_range": "£3.35-£3.35"
+  },
+  {
+    "description_group": "BOXFIT UK - BOXFIT",
+    "merchant_name": "Boxfit Uk - Boxfit",
+    "count": 1,
+    "amount_range": "£13.99-£13.99"
+  },
+  {
+    "description_group": "BOXHALL CITY (TRADERS)",
+    "merchant_name": "Boxhall City (traders",
+    "count": 1,
+    "amount_range": "£14.50-£14.50"
+  },
+  {
+    "description_group": "BOYLESPORTS",
+    "merchant_name": "Boylesports",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "BREAD AND TRUFFLE",
+    "merchant_name": "Bread And Truffle",
+    "count": 1,
+    "amount_range": "£10.45-£10.45"
+  },
+  {
+    "description_group": "BREWDOG UPMINSTER",
+    "merchant_name": "Brewdog Upminster",
+    "count": 2,
+    "amount_range": "£13.75-£19.80"
+  },
+  {
+    "description_group": "BRICK BONANZA",
+    "merchant_name": "Brick Bonanza",
+    "count": 2,
+    "amount_range": "£0.99-£0.99"
+  },
+  {
+    "description_group": "BRIXTON LEON",
+    "merchant_name": "Brixton Leon",
+    "count": 1,
+    "amount_range": "£4.99-£4.99"
+  },
+  {
+    "description_group": "BROZZIANO-PACIFICO",
+    "merchant_name": "Brozziano-pacifico",
+    "count": 1,
+    "amount_range": "£0.55-£0.55"
+  },
+  {
+    "description_group": "BULLER",
+    "merchant_name": "Buller",
+    "count": 1,
+    "amount_range": "£8.68-£8.68"
+  },
+  {
+    "description_group": "BUSTER MANTIS",
+    "merchant_name": "Buster Mantis",
+    "count": 1,
+    "amount_range": "£61.99-£61.99"
+  },
+  {
+    "description_group": "CABIFY AR 25460WVIAPZS",
+    "merchant_name": "Cabify Ar 25460wviapzs",
+    "count": 1,
+    "amount_range": "£3.41-£3.41"
+  },
+  {
+    "description_group": "CABIFY AR 25463J3WDNMQ",
+    "merchant_name": "Cabify Ar 25463j3wdnmq",
+    "count": 1,
+    "amount_range": "£3.12-£3.12"
+  },
+  {
+    "description_group": "CABIFY AR 2546AB1EFWMB",
+    "merchant_name": "Cabify Ar 2546ab1efwmb",
+    "count": 1,
+    "amount_range": "£2.01-£2.01"
+  },
+  {
+    "description_group": "CABIFY AR 2546EDJFJ5ZT",
+    "merchant_name": "Cabify Ar 2546edjfj5zt",
+    "count": 1,
+    "amount_range": "£3.82-£3.82"
+  },
+  {
+    "description_group": "CABIFY AR 2546ESFLCKXD",
+    "merchant_name": "Cabify Ar 2546esflckxd",
+    "count": 1,
+    "amount_range": "£10.65-£10.65"
+  },
+  {
+    "description_group": "CABIFY AR 2546FRBERXR8",
+    "merchant_name": "Cabify Ar 2546frberxr8",
+    "count": 1,
+    "amount_range": "£7.44-£7.44"
+  },
+  {
+    "description_group": "CABIFY AR 2546GDZXTLJ7",
+    "merchant_name": "Cabify Ar 2546gdzxtlj7",
+    "count": 1,
+    "amount_range": "£8.22-£8.22"
+  },
+  {
+    "description_group": "CABIFY AR 2546YEIWDX9D",
+    "merchant_name": "Cabify Ar 2546yeiwdx9d",
+    "count": 1,
+    "amount_range": "£7.35-£7.35"
+  },
+  {
+    "description_group": "CAFE LILOU",
+    "merchant_name": "Cafe Lilou",
+    "count": 1,
+    "amount_range": "£12.20-£12.20"
+  },
+  {
+    "description_group": "CAFFE NERO 468 UPMINS",
+    "merchant_name": "Caffe Nero  468 Upmins",
+    "count": 1,
+    "amount_range": "£4.00-£4.00"
+  },
+  {
+    "description_group": "CAFFE' DEGLI INNOCENTI",
+    "merchant_name": "Caffe' Degli Innocenti",
+    "count": 1,
+    "amount_range": "£13.30-£13.30"
+  },
+  {
+    "description_group": "CAFFETTERIA SAN LEONAR",
+    "merchant_name": "Caffetteria San Leonar",
+    "count": 1,
+    "amount_range": "£14.50-£14.50"
+  },
+  {
+    "description_group": "CAMBRIDGE BELFRY HOTEL",
+    "merchant_name": "Cambridge Belfry Hotel",
+    "count": 5,
+    "amount_range": "£4.50-£18.50"
+  },
+  {
+    "description_group": "CAMBRIDGE BELFRY RECEP",
+    "merchant_name": "Cambridge Belfry Recep",
+    "count": 1,
+    "amount_range": "£35.00-£35.00"
+  },
+  {
+    "description_group": "CAMBRIDGE BLUE",
+    "merchant_name": "Cambridge Blue",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "CANTINA DE' PUCCI",
+    "merchant_name": "Cantina De' Pucci",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "CARREFOUR 3421",
+    "merchant_name": "Carrefour 3421",
+    "count": 1,
+    "amount_range": "£4.29-£4.29"
+  },
+  {
+    "description_group": "CARREFOUR EXPRESS",
+    "merchant_name": "Carrefour Express",
+    "count": 1,
+    "amount_range": "£8.31-£8.31"
+  },
+  {
+    "description_group": "CASA 28",
+    "merchant_name": "Casa 28",
+    "count": 1,
+    "amount_range": "£52.70-£52.70"
+  },
+  {
+    "description_group": "CASH AT CHANGEGROUP OPEN SPACE FA",
+    "merchant_name": "Cash At Changegroup Open Space Fa",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "CASH AT THE COPERATIVE FOOD",
+    "merchant_name": "Cash At The Coperative Food",
+    "count": 1,
+    "amount_range": "£50.00-£50.00"
+  },
+  {
+    "description_group": "CHEZ COFFEE & CO",
+    "merchant_name": "Chez Coffee & Co",
+    "count": 1,
+    "amount_range": "£10.50-£10.50"
+  },
+  {
+    "description_group": "CHEZ GADO GADO",
+    "merchant_name": "Chez Gado Gado",
+    "count": 1,
+    "amount_range": "£14.58-£14.58"
+  },
+  {
+    "description_group": "CKM.NORD",
+    "merchant_name": "Ckm.nord",
+    "count": 1,
+    "amount_range": "£12.71-£12.71"
+  },
+  {
+    "description_group": "CLACTON PIER",
+    "merchant_name": "Clacton Pier",
+    "count": 1,
+    "amount_range": "£16.95-£16.95"
+  },
+  {
+    "description_group": "CLAPTON HART",
+    "merchant_name": "Clapton Hart",
+    "count": 1,
+    "amount_range": "£14.00-£14.00"
+  },
+  {
+    "description_group": "CLIP MX*BLACKSTAR",
+    "merchant_name": "Clip Mx*blackstar",
+    "count": 1,
+    "amount_range": "£54.23-£54.23"
+  },
+  {
+    "description_group": "CO OP MEMBERSHIP",
+    "merchant_name": "Co Op Membership",
+    "count": 1,
+    "amount_range": "£1.00-£1.00"
+  },
+  {
+    "description_group": "CO-OP GROUP FOOD",
+    "merchant_name": "Co-op Group Food",
+    "count": 59,
+    "amount_range": "£1.15-£27.25"
+  },
+  {
+    "description_group": "COACH AND HORSES GREEN",
+    "merchant_name": "Coach And Horses Gree",
+    "count": 2,
+    "amount_range": "£14.20-£14.20"
+  },
+  {
+    "description_group": "COACH AND HORSES GREENWIC",
+    "merchant_name": "Coach And Horses Greenwic",
+    "count": 1,
+    "amount_range": "£14.40-£14.40"
+  },
+  {
+    "description_group": "COFFEE BEYOND LTD",
+    "merchant_name": "Coffee Beyond Ltd",
+    "count": 3,
+    "amount_range": "£3.75-£12.85"
+  },
+  {
+    "description_group": "COMO CAFFE' STAZIONE S",
+    "merchant_name": "Como Caffe' Stazione S",
+    "count": 1,
+    "amount_range": "£9.95-£9.95"
+  },
+  {
+    "description_group": "COSTA COFFEE 43010438",
+    "merchant_name": "Costa Coffee 43010438",
+    "count": 1,
+    "amount_range": "£7.10-£7.10"
+  },
+  {
+    "description_group": "COSTCUTTER",
+    "merchant_name": "Costcutter",
+    "count": 2,
+    "amount_range": "£0.89-£1.50"
+  },
+  {
+    "description_group": "CREAM AND CRUMBLE BAKE",
+    "merchant_name": "Cream And Crumble Bake",
+    "count": 1,
+    "amount_range": "£3.48-£3.48"
+  },
+  {
+    "description_group": "CRF EXP FIG4637",
+    "merchant_name": "Crf Exp Fig4637",
+    "count": 2,
+    "amount_range": "£10.42-£10.50"
+  },
+  {
+    "description_group": "CRF EXP FIR4639",
+    "merchant_name": "Crf Exp Fir4639",
+    "count": 1,
+    "amount_range": "£17.17-£17.17"
+  },
+  {
+    "description_group": "CROWN BH",
+    "merchant_name": "Crown Bh",
+    "count": 3,
+    "amount_range": "£15.10-£18.50"
+  },
+  {
+    "description_group": "CUTTY SARK",
+    "merchant_name": "Cutty Sark",
+    "count": 2,
+    "amount_range": "£22.25-£57.60"
+  },
+  {
+    "description_group": "DAG SUPERMARKET",
+    "merchant_name": "Dag Supermarket",
+    "count": 40,
+    "amount_range": "£1.00-£12.55"
+  },
+  {
+    "description_group": "DANDY GRILL PALERMO",
+    "merchant_name": "Dandy Grill Palermo",
+    "count": 1,
+    "amount_range": "£90.50-£90.50"
+  },
+  {
+    "description_group": "DARK SUGARS LTD",
+    "merchant_name": "Dark Sugars Ltd",
+    "count": 1,
+    "amount_range": "£12.50-£12.50"
+  },
+  {
+    "description_group": "DAVYS AT GREENWICH",
+    "merchant_name": "Davys At Greenwich",
+    "count": 1,
+    "amount_range": "£15.95-£15.95"
+  },
+  {
+    "description_group": "DAZNBET",
+    "merchant_name": "Daznbet",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "DECORUM VENDING PAYTER",
+    "merchant_name": "Decorum Vending Payter",
+    "count": 1,
+    "amount_range": "£2.75-£2.75"
+  },
+  {
+    "description_group": "DELIVEROO",
+    "merchant_name": "Deliveroo",
+    "count": 4,
+    "amount_range": "£5.00-£70.68"
+  },
+  {
+    "description_group": "DEPTFORD SUPERMARKET",
+    "merchant_name": "Deptford Supermarket",
+    "count": 1,
+    "amount_range": "£4.98-£4.98"
+  },
+  {
+    "description_group": "DESIGNMYNIGHT",
+    "merchant_name": "Designmynight",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "DH SEETHING LANE",
+    "merchant_name": "Dh Seething Lane",
+    "count": 1,
+    "amount_range": "£22.50-£22.50"
+  },
+  {
+    "description_group": "DISNEY PLUS",
+    "merchant_name": "Disney Plus",
+    "count": 9,
+    "amount_range": "£0.00-£9.99"
+  },
+  {
+    "description_group": "DNHGODADDY *#77206254",
+    "merchant_name": "Dnhgodaddy  *#77206254",
+    "count": 1,
+    "amount_range": "£5.99-£5.99"
+  },
+  {
+    "description_group": "DONNA",
+    "merchant_name": "Donna",
+    "count": 1,
+    "amount_range": "£32.40-£32.40"
+  },
+  {
+    "description_group": "DRINGS BUTCHERS",
+    "merchant_name": "Drings Butchers",
+    "count": 4,
+    "amount_range": "£0.77-£25.79"
+  },
+  {
+    "description_group": "DRINGS BUTCHERS 2",
+    "merchant_name": "Drings Butchers 2",
+    "count": 4,
+    "amount_range": "£3.18-£34.10"
+  },
+  {
+    "description_group": "DRINKY CAFFE'",
+    "merchant_name": "Drinky Caffe'",
+    "count": 1,
+    "amount_range": "£21.42-£21.42"
+  },
+  {
+    "description_group": "DUKE OF EDINBURGH",
+    "merchant_name": "Duke Of Edinburgh",
+    "count": 2,
+    "amount_range": "£27.20-£43.60"
+  },
+  {
+    "description_group": "EATVIET",
+    "merchant_name": "Eatviet",
+    "count": 1,
+    "amount_range": "£10.50-£10.50"
+  },
+  {
+    "description_group": "EFC STORE LTD",
+    "merchant_name": "Efc Store Ltd",
+    "count": 1,
+    "amount_range": "£6.00-£6.00"
+  },
+  {
+    "description_group": "ESSEX WILDLIFE SALES L",
+    "merchant_name": "Essex Wildlife Sales L",
+    "count": 1,
+    "amount_range": "£11.55-£11.55"
+  },
+  {
+    "description_group": "ESTIATORIO SARRIS",
+    "merchant_name": "Estiatorio Sarris",
+    "count": 1,
+    "amount_range": "£28.80-£28.80"
+  },
+  {
+    "description_group": "EURL KESTENER FR",
+    "merchant_name": "Eurl Kestener Fr",
+    "count": 1,
+    "amount_range": "£14.95-£14.95"
+  },
+  {
+    "description_group": "EVENT TICKETS",
+    "merchant_name": "Event Tickets",
+    "count": 1,
+    "amount_range": "£43.90-£43.90"
+  },
+  {
+    "description_group": "EVERBRITE FOOD AND WIN",
+    "merchant_name": "Everbrite Food And Win",
+    "count": 2,
+    "amount_range": "£2.24-£9.99"
+  },
+  {
+    "description_group": "EXCHANGED TO EUR",
+    "merchant_name": "Exchanged To Eur",
+    "count": 20,
+    "amount_range": "£50.00-£359.51"
+  },
+  {
+    "description_group": "EXCHANGED TO GBP",
+    "merchant_name": "Exchanged To Gbp",
+    "count": 14,
+    "amount_range": "£0.11-£86.00"
+  },
+  {
+    "description_group": "FAIRDEAL FOOD CENTRE",
+    "merchant_name": "Fairdeal Food Centre",
+    "count": 1,
+    "amount_range": "£18.99-£18.99"
+  },
+  {
+    "description_group": "FARMACIA ALLA CROCE DI",
+    "merchant_name": "Farmacia Alla Croce Di",
+    "count": 1,
+    "amount_range": "£33.80-£33.80"
+  },
+  {
+    "description_group": "FARMACIA REALE",
+    "merchant_name": "Farmacia Reale",
+    "count": 1,
+    "amount_range": "£15.50-£15.50"
+  },
+  {
+    "description_group": "FARMER J (FINSBURY SQU",
+    "merchant_name": "Farmer J (finsbury Squ",
+    "count": 1,
+    "amount_range": "£12.30-£12.30"
+  },
+  {
+    "description_group": "FATLING & FIRKIN HORNC",
+    "merchant_name": "Fatling And Firkin",
+    "count": 2,
+    "amount_range": "£11.90-£16.78"
+  },
+  {
+    "description_group": "FELICITY SPA",
+    "merchant_name": "Felicity Spa",
+    "count": 1,
+    "amount_range": "£10.34-£10.34"
+  },
+  {
+    "description_group": "FIG BRANCH CAFE",
+    "merchant_name": "Fig Branch Cafe",
+    "count": 3,
+    "amount_range": "£10.30-£20.00"
+  },
+  {
+    "description_group": "FINCA MONASTERIO EVENT",
+    "merchant_name": "Finca Monasterio Event",
+    "count": 1,
+    "amount_range": "£5.30-£5.30"
+  },
+  {
+    "description_group": "FLYING HORSE",
+    "merchant_name": "Flying Horse",
+    "count": 1,
+    "amount_range": "£13.80-£13.80"
+  },
+  {
+    "description_group": "FONTAINE",
+    "merchant_name": "Fontaine",
+    "count": 1,
+    "amount_range": "£14.00-£14.00"
+  },
+  {
+    "description_group": "FOTIS",
+    "merchant_name": "Fotis",
+    "count": 1,
+    "amount_range": "£63.30-£63.30"
+  },
+  {
+    "description_group": "FRANGOS IOANNIS ARCH",
+    "merchant_name": "Frangos Ioannis",
+    "count": 1,
+    "amount_range": "£24.00-£24.00"
+  },
+  {
+    "description_group": "FREDDIES FLOWERS",
+    "merchant_name": "Freddies Flowers",
+    "count": 8,
+    "amount_range": "£0.00-£32.00"
+  },
+  {
+    "description_group": "FREEMANS EVENT PARTNER",
+    "merchant_name": "Freemans Event Partner",
+    "count": 6,
+    "amount_range": "£7.50-£28.00"
+  },
+  {
+    "description_group": "FROM WILLIAM OLIVER M FENTON",
+    "merchant_name": "From William Oliver M Fenton",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "G & G SNC DI GIANNETTI",
+    "merchant_name": "G & G Snc Di Giannetti",
+    "count": 1,
+    "amount_range": "£3.08-£3.08"
+  },
+  {
+    "description_group": "GAILS GREENWICH",
+    "merchant_name": "Gails Greenwich",
+    "count": 5,
+    "amount_range": "£4.00-£15.40"
+  },
+  {
+    "description_group": "GELATERIA CI GUSTA",
+    "merchant_name": "Gelateria Ci Gusta",
+    "count": 1,
+    "amount_range": "£5.00-£5.00"
+  },
+  {
+    "description_group": "GINGER LOUNGE",
+    "merchant_name": "Ginger Lounge",
+    "count": 1,
+    "amount_range": "£33.60-£33.60"
+  },
+  {
+    "description_group": "GIPSY MOTH",
+    "merchant_name": "Gipsy Moth",
+    "count": 1,
+    "amount_range": "£19.80-£19.80"
+  },
+  {
+    "description_group": "GIROLA MARIA",
+    "merchant_name": "Girola Maria",
+    "count": 1,
+    "amount_range": "£9.51-£9.51"
+  },
+  {
+    "description_group": "GISHOTELS DI GISELDA B",
+    "merchant_name": "Gishotels Di Giselda B",
+    "count": 1,
+    "amount_range": "£50.00-£50.00"
+  },
+  {
+    "description_group": "GODFREY'S OF HORNCHURC",
+    "merchant_name": "Godfrey's Of Hornchur",
+    "count": 1,
+    "amount_range": "£3.30-£3.30"
+  },
+  {
+    "description_group": "GODFREY'S OF HORNCHURCH,",
+    "merchant_name": "Godfrey's Of Hornchurch,",
+    "count": 1,
+    "amount_range": "£7.45-£7.45"
+  },
+  {
+    "description_group": "GOOGLE *CHROME TEMP",
+    "merchant_name": "Google *chrome Temp",
+    "count": 4,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "GOOGLE *GOOGLE ONE",
+    "merchant_name": "Google *google One",
+    "count": 3,
+    "amount_range": "£1.59-£1.59"
+  },
+  {
+    "description_group": "GOOGLE *TEMPORARY HOLD",
+    "merchant_name": "Google *temporary Hold",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "GRAB REGISTRATION",
+    "merchant_name": "Grab Registration",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "GRAB* A-882ARSKWWJSCAV",
+    "merchant_name": "Grab* A-882arskwwjscav",
+    "count": 2,
+    "amount_range": "£0.48-£0.71"
+  },
+  {
+    "description_group": "GRAB* A-88JH426GWCW4AV",
+    "merchant_name": "Grab* A-88jh426gwcw4av",
+    "count": 1,
+    "amount_range": "£1.02-£1.02"
+  },
+  {
+    "description_group": "GRAB* A-88JKQOBWWJSCAV",
+    "merchant_name": "Grab* A-88jkqobwwjscav",
+    "count": 1,
+    "amount_range": "£0.72-£0.72"
+  },
+  {
+    "description_group": "GRAB* A-88JU6OQWX6SMAV",
+    "merchant_name": "Grab* A-88ju6oqwx6smav",
+    "count": 2,
+    "amount_range": "£0.11-£3.55"
+  },
+  {
+    "description_group": "GRAB* A-88KMIV9GWC2VAV",
+    "merchant_name": "Grab* A-88kmiv9gwc2vav",
+    "count": 1,
+    "amount_range": "£2.51-£2.51"
+  },
+  {
+    "description_group": "GRAB* A-88OAC97GWLJUAV",
+    "merchant_name": "Grab* A-88oac97gwljuav",
+    "count": 1,
+    "amount_range": "£1.19-£1.19"
+  },
+  {
+    "description_group": "GRAB* A-88P2JELWWJSCAV",
+    "merchant_name": "Grab* A-88p2jelwwjscav",
+    "count": 2,
+    "amount_range": "£0.23-£0.67"
+  },
+  {
+    "description_group": "GRAB* A-88QMU22WXEMBAV",
+    "merchant_name": "Grab* A-88qmu22wxembav",
+    "count": 1,
+    "amount_range": "£1.00-£1.00"
+  },
+  {
+    "description_group": "GRAB* A-88SKG6MGWHUUAV",
+    "merchant_name": "Grab* A-88skg6mgwhuuav",
+    "count": 1,
+    "amount_range": "£1.32-£1.32"
+  },
+  {
+    "description_group": "GRAB* A-88T5PVDGX7NSAV",
+    "merchant_name": "Grab* A-88t5pvdgx7nsav",
+    "count": 1,
+    "amount_range": "£0.81-£0.81"
+  },
+  {
+    "description_group": "GREENS COFFEE AND COMP",
+    "merchant_name": "Greens Coffee And Comp",
+    "count": 1,
+    "amount_range": "£30.00-£30.00"
+  },
+  {
+    "description_group": "GREGGS",
+    "merchant_name": "Greggs",
+    "count": 5,
+    "amount_range": "£1.25-£4.60"
+  },
+  {
+    "description_group": "H & M",
+    "merchant_name": "H & M",
+    "count": 1,
+    "amount_range": "£14.99-£14.99"
+  },
+  {
+    "description_group": "HALAI GENERAL STORES",
+    "merchant_name": "Halai General Stores",
+    "count": 1,
+    "amount_range": "£18.00-£18.00"
+  },
+  {
+    "description_group": "HAMILTON HALL",
+    "merchant_name": "Hamilton Hall",
+    "count": 1,
+    "amount_range": "£11.63-£11.63"
+  },
+  {
+    "description_group": "HARROW",
+    "merchant_name": "Harrow",
+    "count": 2,
+    "amount_range": "£13.25-£14.29"
+  },
+  {
+    "description_group": "HAVERING COUNCIL",
+    "merchant_name": "Havering Council",
+    "count": 1,
+    "amount_range": "£6.00-£6.00"
+  },
+  {
+    "description_group": "HILTON GATWICK AIRPORT AM",
+    "merchant_name": "Hilton Gatwick Airport Am",
+    "count": 2,
+    "amount_range": "£42.00-£81.00"
+  },
+  {
+    "description_group": "HOLLYWOODBETS.CO.UK",
+    "merchant_name": "Hollywoodbets.Co.Uk",
+    "count": 1,
+    "amount_range": "£200.90-£200.90"
+  },
+  {
+    "description_group": "HOLLYWOODBETS.CO.UK",
+    "merchant_name": "Hollywoodbets.co.uk",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "I LOVE COMO SRL",
+    "merchant_name": "I Love Como Srl",
+    "count": 1,
+    "amount_range": "£3.44-£3.44"
+  },
+  {
+    "description_group": "IKEA LTD 567 GREENWICH IK",
+    "merchant_name": "Ikea Ltd 567 Greenwich Ik",
+    "count": 1,
+    "amount_range": "£6.75-£6.75"
+  },
+  {
+    "description_group": "IL DIAVOLO E L'AQUASA.",
+    "merchant_name": "Il Diavolo E L'aquasa.",
+    "count": 1,
+    "amount_range": "£30.80-£30.80"
+  },
+  {
+    "description_group": "INTAN SARI LUWAK COFFE",
+    "merchant_name": "Intan Sari Luwak Coffe",
+    "count": 1,
+    "amount_range": "£17.78-£17.78"
+  },
+  {
+    "description_group": "IRISH PUB THE LION'S F",
+    "merchant_name": "Irish Pub The Lion's F",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "ITSU 118",
+    "merchant_name": "Itsu 118",
+    "count": 1,
+    "amount_range": "£1.50-£1.50"
+  },
+  {
+    "description_group": "JAM CIRCUS",
+    "merchant_name": "Jam Circus",
+    "count": 1,
+    "amount_range": "£13.15-£13.15"
+  },
+  {
+    "description_group": "JAMILA",
+    "merchant_name": "Jamila",
+    "count": 1,
+    "amount_range": "£55.00-£55.00"
+  },
+  {
+    "description_group": "JAZU",
+    "merchant_name": "Jazu",
+    "count": 2,
+    "amount_range": "£17.45-£40.00"
+  },
+  {
+    "description_group": "JG *PRINCESS ALICE HOS",
+    "merchant_name": "Jg *princess Alice Hos",
+    "count": 1,
+    "amount_range": "£17.55-£17.55"
+  },
+  {
+    "description_group": "JOE THEN JUICE UK LTD",
+    "merchant_name": "Joe  Then Juice Uk Ltd",
+    "count": 1,
+    "amount_range": "£26.40-£26.40"
+  },
+  {
+    "description_group": "JUNCTION",
+    "merchant_name": "Junction",
+    "count": 1,
+    "amount_range": "£11.10-£11.10"
+  },
+  {
+    "description_group": "KAZUMI",
+    "merchant_name": "Kazumi",
+    "count": 1,
+    "amount_range": "£19.29-£19.29"
+  },
+  {
+    "description_group": "KLARNA*AIRBNB",
+    "merchant_name": "Klarna*airbnb",
+    "count": 1,
+    "amount_range": "£23.14-£23.14"
+  },
+  {
+    "description_group": "KLARNA*KLARNA",
+    "merchant_name": "Klarna*klarna",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "KRYSTALS EXPRESS",
+    "merchant_name": "Krystals Express",
+    "count": 2,
+    "amount_range": "£1.29-£8.99"
+  },
+  {
+    "description_group": "KWIFF",
+    "merchant_name": "Kwiff",
+    "count": 1,
+    "amount_range": "£37.60-£37.60"
+  },
+  {
+    "description_group": "KWIFF.COM",
+    "merchant_name": "Kwiff.com",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "LA COMETE",
+    "merchant_name": "La Comete",
+    "count": 1,
+    "amount_range": "£75.00-£75.00"
+  },
+  {
+    "description_group": "LA TERRASSE SAINT JA",
+    "merchant_name": "La Terrasse Saint Ja",
+    "count": 1,
+    "amount_range": "£36.50-£36.50"
+  },
+  {
+    "description_group": "LE BON MOMENT",
+    "merchant_name": "Le Bon Moment",
+    "count": 1,
+    "amount_range": "£13.30-£13.30"
+  },
+  {
+    "description_group": "LEON",
+    "merchant_name": "Leon",
+    "count": 4,
+    "amount_range": "£2.29-£9.09"
+  },
+  {
+    "description_group": "LEON EUSTON",
+    "merchant_name": "Leon Euston",
+    "count": 1,
+    "amount_range": "£4.00-£4.00"
+  },
+  {
+    "description_group": "LES PARIGOTS",
+    "merchant_name": "Les Parigots",
+    "count": 1,
+    "amount_range": "£70.00-£70.00"
+  },
+  {
+    "description_group": "LIDL GB HORNCHURCH",
+    "merchant_name": "Lidl Gb Hornchurch",
+    "count": 1,
+    "amount_range": "£23.51-£23.51"
+  },
+  {
+    "description_group": "LIME*RIDE M5L2",
+    "merchant_name": "Lime*2 Rides M5l2",
+    "count": 2,
+    "amount_range": "£6.95-£12.23"
+  },
+  {
+    "description_group": "LIME*PASS M5L2",
+    "merchant_name": "Lime*pass M5l2",
+    "count": 2,
+    "amount_range": "£3.99-£6.99"
+  },
+  {
+    "description_group": "LIME*RIDE M5L2",
+    "merchant_name": "Lime*ride M5l2",
+    "count": 6,
+    "amount_range": "£3.31-£8.25"
+  },
+  {
+    "description_group": "LIME*AUTH M5L2",
+    "merchant_name": "Lime*ride M5l2",
+    "count": 1,
+    "amount_range": "£1.00-£1.00"
+  },
+  {
+    "description_group": "LIVESCOREBET.COM",
+    "merchant_name": "Livescorebet.com",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "LONDON BRIDGE LEON",
+    "merchant_name": "London Bridge Leon",
+    "count": 1,
+    "amount_range": "£8.74-£8.74"
+  },
+  {
+    "description_group": "LOQBOX",
+    "merchant_name": "Loqbox",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "LOQBOX GROW",
+    "merchant_name": "Loqbox Grow",
+    "count": 2,
+    "amount_range": "£2.99-£5.98"
+  },
+  {
+    "description_group": "LOT BAR AND RESTAURANT",
+    "merchant_name": "Lot Bar And Restaurant",
+    "count": 1,
+    "amount_range": "£13.00-£13.00"
+  },
+  {
+    "description_group": "LOTTOLAND",
+    "merchant_name": "Lottoland",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "LS BERMONDSEY BAR AND",
+    "merchant_name": "Ls Bermondsey Bar And",
+    "count": 1,
+    "amount_range": "£41.60-£41.60"
+  },
+  {
+    "description_group": "M&S SIMPLY FOOD - SSP",
+    "merchant_name": "M&s Simply Food - Ssp",
+    "count": 2,
+    "amount_range": "£5.25-£34.80"
+  },
+  {
+    "description_group": "M6 TOLL",
+    "merchant_name": "M6 Toll",
+    "count": 1,
+    "amount_range": "£10.50-£10.50"
+  },
+  {
+    "description_group": "MAISON ISABELLE",
+    "merchant_name": "Maison Isabelle",
+    "count": 1,
+    "amount_range": "£4.10-£4.10"
+  },
+  {
+    "description_group": "MANDARIN PALACE 01",
+    "merchant_name": "Mandarin Palace 01",
+    "count": 1,
+    "amount_range": "£52.00-£52.00"
+  },
+  {
+    "description_group": "MANOR ARMS",
+    "merchant_name": "Manor Arms",
+    "count": 1,
+    "amount_range": "£7.05-£7.05"
+  },
+  {
+    "description_group": "MARINERS COURT",
+    "merchant_name": "Mariners Court",
+    "count": 1,
+    "amount_range": "£23.90-£23.90"
+  },
+  {
+    "description_group": "MARKS&SPENCER PLC",
+    "merchant_name": "Marks&spencer Plc",
+    "count": 1,
+    "amount_range": "£7.00-£7.00"
+  },
+  {
+    "description_group": "MARKS&SPENCER PLC SACA",
+    "merchant_name": "Marks&spencer Plc Saca",
+    "count": 2,
+    "amount_range": "£3.90-£60.00"
+  },
+  {
+    "description_group": "MARKS&SPENCER PLC SF",
+    "merchant_name": "Marks&spencer Plc Sf",
+    "count": 1,
+    "amount_range": "£8.75-£8.75"
+  },
+  {
+    "description_group": "MARTESANA SRL",
+    "merchant_name": "Martesana Srl",
+    "count": 1,
+    "amount_range": "£46.69-£46.69"
+  },
+  {
+    "description_group": "MATCHBOOK.COM",
+    "merchant_name": "Matchbook.Com",
+    "count": 3,
+    "amount_range": "£25.00-£144.35"
+  },
+  {
+    "description_group": "MATCHBOOK.COM",
+    "merchant_name": "Matchbook.com",
+    "count": 5,
+    "amount_range": "£13.43-£111.29"
+  },
+  {
+    "description_group": "MAYAN MONKEY ISLA SC",
+    "merchant_name": "Mayan Monkey Isla Sc",
+    "count": 2,
+    "amount_range": "£8.58-£20.47"
+  },
+  {
+    "description_group": "MC DONALDS SFS",
+    "merchant_name": "Mc Donalds Sfs",
+    "count": 1,
+    "amount_range": "£9.82-£9.82"
+  },
+  {
+    "description_group": "MCDONALDS",
+    "merchant_name": "Mcdonalds",
+    "count": 2,
+    "amount_range": "£1.39-£9.69"
+  },
+  {
+    "description_group": "MERCATO CENTRALE FIREN",
+    "merchant_name": "Mercato Centrale Firen",
+    "count": 4,
+    "amount_range": "£4.90-£13.00"
+  },
+  {
+    "description_group": "MERPAGO*BONAIR",
+    "merchant_name": "Merpago*bonair",
+    "count": 1,
+    "amount_range": "£10.92-£10.92"
+  },
+  {
+    "description_group": "MERPAGO*GABRIELAMP",
+    "merchant_name": "Merpago*gabrielamp",
+    "count": 1,
+    "amount_range": "£8.45-£8.45"
+  },
+  {
+    "description_group": "MERPAGO*GERMANDARIOFINOCH",
+    "merchant_name": "Merpago*germandariofinoch",
+    "count": 1,
+    "amount_range": "£1.81-£1.81"
+  },
+  {
+    "description_group": "MERPAGO*HOPPE",
+    "merchant_name": "Merpago*hoppe",
+    "count": 1,
+    "amount_range": "£2.83-£2.83"
+  },
+  {
+    "description_group": "MERPAGO*MAPCAFE",
+    "merchant_name": "Merpago*mapcafe",
+    "count": 1,
+    "amount_range": "£11.07-£11.07"
+  },
+  {
+    "description_group": "MERPAGO*OPEN25HS",
+    "merchant_name": "Merpago*open25hs",
+    "count": 1,
+    "amount_range": "£5.80-£5.80"
+  },
+  {
+    "description_group": "MERPAGO*ORSOCAFE",
+    "merchant_name": "Merpago*orsocafe",
+    "count": 1,
+    "amount_range": "£15.76-£15.76"
+  },
+  {
+    "description_group": "MERPAGO*PUNTASUR",
+    "merchant_name": "Merpago*puntasur",
+    "count": 1,
+    "amount_range": "£0.87-£0.87"
+  },
+  {
+    "description_group": "MERPAGO*TAXI471",
+    "merchant_name": "Merpago*taxi471",
+    "count": 1,
+    "amount_range": "£7.83-£7.83"
+  },
+  {
+    "description_group": "METLAND VENYA UBUD",
+    "merchant_name": "Metland Venya Ubud",
+    "count": 3,
+    "amount_range": "£3.88-£34.97"
+  },
+  {
+    "description_group": "MIAH SUMON",
+    "merchant_name": "Miah Sumon",
+    "count": 1,
+    "amount_range": "£6.50-£6.50"
+  },
+  {
+    "description_group": "MILE END STADIUM",
+    "merchant_name": "Mile End Stadium",
+    "count": 4,
+    "amount_range": "£5.05-£5.05"
+  },
+  {
+    "description_group": "MINIC ASIAN PANTRY",
+    "merchant_name": "Minic Asian Pantry",
+    "count": 1,
+    "amount_range": "£13.97-£13.97"
+  },
+  {
+    "description_group": "MM UB26",
+    "merchant_name": "Mm  Ub26",
+    "count": 2,
+    "amount_range": "£2.53-£7.11"
+  },
+  {
+    "description_group": "MM - PT11",
+    "merchant_name": "Mm - Pt11",
+    "count": 1,
+    "amount_range": "£1.07-£1.07"
+  },
+  {
+    "description_group": "MNK*VILLAGE FOOD & WIN",
+    "merchant_name": "Mnk*village Food & Win",
+    "count": 1,
+    "amount_range": "£5.00-£5.00"
+  },
+  {
+    "description_group": "MONUMENT",
+    "merchant_name": "Monument",
+    "count": 1,
+    "amount_range": "£15.25-£15.25"
+  },
+  {
+    "description_group": "MONZO* ME SOPHIE PALLO",
+    "merchant_name": "Monzo* Me Sophie Pallo",
+    "count": 1,
+    "amount_range": "£22.06-£22.06"
+  },
+  {
+    "description_group": "MOONPIG",
+    "merchant_name": "Moonpig",
+    "count": 1,
+    "amount_range": "£6.68-£6.68"
+  },
+  {
+    "description_group": "MORLEYS FRIED CHICKEN",
+    "merchant_name": "Morleys Fried Chicken",
+    "count": 1,
+    "amount_range": "£16.67-£16.67"
+  },
+  {
+    "description_group": "MOSI",
+    "merchant_name": "Mosi",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "N.O.T. UK LIMITED",
+    "merchant_name": "N.o.t. Uk Limited",
+    "count": 1,
+    "amount_range": "£17.15-£17.15"
+  },
+  {
+    "description_group": "N1 LONDON",
+    "merchant_name": "N1 London",
+    "count": 2,
+    "amount_range": "£10.00-£21.50"
+  },
+  {
+    "description_group": "NANDOS.CO.UK",
+    "merchant_name": "Nandos.co.uk",
+    "count": 1,
+    "amount_range": "£33.90-£33.90"
+  },
+  {
+    "description_group": "NANDRE",
+    "merchant_name": "Nandre",
+    "count": 1,
+    "amount_range": "£3.20-£3.20"
+  },
+  {
+    "description_group": "NEXO",
+    "merchant_name": "Nexo",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "NEXO*NMERRY",
+    "merchant_name": "Nexo*Nmerry",
+    "count": 2,
+    "amount_range": "£239.05-£242.24"
+  },
+  {
+    "description_group": "NEXT DIRECTORY",
+    "merchant_name": "Next Directory",
+    "count": 2,
+    "amount_range": "£100.00-£302.95"
+  },
+  {
+    "description_group": "NOVOTEL LON GREENWICH",
+    "merchant_name": "Novotel Lon Greenwich",
+    "count": 2,
+    "amount_range": "£9.90-£9.90"
+  },
+  {
+    "description_group": "NRG",
+    "merchant_name": "Nrg",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "NYA*LRS",
+    "merchant_name": "Nya*lrs",
+    "count": 1,
+    "amount_range": "£2.39-£2.39"
+  },
+  {
+    "description_group": "NYA*PURE GYM",
+    "merchant_name": "Nya*pure Gym",
+    "count": 2,
+    "amount_range": "£1.99-£2.29"
+  },
+  {
+    "description_group": "NYX*LRS",
+    "merchant_name": "Nyx*lrs",
+    "count": 4,
+    "amount_range": "£1.90-£1.99"
+  },
+  {
+    "description_group": "NYX*PGGROUP",
+    "merchant_name": "Nyx*pggroup",
+    "count": 2,
+    "amount_range": "£2.40-£2.40"
+  },
+  {
+    "description_group": "NYX*PHOTOBOTCO",
+    "merchant_name": "Nyx*photobotco",
+    "count": 2,
+    "amount_range": "£5.00-£5.00"
+  },
+  {
+    "description_group": "OCADO",
+    "merchant_name": "Ocado",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "ODDS MONKEY",
+    "merchant_name": "Odds Monkey",
+    "count": 1,
+    "amount_range": "£29.99-£29.99"
+  },
+  {
+    "description_group": "ODEON CINEMAS",
+    "merchant_name": "Odeon Cinemas",
+    "count": 1,
+    "amount_range": "£9.50-£9.50"
+  },
+  {
+    "description_group": "ODEON STREATHAM",
+    "merchant_name": "Odeon Streatham",
+    "count": 1,
+    "amount_range": "£16.66-£16.66"
+  },
+  {
+    "description_group": "OLIVER BONAS GREENWICH",
+    "merchant_name": "Oliver Bonas Greenwich",
+    "count": 1,
+    "amount_range": "£17.00-£17.00"
+  },
+  {
+    "description_group": "ONCU FOOD CENTRE",
+    "merchant_name": "Oncu Food Centre",
+    "count": 3,
+    "amount_range": "£5.80-£25.99"
+  },
+  {
+    "description_group": "ORCHARDS - RETAIL",
+    "merchant_name": "Orchards - Retail",
+    "count": 2,
+    "amount_range": "£8.64-£10.19"
+  },
+  {
+    "description_group": "THE ORIGIN HEALTH &FIT",
+    "merchant_name": "Origin Health And",
+    "count": 2,
+    "amount_range": "£5.00-£8.00"
+  },
+  {
+    "description_group": "OSTERIA AE SPEZIE",
+    "merchant_name": "Osteria Ae Spezie",
+    "count": 1,
+    "amount_range": "£50.50-£50.50"
+  },
+  {
+    "description_group": "OSTERIA DE PECCATORI",
+    "merchant_name": "Osteria De Peccatori",
+    "count": 1,
+    "amount_range": "£49.50-£49.50"
+  },
+  {
+    "description_group": "OSTERIA PESADOR",
+    "merchant_name": "Osteria Pesador",
+    "count": 1,
+    "amount_range": "£31.00-£31.00"
+  },
+  {
+    "description_group": "PADDLE.NET* DECODO",
+    "merchant_name": "Paddle.net* Decodo",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "PADDY POWER",
+    "merchant_name": "Paddy Power",
+    "count": 2,
+    "amount_range": "£5.00-£256.50"
+  },
+  {
+    "description_group": "PASTICCERIA ALLA BRAGO",
+    "merchant_name": "Pasticceria Alla Brago",
+    "count": 1,
+    "amount_range": "£7.00-£7.00"
+  },
+  {
+    "description_group": "PASTICCERIA FUIN",
+    "merchant_name": "Pasticceria Fuin",
+    "count": 1,
+    "amount_range": "£5.82-£5.82"
+  },
+  {
+    "description_group": "PAYMENT FROM CONVERTOO LTD",
+    "merchant_name": "Payment From Convertoo Ltd",
+    "count": 1,
+    "amount_range": "£42.63-£42.63"
+  },
+  {
+    "description_group": "PAYMENT FROM COPYBET UK LTD",
+    "merchant_name": "Payment From Copybet Uk Ltd",
+    "count": 1,
+    "amount_range": "£19.10-£19.10"
+  },
+  {
+    "description_group": "PAYMENT FROM GEORGE STYLE & REBECCA STYLE",
+    "merchant_name": "Payment From George Style & Rebecca Style",
+    "count": 1,
+    "amount_range": "£96.00-£96.00"
+  },
+  {
+    "description_group": "PAYMENT FROM INTELLIQUENCE LTD",
+    "merchant_name": "Payment From Intelliquence Ltd",
+    "count": 1,
+    "amount_range": "£105.00-£105.00"
+  },
+  {
+    "description_group": "PAYMENT FROM MERRY K & P/",
+    "merchant_name": "Payment From Merry K & P/",
+    "count": 5,
+    "amount_range": "£50.00-£986.00"
+  },
+  {
+    "description_group": "PAYMENT FROM MIA HARVEY",
+    "merchant_name": "Payment From Mia Harvey",
+    "count": 1,
+    "amount_range": "£28.00-£28.00"
+  },
+  {
+    "description_group": "PAYMENT FROM MONETURN SPV LTD",
+    "merchant_name": "Payment From Moneturn Spv Ltd",
+    "count": 3,
+    "amount_range": "£350.00-£3795.34"
+  },
+  {
+    "description_group": "PAYMENT FROM N MERRY",
+    "merchant_name": "Payment From N Merry",
+    "count": 54,
+    "amount_range": "£6.26-£1982.00"
+  },
+  {
+    "description_group": "PAYMENT FROM NATHAN JOSEPH MERRY",
+    "merchant_name": "Payment From Nathan Joseph Merry",
+    "count": 2,
+    "amount_range": "£241.21-£243.32"
+  },
+  {
+    "description_group": "PAYMENT FROM REYNOLDS B G",
+    "merchant_name": "Payment From Reynolds B G",
+    "count": 3,
+    "amount_range": "£15.00-£200.00"
+  },
+  {
+    "description_group": "PAYMENT FROM S BROWN",
+    "merchant_name": "Payment From S Brown",
+    "count": 10,
+    "amount_range": "£1.00-£50.00"
+  },
+  {
+    "description_group": "PAYMENT FROM S MERRY",
+    "merchant_name": "Payment From S Merry",
+    "count": 1,
+    "amount_range": "£170.00-£170.00"
+  },
+  {
+    "description_group": "PAYMENT FROM SHANNON WALSH",
+    "merchant_name": "Payment From Shannon Walsh",
+    "count": 12,
+    "amount_range": "£25.00-£350.00"
+  },
+  {
+    "description_group": "PAYMENT FROM SMARKETS",
+    "merchant_name": "Payment From Smarkets",
+    "count": 4,
+    "amount_range": "£0.01-£265.47"
+  },
+  {
+    "description_group": "PAYPAL",
+    "merchant_name": "Paypal",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "PAYU*AR*UBER",
+    "merchant_name": "Payu*ar*uber",
+    "count": 1,
+    "amount_range": "£18.48-£18.48"
+  },
+  {
+    "description_group": "PAYU*AR*UBER",
+    "merchant_name": "Payu*ar*uber         9429",
+    "count": 2,
+    "amount_range": "£6.22-£16.20"
+  },
+  {
+    "description_group": "PETS AT HOME LTD",
+    "merchant_name": "Pets At Home Ltd",
+    "count": 6,
+    "amount_range": "£3.00-£18.16"
+  },
+  {
+    "description_group": "PIZZA PILGRIMS",
+    "merchant_name": "Pizza Pilgrims",
+    "count": 1,
+    "amount_range": "£31.05-£31.05"
+  },
+  {
+    "description_group": "POST OFFICE COUNTER",
+    "merchant_name": "Post Office Counter",
+    "count": 1,
+    "amount_range": "£1.55-£1.55"
+  },
+  {
+    "description_group": "PREBATEO DI TOUKABRI F",
+    "merchant_name": "Prebateo Di Toukabri F",
+    "count": 1,
+    "amount_range": "£9.00-£9.00"
+  },
+  {
+    "description_group": "PREMIUM REPRICING 1 PLAN FEE",
+    "merchant_name": "Premium Repricing 1 Plan Fee",
+    "count": 6,
+    "amount_range": "£7.99-£7.99"
+  },
+  {
+    "description_group": "PRICED UP",
+    "merchant_name": "Priced Up",
+    "count": 3,
+    "amount_range": "£41.67-£115.00"
+  },
+  {
+    "description_group": "PRICEDUP",
+    "merchant_name": "Pricedup",
+    "count": 1,
+    "amount_range": "£50.00-£50.00"
+  },
+  {
+    "description_group": "PRIME VIDEO RENT / BUY",
+    "merchant_name": "Prime Video Rent",
+    "count": 4,
+    "amount_range": "£3.49-£4.99"
+  },
+  {
+    "description_group": "PROGRESSPLAY LTD",
+    "merchant_name": "Progressplay Ltd",
+    "count": 3,
+    "amount_range": "£9.90-£10.00"
+  },
+  {
+    "description_group": "PUMA NORDELTA",
+    "merchant_name": "Puma-nordelta",
+    "count": 2,
+    "amount_range": "£2.74-£17.36"
+  },
+  {
+    "description_group": "PUNTO CASA CASTELLO",
+    "merchant_name": "Punto Casa Castello",
+    "count": 1,
+    "amount_range": "£10.84-£10.84"
+  },
+  {
+    "description_group": "PURA DESA ADAT BATUAN",
+    "merchant_name": "Pura Desa Adat Batuan",
+    "count": 1,
+    "amount_range": "£4.59-£4.59"
+  },
+  {
+    "description_group": "PURE GYM",
+    "merchant_name": "Pure Gym",
+    "count": 2,
+    "amount_range": "£1.99-£1.99"
+  },
+  {
+    "description_group": "PUREGYM LIMITED",
+    "merchant_name": "Puregym Limited",
+    "count": 1,
+    "amount_range": "£28.99-£28.99"
+  },
+  {
+    "description_group": "RAILWAY HOTEL",
+    "merchant_name": "Railway Hotel",
+    "count": 9,
+    "amount_range": "£12.20-£28.64"
+  },
+  {
+    "description_group": "RATP",
+    "merchant_name": "Ratp",
+    "count": 2,
+    "amount_range": "£4.30-£8.60"
+  },
+  {
+    "description_group": "RAZZA",
+    "merchant_name": "Razza",
+    "count": 1,
+    "amount_range": "£30.00-£30.00"
+  },
+  {
+    "description_group": "REAL EATING CO",
+    "merchant_name": "Real Eating Co",
+    "count": 1,
+    "amount_range": "£13.90-£13.90"
+  },
+  {
+    "description_group": "REFERRAL REWARD",
+    "merchant_name": "Referral Reward",
+    "count": 1,
+    "amount_range": "£60.00-£60.00"
+  },
+  {
+    "description_group": "REFUND FROM AMAZON UK* 9B33U1D75",
+    "merchant_name": "Refund From Amazon Uk* 9b33u1d75",
+    "count": 1,
+    "amount_range": "£199.00-£199.00"
+  },
+  {
+    "description_group": "REFUND FROM APPLE.COM/BILL",
+    "merchant_name": "Refund From Apple.Com/Bill",
+    "count": 1,
+    "amount_range": "£34.99-£34.99"
+  },
+  {
+    "description_group": "REFUND FROM BRICK BONANZA",
+    "merchant_name": "Refund From Brick Bonanza",
+    "count": 2,
+    "amount_range": "£0.99-£0.99"
+  },
+  {
+    "description_group": "REFUND FROM CABIFY AR 2546EDJFJ5ZT",
+    "merchant_name": "Refund From Cabify Ar 2546edjfj5zt",
+    "count": 1,
+    "amount_range": "£0.89-£0.89"
+  },
+  {
+    "description_group": "REFUND FROM NEXT DIRECTORY",
+    "merchant_name": "Refund From Next Directory",
+    "count": 1,
+    "amount_range": "£149.00-£149.00"
+  },
+  {
+    "description_group": "REFUND FROM TFL TRAVEL RE",
+    "merchant_name": "Refund From Tfl Travel Re",
+    "count": 3,
+    "amount_range": "£2.90-£10.40"
+  },
+  {
+    "description_group": "REFUND FROM TRUEHOA.APP",
+    "merchant_name": "Refund From Truehoa.App",
+    "count": 2,
+    "amount_range": "£6.00-£17.86"
+  },
+  {
+    "description_group": "REFUND FROM WWW.BOOKSY.COM",
+    "merchant_name": "Refund From Www.Booksy.Com",
+    "count": 1,
+    "amount_range": "£7.50-£7.50"
+  },
+  {
+    "description_group": "REFUND FROM ZIPCAR LATE RETURN",
+    "merchant_name": "Refund From Zipcar Late Return",
+    "count": 1,
+    "amount_range": "£35.00-£35.00"
+  },
+  {
+    "description_group": "REFUND FROM ZIPCAR TRIP",
+    "merchant_name": "Refund From Zipcar Trip",
+    "count": 2,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "RELAX&CAFFE' CAFFETTE.",
+    "merchant_name": "Relax&caffe' Caffette.",
+    "count": 2,
+    "amount_range": "£10.00-£16.40"
+  },
+  {
+    "description_group": "REST MAYAN MONK MXN SC",
+    "merchant_name": "Rest Mayan Monk Mxn Sc",
+    "count": 1,
+    "amount_range": "£11.79-£11.79"
+  },
+  {
+    "description_group": "RICHARD THE FIRST",
+    "merchant_name": "Richard The First",
+    "count": 3,
+    "amount_range": "£14.55-£19.90"
+  },
+  {
+    "description_group": "RISTORANTE RINO SRL",
+    "merchant_name": "Ristorante Rino Srl",
+    "count": 1,
+    "amount_range": "£83.87-£83.87"
+  },
+  {
+    "description_group": "RISTORANTE STILO",
+    "merchant_name": "Ristorante Stilo",
+    "count": 1,
+    "amount_range": "£58.97-£58.97"
+  },
+  {
+    "description_group": "ROBERT SMITH AND SON",
+    "merchant_name": "Robert Smith And Son",
+    "count": 4,
+    "amount_range": "£9.00-£14.17"
+  },
+  {
+    "description_group": "RRSQUARE BERMONDSEY",
+    "merchant_name": "Rrsquare Bermondsey",
+    "count": 1,
+    "amount_range": "£8.99-£8.99"
+  },
+  {
+    "description_group": "RUDYS SPITALFIELDS",
+    "merchant_name": "Rudys Spitalfields",
+    "count": 1,
+    "amount_range": "£22.40-£22.40"
+  },
+  {
+    "description_group": "SAINSBURYS",
+    "merchant_name": "Sainsburys - Londo",
+    "count": 1,
+    "amount_range": "£33.90-£33.90"
+  },
+  {
+    "description_group": "SAINSBURYS HORNCHURCH",
+    "merchant_name": "Sainsburys S",
+    "count": 134,
+    "amount_range": "£0.35-£20.18"
+  },
+  {
+    "description_group": "SAINSBURYS",
+    "merchant_name": "Sainsburys S",
+    "count": 22,
+    "amount_range": "£0.80-£61.60"
+  },
+  {
+    "description_group": "SAINSBURYS HORNCHURCH-",
+    "merchant_name": "Sainsburys S",
+    "count": 13,
+    "amount_range": "£1.20-£35.47"
+  },
+  {
+    "description_group": "SAINSBURYS SUPERMARKET",
+    "merchant_name": "Sainsburys S",
+    "count": 10,
+    "amount_range": "£4.15-£84.45"
+  },
+  {
+    "description_group": "SAINSBURYS TOWER HAMLE",
+    "merchant_name": "Sainsburys S",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "SAINSBURYS HORNCHURCH",
+    "merchant_name": "Sainsburys S/mkts",
+    "count": 20,
+    "amount_range": "£1.30-£13.40"
+  },
+  {
+    "description_group": "SAINSBURYS",
+    "merchant_name": "Sainsburys S/mkts",
+    "count": 16,
+    "amount_range": "£0.99-£16.30"
+  },
+  {
+    "description_group": "SAINSBURYS - GREENWICH",
+    "merchant_name": "Sainsburys S/mkts",
+    "count": 3,
+    "amount_range": "£0.90-£2.15"
+  },
+  {
+    "description_group": "SAINSBURYS HORNCHURCH-",
+    "merchant_name": "Sainsburys S/mkts",
+    "count": 2,
+    "amount_range": "£5.79-£7.06"
+  },
+  {
+    "description_group": "SAINSBURYS SUPERMARKET",
+    "merchant_name": "Sainsburys S/mkts",
+    "count": 1,
+    "amount_range": "£8.25-£8.25"
+  },
+  {
+    "description_group": "SANTORINI GREEK",
+    "merchant_name": "Santorini Greek",
+    "count": 1,
+    "amount_range": "£5.06-£5.06"
+  },
+  {
+    "description_group": "SAPORI SAS",
+    "merchant_name": "Sapori Sas",
+    "count": 1,
+    "amount_range": "£2.50-£2.50"
+  },
+  {
+    "description_group": "SARL OENOTHIBAUT",
+    "merchant_name": "Sarl Oenothibaut",
+    "count": 1,
+    "amount_range": "£13.00-£13.00"
+  },
+  {
+    "description_group": "SATRINCHA S.A",
+    "merchant_name": "Satrincha S.a",
+    "count": 2,
+    "amount_range": "£3.42-£34.48"
+  },
+  {
+    "description_group": "SCD MONTMARTRE",
+    "merchant_name": "Scd Montmartre",
+    "count": 1,
+    "amount_range": "£5.90-£5.90"
+  },
+  {
+    "description_group": "SIMPLY MARKET",
+    "merchant_name": "Simply Market",
+    "count": 1,
+    "amount_range": "£2.00-£2.00"
+  },
+  {
+    "description_group": "SIX RESTAURANT",
+    "merchant_name": "Six Restaurant",
+    "count": 2,
+    "amount_range": "£17.30-£18.50"
+  },
+  {
+    "description_group": "SKY BET",
+    "merchant_name": "Sky Bet",
+    "count": 2,
+    "amount_range": "£0.00-£5.00"
+  },
+  {
+    "description_group": "SKY BETTING & GAMING",
+    "merchant_name": "Sky Betting & Gaming",
+    "count": 1,
+    "amount_range": "£21.67-£21.67"
+  },
+  {
+    "description_group": "SMOKERS PARADISE",
+    "merchant_name": "Smokers Paradise",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "SPANISH GALLEON",
+    "merchant_name": "Spanish Galleon",
+    "count": 2,
+    "amount_range": "£18.00-£23.60"
+  },
+  {
+    "description_group": "SPORTING INDEX",
+    "merchant_name": "Sporting Index",
+    "count": 2,
+    "amount_range": "£10.00-£17.50"
+  },
+  {
+    "description_group": "SQ *15GRAMS",
+    "merchant_name": "Sq *15grams",
+    "count": 1,
+    "amount_range": "£8.80-£8.80"
+  },
+  {
+    "description_group": "SQ *CHACARERO GREENWICH",
+    "merchant_name": "Sq *chacarero Greenwich",
+    "count": 1,
+    "amount_range": "£12.95-£12.95"
+  },
+  {
+    "description_group": "SQ *EVENT CATERING SOL",
+    "merchant_name": "Sq *event Catering Sol",
+    "count": 2,
+    "amount_range": "£13.00-£13.00"
+  },
+  {
+    "description_group": "SQ *GREENWICH",
+    "merchant_name": "Sq *greenwich",
+    "count": 1,
+    "amount_range": "£12.43-£12.43"
+  },
+  {
+    "description_group": "SQ *HEAP'S SAUSAGES CAFE",
+    "merchant_name": "Sq *heap's Sausages Cafe",
+    "count": 11,
+    "amount_range": "£1.95-£8.90"
+  },
+  {
+    "description_group": "SQ *LULU'S",
+    "merchant_name": "Sq *lulu's",
+    "count": 1,
+    "amount_range": "£7.60-£7.60"
+  },
+  {
+    "description_group": "SQ *OYSTER BROTHERS",
+    "merchant_name": "Sq *oyster Brothers",
+    "count": 1,
+    "amount_range": "£13.00-£13.00"
+  },
+  {
+    "description_group": "SQ *PEYTON AND BYRNE",
+    "merchant_name": "Sq *peyton And Byrne",
+    "count": 1,
+    "amount_range": "£6.40-£6.40"
+  },
+  {
+    "description_group": "SQ *PIMP MY RAMEN",
+    "merchant_name": "Sq *pimp My Ramen",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "SQ *SLAMMIN EVENTS",
+    "merchant_name": "Sq *slammin Events",
+    "count": 1,
+    "amount_range": "£13.50-£13.50"
+  },
+  {
+    "description_group": "SQ *SLAMMIN' EVENTS",
+    "merchant_name": "Sq *slammin' Events",
+    "count": 1,
+    "amount_range": "£36.00-£36.00"
+  },
+  {
+    "description_group": "SQ *TACA DEPTFORD MARKET",
+    "merchant_name": "Sq *taca Deptford Market",
+    "count": 2,
+    "amount_range": "£5.50-£5.50"
+  },
+  {
+    "description_group": "SQ *UNCOMMON LIVERPOOL",
+    "merchant_name": "Sq *uncommon Liverpool",
+    "count": 2,
+    "amount_range": "£3.40-£7.20"
+  },
+  {
+    "description_group": "SR LIMITED",
+    "merchant_name": "Sr Limited",
+    "count": 1,
+    "amount_range": "£50.00-£50.00"
+  },
+  {
+    "description_group": "ST PANCRAS",
+    "merchant_name": "St Pancras",
+    "count": 1,
+    "amount_range": "£7.49-£7.49"
+  },
+  {
+    "description_group": "STANLEYS OF STREATHAM",
+    "merchant_name": "Stanleys Of Streatham",
+    "count": 1,
+    "amount_range": "£15.80-£15.80"
+  },
+  {
+    "description_group": "STAR SPORTS",
+    "merchant_name": "Star Sports",
+    "count": 1,
+    "amount_range": "£50.00-£50.00"
+  },
+  {
+    "description_group": "STATION LANE STORE",
+    "merchant_name": "Station Lane Store",
+    "count": 1,
+    "amount_range": "£7.99-£7.99"
+  },
+  {
+    "description_group": "STOP ONCE EXPRESS",
+    "merchant_name": "Stop Once Express",
+    "count": 7,
+    "amount_range": "£1.00-£12.00"
+  },
+  {
+    "description_group": "SUBWAY 64615",
+    "merchant_name": "Subway 64615",
+    "count": 1,
+    "amount_range": "£4.39-£4.39"
+  },
+  {
+    "description_group": "SUMUP *COPPINS TOOTIN",
+    "merchant_name": "Sumup  *coppins Tootin",
+    "count": 1,
+    "amount_range": "£18.50-£18.50"
+  },
+  {
+    "description_group": "SUMUP *DEPTFORD SUPER",
+    "merchant_name": "Sumup  *deptford Super",
+    "count": 1,
+    "amount_range": "£1.99-£1.99"
+  },
+  {
+    "description_group": "SUMUP *HONGYUN",
+    "merchant_name": "Sumup  *hongyun",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "SUMUP *IGNAZIO CARDIL",
+    "merchant_name": "Sumup  *ignazio Cardil",
+    "count": 1,
+    "amount_range": "£21.44-£21.44"
+  },
+  {
+    "description_group": "SUMUP *JERK YARD",
+    "merchant_name": "Sumup  *jerk Yard",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "SUMUP *LITTLE OLIVE",
+    "merchant_name": "Sumup  *little Olive",
+    "count": 1,
+    "amount_range": "£7.00-£7.00"
+  },
+  {
+    "description_group": "SUMUP *MY OPTIMUM LTD",
+    "merchant_name": "Sumup  *my Optimum Ltd",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "SUMUP *ROK STREET FOO",
+    "merchant_name": "Sumup  *rok Street Foo",
+    "count": 1,
+    "amount_range": "£3.00-£3.00"
+  },
+  {
+    "description_group": "SUMUP *SCOTT DEAN ICE",
+    "merchant_name": "Sumup  *scott Dean Ice",
+    "count": 1,
+    "amount_range": "£9.00-£9.00"
+  },
+  {
+    "description_group": "SUMUP *TIGER TAXIS",
+    "merchant_name": "Sumup  *tiger Taxis",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "SUMUP *TRE ROTE CAMDE",
+    "merchant_name": "Sumup  *tre Rote Camde",
+    "count": 1,
+    "amount_range": "£9.50-£9.50"
+  },
+  {
+    "description_group": "SUN & SAN HO",
+    "merchant_name": "Sun & San Ho",
+    "count": 1,
+    "amount_range": "£11.82-£11.82"
+  },
+  {
+    "description_group": "SUPERDRUG STORES PLC",
+    "merchant_name": "Superdrug Stores Plc",
+    "count": 1,
+    "amount_range": "£0.80-£0.80"
+  },
+  {
+    "description_group": "SURREY MEAT AND GROCERY S",
+    "merchant_name": "Surrey Meat And Grocery S",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "TABACCHI GARRETTI",
+    "merchant_name": "Tabacchi Garretti",
+    "count": 1,
+    "amount_range": "£6.00-£6.00"
+  },
+  {
+    "description_group": "TEAM MASTER",
+    "merchant_name": "Team Master",
+    "count": 1,
+    "amount_range": "£18.00-£18.00"
+  },
+  {
+    "description_group": "TENNIS IN LAMBETH",
+    "merchant_name": "Tennis In Lambeth",
+    "count": 2,
+    "amount_range": "£7.50-£7.70"
+  },
+  {
+    "description_group": "TERRASSE FOOD",
+    "merchant_name": "Terrasse Food",
+    "count": 1,
+    "amount_range": "£17.50-£17.50"
+  },
+  {
+    "description_group": "TERRAZA MIKUNA",
+    "merchant_name": "Terraza Mikuna",
+    "count": 1,
+    "amount_range": "£35.20-£35.20"
+  },
+  {
+    "description_group": "TESCO PFS 3317",
+    "merchant_name": "Tesco Pfs 3317",
+    "count": 1,
+    "amount_range": "£6.00-£6.00"
+  },
+  {
+    "description_group": "TESCO STORES 2544",
+    "merchant_name": "Tesco Stores 2544",
+    "count": 1,
+    "amount_range": "£15.15-£15.15"
+  },
+  {
+    "description_group": "TESCO STORES 2685",
+    "merchant_name": "Tesco Stores 2685",
+    "count": 1,
+    "amount_range": "£13.75-£13.75"
+  },
+  {
+    "description_group": "TESCO STORES 3082",
+    "merchant_name": "Tesco Stores 3082",
+    "count": 1,
+    "amount_range": "£5.99-£5.99"
+  },
+  {
+    "description_group": "TESCO STORES 4911",
+    "merchant_name": "Tesco Stores 4911",
+    "count": 1,
+    "amount_range": "£1.60-£1.60"
+  },
+  {
+    "description_group": "TESCO STORES 5420",
+    "merchant_name": "Tesco Stores 5420",
+    "count": 2,
+    "amount_range": "£1.60-£10.50"
+  },
+  {
+    "description_group": "TESCO STORES 5494",
+    "merchant_name": "Tesco Stores 5494",
+    "count": 1,
+    "amount_range": "£5.99-£5.99"
+  },
+  {
+    "description_group": "TESCO STORES 6709",
+    "merchant_name": "Tesco Stores 6709",
+    "count": 10,
+    "amount_range": "£0.85-£16.30"
+  },
+  {
+    "description_group": "TFL TRAVEL CHARGE",
+    "merchant_name": "Tfl Travel Ch",
+    "count": 49,
+    "amount_range": "£1.75-£16.60"
+  },
+  {
+    "description_group": "TFL TRAVEL CH",
+    "merchant_name": "Tfl Travel Ch",
+    "count": 40,
+    "amount_range": "£1.75-£14.00"
+  },
+  {
+    "description_group": "TFL TRAVEL AUTHORISATION",
+    "merchant_name": "Tfl Travel Ch",
+    "count": 10,
+    "amount_range": "£1.75-£14.00"
+  },
+  {
+    "description_group": "TFL TRAVEL CHARGE",
+    "merchant_name": "Tfl Travel Charge",
+    "count": 9,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "TFL UNPAID FARES",
+    "merchant_name": "Tfl Unpaid Fare",
+    "count": 7,
+    "amount_range": "£5.55-£21.60"
+  },
+  {
+    "description_group": "TFL UNPAID FARES",
+    "merchant_name": "Tfl Unpaid Fares",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "THE BLUE DOOR BAR CLU",
+    "merchant_name": "The Blue Door Bar  Clu",
+    "count": 1,
+    "amount_range": "£30.82-£30.82"
+  },
+  {
+    "description_group": "THE CAMBRIDGE CHOP HOU",
+    "merchant_name": "The Cambridge Chop Ho",
+    "count": 1,
+    "amount_range": "£77.50-£77.50"
+  },
+  {
+    "description_group": "THE CHAMPLUNG BAR & RE",
+    "merchant_name": "The Champlung Bar & R",
+    "count": 1,
+    "amount_range": "£18.71-£18.71"
+  },
+  {
+    "description_group": "THE COFFEE ROOM",
+    "merchant_name": "The Coffee Room",
+    "count": 2,
+    "amount_range": "£11.20-£11.60"
+  },
+  {
+    "description_group": "THE DRIFT",
+    "merchant_name": "The Drift",
+    "count": 1,
+    "amount_range": "£30.00-£30.00"
+  },
+  {
+    "description_group": "THE DRIP",
+    "merchant_name": "The Drip",
+    "count": 6,
+    "amount_range": "£3.60-£8.60"
+  },
+  {
+    "description_group": "THE GOAT FATHER",
+    "merchant_name": "The Goat Father",
+    "count": 3,
+    "amount_range": "£1.90-£7.30"
+  },
+  {
+    "description_group": "THE HIVER TAPROOM",
+    "merchant_name": "The Hiver Taproom",
+    "count": 1,
+    "amount_range": "£14.00-£14.00"
+  },
+  {
+    "description_group": "THE HOOK OF HALSTEAD",
+    "merchant_name": "The Hook Of Halstead",
+    "count": 1,
+    "amount_range": "£15.30-£15.30"
+  },
+  {
+    "description_group": "THE HUTTON JUNCTION",
+    "merchant_name": "The Hutton Junction",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "THE LAWN CANGGU",
+    "merchant_name": "The Lawn Canggu",
+    "count": 1,
+    "amount_range": "£29.66-£29.66"
+  },
+  {
+    "description_group": "THE LITTLE SCARLET DOO",
+    "merchant_name": "The Little Scarlet Do",
+    "count": 2,
+    "amount_range": "£7.09-£7.09"
+  },
+  {
+    "description_group": "THE MASTER GROOMING",
+    "merchant_name": "The Master Grooming",
+    "count": 3,
+    "amount_range": "£3.30-£3.60"
+  },
+  {
+    "description_group": "THE MAYFLOWER LEIGH",
+    "merchant_name": "The Mayflower Leigh",
+    "count": 1,
+    "amount_range": "£15.35-£15.35"
+  },
+  {
+    "description_group": "THE NEW AVOCADO FACTOR",
+    "merchant_name": "The New Avocado Factor",
+    "count": 1,
+    "amount_range": "£8.11-£8.11"
+  },
+  {
+    "description_group": "THE ORIGIN HEALTH AND",
+    "merchant_name": "The Origin Health And",
+    "count": 1,
+    "amount_range": "£1.00-£1.00"
+  },
+  {
+    "description_group": "THE PLOUGH (WESTCLIFF)",
+    "merchant_name": "The Plough (westcliff",
+    "count": 1,
+    "amount_range": "£4.50-£4.50"
+  },
+  {
+    "description_group": "THE SHIP",
+    "merchant_name": "The Ship",
+    "count": 1,
+    "amount_range": "£22.65-£22.65"
+  },
+  {
+    "description_group": "THE TREE STONE BUTCHER-GR",
+    "merchant_name": "The Tree Stone Butcher-gr",
+    "count": 1,
+    "amount_range": "£16.31-£16.31"
+  },
+  {
+    "description_group": "TICKETS HELP.LIVEIT.IO",
+    "merchant_name": "Tickets Help.liveit.io",
+    "count": 1,
+    "amount_range": "£96.60-£96.60"
+  },
+  {
+    "description_group": "TIMES BEACH WARUNG",
+    "merchant_name": "Times Beach Warung",
+    "count": 1,
+    "amount_range": "£18.14-£18.14"
+  },
+  {
+    "description_group": "TIPTOES (ESSEX) LTD",
+    "merchant_name": "Tiptoes (essex) Ltd",
+    "count": 1,
+    "amount_range": "£14.85-£14.85"
+  },
+  {
+    "description_group": "TO ADRIAN CARTER",
+    "merchant_name": "To Adrian Carter",
+    "count": 1,
+    "amount_range": "£150.00-£150.00"
+  },
+  {
+    "description_group": "TO AG COMMUNICATIONS",
+    "merchant_name": "To Ag Communications",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "TO ANDY O’NYAN",
+    "merchant_name": "To Andy O’Nyan",
+    "count": 1,
+    "amount_range": "£21.00-£21.00"
+  },
+  {
+    "description_group": "TO BENJAMIN GEORGE ERNEST REYNOLDS",
+    "merchant_name": "To Benjamin George Ernest Reynolds",
+    "count": 2,
+    "amount_range": "£50.00-£74.00"
+  },
+  {
+    "description_group": "TO CAPITAL ONE",
+    "merchant_name": "To Capital One",
+    "count": 1,
+    "amount_range": "£10.95-£10.95"
+  },
+  {
+    "description_group": "TO CATARINA C",
+    "merchant_name": "To Catarina C",
+    "count": 1,
+    "amount_range": "£44.00-£44.00"
+  },
+  {
+    "description_group": "TO CONOR O BRIEN",
+    "merchant_name": "To Conor O Brien",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "TO COPYBET UK LTD",
+    "merchant_name": "To Copybet Uk Ltd",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "TO ELLIE MERRY",
+    "merchant_name": "To Ellie Merry",
+    "count": 2,
+    "amount_range": "£15.00-£120.00"
+  },
+  {
+    "description_group": "TO GBP",
+    "merchant_name": "To Gbp",
+    "count": 198,
+    "amount_range": "£0.31-£245.00"
+  },
+  {
+    "description_group": "TO GBP MB:24D5A6EE-507A-4BDD-8415-E9BE0DBAB3E6",
+    "merchant_name": "To Gbp Mb:24d5a6ee-507a-4bdd-8415-E9be0dbab3e6",
+    "count": 14,
+    "amount_range": "£10.00-£155.00"
+  },
+  {
+    "description_group": "TO GBP MB:2F703BA7-0601-42D9-BD83-F89E2073F904",
+    "merchant_name": "To Gbp Mb:2f703ba7-0601-42d9-Bd83-F89e2073f904",
+    "count": 8,
+    "amount_range": "£14.00-£160.00"
+  },
+  {
+    "description_group": "TO GBP MB:318ADB28-55D9-4EC6-A63E-37DE26F1CC92",
+    "merchant_name": "To Gbp Mb:318adb28-55d9-4ec6-A63e-37de26f1cc92",
+    "count": 8,
+    "amount_range": "£129.00-£248.00"
+  },
+  {
+    "description_group": "TO GBP MB:429CF51F-E008-4C44-9C8D-1E6608357CE5",
+    "merchant_name": "To Gbp Mb:429cf51f-E008-4c44-9c8d-1e6608357ce5",
+    "count": 6,
+    "amount_range": "£10.00-£465.00"
+  },
+  {
+    "description_group": "TO GBP MB:47B55753-D36E-4B56-8D04-D161753FFCD9",
+    "merchant_name": "To Gbp Mb:47b55753-D36e-4b56-8d04-D161753ffcd9",
+    "count": 6,
+    "amount_range": "£10.00-£248.00"
+  },
+  {
+    "description_group": "TO GBP MB:FDF360CD-A9BC-40D5-80BD-8426589C22EA",
+    "merchant_name": "To Gbp Mb:Fdf360cd-A9bc-40d5-80bd-8426589c22ea",
+    "count": 10,
+    "amount_range": "£23.00-£310.00"
+  },
+  {
+    "description_group": "TO MR STEVEN LITTLE",
+    "merchant_name": "To Mr Steven Little",
+    "count": 1,
+    "amount_range": "£8.50-£8.50"
+  },
+  {
+    "description_group": "TO NATHAN MERRY",
+    "merchant_name": "To Nathan Merry",
+    "count": 39,
+    "amount_range": "£1.02-£3703.00"
+  },
+  {
+    "description_group": "TO OLIVIA S",
+    "merchant_name": "To Olivia S",
+    "count": 1,
+    "amount_range": "£17.50-£17.50"
+  },
+  {
+    "description_group": "TO ONE MISKET LTD",
+    "merchant_name": "To One Misket Ltd",
+    "count": 1,
+    "amount_range": "£21.00-£21.00"
+  },
+  {
+    "description_group": "TO SARAH MERRY",
+    "merchant_name": "To Sarah Merry",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "TO SERENA R",
+    "merchant_name": "To Serena R",
+    "count": 1,
+    "amount_range": "£30.00-£30.00"
+  },
+  {
+    "description_group": "TO SHANNON WALSH",
+    "merchant_name": "To Shannon Walsh",
+    "count": 19,
+    "amount_range": "£3.00-£161.17"
+  },
+  {
+    "description_group": "TO SMARKETS",
+    "merchant_name": "To Smarkets",
+    "count": 9,
+    "amount_range": "£10.00-£200.00"
+  },
+  {
+    "description_group": "TO STUART BROWN",
+    "merchant_name": "To Stuart Brown",
+    "count": 4,
+    "amount_range": "£2.50-£37.50"
+  },
+  {
+    "description_group": "TO TOM GARNET",
+    "merchant_name": "To Tom Garnet",
+    "count": 3,
+    "amount_range": "£28.75-£50.00"
+  },
+  {
+    "description_group": "TO WILLIAM F",
+    "merchant_name": "To William F",
+    "count": 1,
+    "amount_range": "£37.00-£37.00"
+  },
+  {
+    "description_group": "TO YUCEL GEZER",
+    "merchant_name": "To Yucel Gezer",
+    "count": 1,
+    "amount_range": "£23.00-£23.00"
+  },
+  {
+    "description_group": "TRAFALGAR TAVERN",
+    "merchant_name": "Trafalgar Tavern",
+    "count": 1,
+    "amount_range": "£25.60-£25.60"
+  },
+  {
+    "description_group": "TRAINLINE",
+    "merchant_name": "Trainline",
+    "count": 6,
+    "amount_range": "£5.90-£16.50"
+  },
+  {
+    "description_group": "TRAINLINE.COM",
+    "merchant_name": "Trainline",
+    "count": 2,
+    "amount_range": "£23.10-£43.39"
+  },
+  {
+    "description_group": "TREATWELL",
+    "merchant_name": "Treatwell",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "TRINITY STREATHAM HILL",
+    "merchant_name": "Trinity Streatham Hill",
+    "count": 1,
+    "amount_range": "£18.00-£18.00"
+  },
+  {
+    "description_group": "TRIS SNC",
+    "merchant_name": "Tris Snc",
+    "count": 1,
+    "amount_range": "£3.00-£3.00"
+  },
+  {
+    "description_group": "TRUEHOA.APP",
+    "merchant_name": "Truehoa.app",
+    "count": 2,
+    "amount_range": "£4.53-£17.86"
+  },
+  {
+    "description_group": "TST-ASSENHEIMS 56 - WO",
+    "merchant_name": "Tst-assenheims 56 - Wo",
+    "count": 1,
+    "amount_range": "£12.00-£12.00"
+  },
+  {
+    "description_group": "TST-FLAT IRON SQUARE R",
+    "merchant_name": "Tst-flat Iron Square R",
+    "count": 2,
+    "amount_range": "£8.00-£25.00"
+  },
+  {
+    "description_group": "UBER * EATS PENDING",
+    "merchant_name": "Uber   * Eats Pending",
+    "count": 1,
+    "amount_range": "£71.26-£71.26"
+  },
+  {
+    "description_group": "UBER UK RIDES",
+    "merchant_name": "Uber Uk Rides",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "UBR* PENDING.UBER.COM",
+    "merchant_name": "Ubr* Pending.uber.com",
+    "count": 8,
+    "amount_range": "£7.94-£30.78"
+  },
+  {
+    "description_group": "UMA CEKING",
+    "merchant_name": "Uma Ceking",
+    "count": 1,
+    "amount_range": "£4.68-£4.68"
+  },
+  {
+    "description_group": "UME COFFEE & DINING UB",
+    "merchant_name": "Ume Coffee & Dining U",
+    "count": 1,
+    "amount_range": "£26.72-£26.72"
+  },
+  {
+    "description_group": "UNIQLO 1 OXFORD STREET",
+    "merchant_name": "Uniqlo 1 Oxford Street",
+    "count": 1,
+    "amount_range": "£82.80-£82.80"
+  },
+  {
+    "description_group": "UNIQLO SPITALFIELDS",
+    "merchant_name": "Uniqlo Spitalfields",
+    "count": 1,
+    "amount_range": "£19.90-£19.90"
+  },
+  {
+    "description_group": "UNIQLO STRATFORD",
+    "merchant_name": "Uniqlo Stratford",
+    "count": 1,
+    "amount_range": "£34.90-£34.90"
+  },
+  {
+    "description_group": "UPWORK -829826113CONNE",
+    "merchant_name": "Upwork -829826113conne",
+    "count": 1,
+    "amount_range": "£2.77-£2.77"
+  },
+  {
+    "description_group": "UPWORK -851319331CONNE",
+    "merchant_name": "Upwork -851319331conne",
+    "count": 1,
+    "amount_range": "£1.40-£1.40"
+  },
+  {
+    "description_group": "UPWORK -851328658CONNE",
+    "merchant_name": "Upwork -851328658conne",
+    "count": 1,
+    "amount_range": "£1.40-£1.40"
+  },
+  {
+    "description_group": "UPWORK INC.",
+    "merchant_name": "Upwork Inc.",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "VAPEXPRESS-ITALIA",
+    "merchant_name": "Vapexpress-italia",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "VENDNATION",
+    "merchant_name": "Vendnation",
+    "count": 1,
+    "amount_range": "£5.00-£5.00"
+  },
+  {
+    "description_group": "VIATOR *IT-1663030075",
+    "merchant_name": "Viator *it-1663030075",
+    "count": 1,
+    "amount_range": "£95.45-£95.45"
+  },
+  {
+    "description_group": "VIRGIN BET",
+    "merchant_name": "Virgin Bet",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "VIVE CAFE-VIVE CAFE",
+    "merchant_name": "Vive Cafe-vive Cafe",
+    "count": 1,
+    "amount_range": "£9.94-£9.94"
+  },
+  {
+    "description_group": "WAITROSE LTD",
+    "merchant_name": "Waitrose 740",
+    "count": 2,
+    "amount_range": "£25.25-£25.56"
+  },
+  {
+    "description_group": "WAITROSE STORES",
+    "merchant_name": "Waitrose Stores",
+    "count": 3,
+    "amount_range": "£14.36-£19.50"
+  },
+  {
+    "description_group": "WE LOVE ITALY",
+    "merchant_name": "We Love Italy",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "WELCOME B/WAITROSE",
+    "merchant_name": "Welcome B/waitrose",
+    "count": 1,
+    "amount_range": "£16.00-£16.00"
+  },
+  {
+    "description_group": "WELCOME BREAK-NEWPORT",
+    "merchant_name": "Welcome Break-newport Pag",
+    "count": 1,
+    "amount_range": "£3.20-£3.20"
+  },
+  {
+    "description_group": "WELL & BUCKET",
+    "merchant_name": "Well & Bucket",
+    "count": 1,
+    "amount_range": "£20.65-£20.65"
+  },
+  {
+    "description_group": "WESTERN UNION",
+    "merchant_name": "Western Union",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "WESTERN UNION-GBP",
+    "merchant_name": "Western Union-gbp",
+    "count": 1,
+    "amount_range": "£408.83-£408.83"
+  },
+  {
+    "description_group": "WH SMITH GATWICK SOU",
+    "merchant_name": "Wh Smith Gatwick South",
+    "count": 1,
+    "amount_range": "£1.79-£1.79"
+  },
+  {
+    "description_group": "WICKES BLACKHEATH",
+    "merchant_name": "Wickes Blackheath",
+    "count": 2,
+    "amount_range": "£3.50-£8.50"
+  },
+  {
+    "description_group": "WINDSURF",
+    "merchant_name": "Windsurf",
+    "count": 1,
+    "amount_range": "£9.19-£9.19"
+  },
+  {
+    "description_group": "WORLDPRESSIT.COM",
+    "merchant_name": "Worldpressit.com",
+    "count": 1,
+    "amount_range": "£3.96-£3.96"
+  },
+  {
+    "description_group": "WORLDREMIT",
+    "merchant_name": "Worldremit",
+    "count": 4,
+    "amount_range": "£488.00-£628.00"
+  },
+  {
+    "description_group": "WP MEDIA",
+    "merchant_name": "Wp Media",
+    "count": 1,
+    "amount_range": "£33.78-£33.78"
+  },
+  {
+    "description_group": "WRAPPED",
+    "merchant_name": "Wrapped",
+    "count": 1,
+    "amount_range": "£9.50-£9.50"
+  },
+  {
+    "description_group": "WWW.KIWI.COM*BRNO",
+    "merchant_name": "Www.Kiwi.Com*Brno",
+    "count": 1,
+    "amount_range": "£280.06-£280.06"
+  },
+  {
+    "description_group": "WWW.BOOKSY.COM",
+    "merchant_name": "Www.booksy.com",
+    "count": 1,
+    "amount_range": "£7.50-£7.50"
+  },
+  {
+    "description_group": "WWW.DAZN.COM",
+    "merchant_name": "Www.dazn.com",
+    "count": 1,
+    "amount_range": "£24.99-£24.99"
+  },
+  {
+    "description_group": "WWW.HUEL.COM",
+    "merchant_name": "Www.huel.com",
+    "count": 2,
+    "amount_range": "£61.00-£61.00"
+  },
+  {
+    "description_group": "WWW.JOHNLEWIS.COM",
+    "merchant_name": "Www.johnlewis.com",
+    "count": 1,
+    "amount_range": "£172.00-£172.00"
+  },
+  {
+    "description_group": "WWW.YESIDOITALY.COM",
+    "merchant_name": "Www.yesidoitaly.com",
+    "count": 1,
+    "amount_range": "£33.00-£33.00"
+  },
+  {
+    "description_group": "WYNDHAM NORDELTA TIGRE BS",
+    "merchant_name": "Wyndham Nordelta Tigr0986",
+    "count": 1,
+    "amount_range": "£32.33-£32.33"
+  },
+  {
+    "description_group": "XOOM",
+    "merchant_name": "Xoom",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "XOOM*MERRY NA",
+    "merchant_name": "Xoom*Merry Na",
+    "count": 2,
+    "amount_range": "£50.00-£55.00"
+  },
+  {
+    "description_group": "YE OLDE SMACK",
+    "merchant_name": "Ye Olde Smack",
+    "count": 1,
+    "amount_range": "£26.50-£26.50"
+  },
+  {
+    "description_group": "YOUR LOCAL CAFE",
+    "merchant_name": "Your Local Cafe",
+    "count": 1,
+    "amount_range": "£5.75-£5.75"
+  },
+  {
+    "description_group": "ZABLE CARDS",
+    "merchant_name": "Zable Cards",
+    "count": 4,
+    "amount_range": "£0.00-£96.00"
+  },
+  {
+    "description_group": "ZARA ARGENTINA SA",
+    "merchant_name": "Zara Argentina Sa    0970",
+    "count": 1,
+    "amount_range": "£207.37-£207.37"
+  },
+  {
+    "description_group": "ZE-ZE CAFE AND WINE BAR",
+    "merchant_name": "Ze-ze Cafe And Wine Bar",
+    "count": 3,
+    "amount_range": "£11.50-£22.50"
+  },
+  {
+    "description_group": "ZETTLE_*A2 FOODS LTD",
+    "merchant_name": "Zettle_*a2 Foods Ltd",
+    "count": 1,
+    "amount_range": "£3.50-£3.50"
+  },
+  {
+    "description_group": "ZETTLE_*FINEST FAYRE",
+    "merchant_name": "Zettle_*finest Fayre",
+    "count": 2,
+    "amount_range": "£6.50-£6.50"
+  },
+  {
+    "description_group": "ZETTLE_*LAKITO",
+    "merchant_name": "Zettle_*lakito",
+    "count": 1,
+    "amount_range": "£10.00-£10.00"
+  },
+  {
+    "description_group": "ZETTLE_*LLOYDS FC",
+    "merchant_name": "Zettle_*lloyds Fc",
+    "count": 1,
+    "amount_range": "£20.00-£20.00"
+  },
+  {
+    "description_group": "ZETTLE_*MEXICAN MAMA L",
+    "merchant_name": "Zettle_*mexican Mama L",
+    "count": 1,
+    "amount_range": "£11.97-£11.97"
+  },
+  {
+    "description_group": "ZETTLE_*NAKED",
+    "merchant_name": "Zettle_*naked",
+    "count": 1,
+    "amount_range": "£4.00-£4.00"
+  },
+  {
+    "description_group": "ZETTLE_*SOUTHWARK BREW",
+    "merchant_name": "Zettle_*southwark Brew",
+    "count": 1,
+    "amount_range": "£13.00-£13.00"
+  },
+  {
+    "description_group": "ZETTLE_*THE SIPPING HO",
+    "merchant_name": "Zettle_*the Sipping Ho",
+    "count": 5,
+    "amount_range": "£3.50-£9.30"
+  },
+  {
+    "description_group": "ZIPCAR APPLICATION",
+    "merchant_name": "Zipcar Application",
+    "count": 1,
+    "amount_range": "£15.00-£15.00"
+  },
+  {
+    "description_group": "ZIPCAR LATE RETURN",
+    "merchant_name": "Zipcar Late Return",
+    "count": 1,
+    "amount_range": "£39.50-£39.50"
+  },
+  {
+    "description_group": "ZIPCAR TRIP",
+    "merchant_name": "Zipcar Trip",
+    "count": 3,
+    "amount_range": "£9.00-£10.00"
+  },
+  {
+    "description_group": "ZIZI BAR",
+    "merchant_name": "Zizi Bar",
+    "count": 1,
+    "amount_range": "£48.00-£48.00"
+  },
+  {
+    "description_group": "ZONCA ANTONIO",
+    "merchant_name": "Zonca Antonio",
+    "count": 1,
+    "amount_range": "£5.15-£5.15"
+  },
+  {
+    "description_group": "APPLE.COM/BILL",
+    "merchant_name": "apple.com/bill",
+    "count": 2,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "BOOKING.COM",
+    "merchant_name": "booking.com",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  },
+  {
+    "description_group": "WWW.BOOKSY.COM",
+    "merchant_name": "www.booksy.com",
+    "count": 1,
+    "amount_range": "£0.00-£0.00"
+  }
+]

@@ -82,15 +82,18 @@ export async function applyRulesToTransaction(transactionId: string) {
   });
 
   for (const rule of rules) {
-    const fieldToMatch =
+    // For merchant rules, prefer normalizedMerchant (collapses variants),
+    // fall back to raw merchantName. Description rules use raw description.
+    const fieldsToMatch =
       rule.matchType === "merchant"
-        ? transaction.merchantName
-        : transaction.description;
+        ? [transaction.normalizedMerchant, transaction.merchantName]
+        : [transaction.description];
 
-    if (!fieldToMatch) continue;
-
-    // Case-insensitive partial match
-    if (!fieldToMatch.toLowerCase().includes(rule.matchValue.toLowerCase())) continue;
+    const matchValueLower = rule.matchValue.toLowerCase();
+    const matched = fieldsToMatch.some(
+      (f) => f && f.toLowerCase().includes(matchValueLower)
+    );
+    if (!matched) continue;
 
     logger.info(
       { transactionId, ruleId: rule.id, matchType: rule.matchType, matchValue: rule.matchValue },
@@ -129,12 +132,19 @@ export async function applyRuleToExistingTransactions(ruleId: string) {
   if (!rule.active) return 0;
 
   // Find all matching transactions
-  const field = rule.matchType === "merchant" ? "merchantName" : "description";
-
+  // For merchant rules, match against both normalizedMerchant and raw merchantName
+  // to catch all variants. For description rules, use raw description.
   const transactions = await prisma.transaction.findMany({
-    where: {
-      [field]: { contains: rule.matchValue, mode: "insensitive" },
-    },
+    where: rule.matchType === "merchant"
+      ? {
+          OR: [
+            { normalizedMerchant: { contains: rule.matchValue, mode: "insensitive" } },
+            { merchantName: { contains: rule.matchValue, mode: "insensitive" } },
+          ],
+        }
+      : {
+          description: { contains: rule.matchValue, mode: "insensitive" },
+        },
   });
 
   let updated = 0;

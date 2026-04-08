@@ -53,6 +53,7 @@ model Transaction {
   transactionDate         DateTime  @map("transaction_date")
   description             String
   merchantName            String?   @map("merchant_name")
+  normalizedMerchant      String?   @map("normalized_merchant")
   pending                 Boolean   @default(false)
   note                    String?
   isIgnored               Boolean   @default(false) @map("is_ignored")
@@ -69,6 +70,7 @@ model Transaction {
   @@index([accountId])
   @@index([transactionDate])
   @@index([isIgnored])
+  @@index([normalizedMerchant])
   @@map("transactions")
 }
 

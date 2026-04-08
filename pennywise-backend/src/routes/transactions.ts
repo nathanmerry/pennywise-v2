@@ -52,6 +52,7 @@ router.get("/", async (req, res) => {
     where.OR = [
       { description: { contains: search, mode: "insensitive" } },
       { merchantName: { contains: search, mode: "insensitive" } },
+      { normalizedMerchant: { contains: search, mode: "insensitive" } },
     ];
   }
 

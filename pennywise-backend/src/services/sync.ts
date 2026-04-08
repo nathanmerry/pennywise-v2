@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { logger } from "../lib/logger.js";
 import * as truelayer from "./truelayer.js";
 import { applyRulesToTransaction } from "./rules.js";
+import { normalizeMerchant } from "./normalize.js";
 
 export async function syncConnection(connectionId: string) {
   const connection = await prisma.bankConnection.findUniqueOrThrow({
@@ -166,6 +167,7 @@ async function upsertTransaction(
   const source = "truelayer";
   const sourceTransactionId = tx.transaction_id;
   const merchantName = tx.meta?.provider_merchant_name || null;
+  const normalizedMerchant = normalizeMerchant(merchantName, tx.description) || null;
 
   // Check if transaction already exists
   const existing = await prisma.transaction.findUnique({
@@ -180,6 +182,7 @@ async function upsertTransaction(
       transactionDate: new Date(tx.timestamp),
       description: tx.description,
       merchantName,
+      normalizedMerchant,
       pending: isPending,
       rawJson: tx as object,
     };
@@ -200,6 +203,7 @@ async function upsertTransaction(
         transactionDate: new Date(tx.timestamp),
         description: tx.description,
         merchantName,
+        normalizedMerchant,
         pending: isPending,
         rawJson: tx as object,
       },
