@@ -1,0 +1,1872 @@
+[
+  {
+    "normalized_merchant": "lot bar and restaurant",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "loqbox",
+    "categoryPaths": [
+      [
+        "Fees & Financial",
+        "Credit Building"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "lloyds fc",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Credit Card Payment"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "livescorebet",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "little olive",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "lime",
+    "categoryPaths": [
+      [
+        "Transport",
+        "Micromobility"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "lidl",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Supermarket"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "les parigots",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "leon",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "le bon moment",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "lakito",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "la terrasse saint ja",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "la comete",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "kwiff",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "krystals express",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "klarna",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "BNPL Payment"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "kazumi",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "junction",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "joe then juice uk ltd",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "jerk yard",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "jazu",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "jamila",
+    "categoryPaths": [
+      [
+        "Personal Care",
+        "Hair & Beauty"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "jam circus",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "itsu",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "irish pub the lion's f",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "intan sari luwak coffe",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "il diavolo e l'aquasa",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "ikea",
+    "categoryPaths": [
+      [
+        "Home & Lifestyle",
+        "Household"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "ignazio cardil",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "i love como srl",
+    "categoryPaths": [
+      [
+        "Travel",
+        "Activities"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "hongyun",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "hollywoodbets",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "hilton",
+    "categoryPaths": [
+      [
+        "Travel",
+        "Hotel"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "heap's sausages cafe",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Breakfast & Brunch"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "havering council",
+    "categoryPaths": [
+      [
+        "Bills",
+        "Government & Council"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "harrow",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "hamilton hall",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "halai general stores",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "h & m",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "Clothes"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "greggs",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Bakery"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "greenwich",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "greens coffee and comp",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "grab",
+    "categoryPaths": [
+      [
+        "Transport",
+        "Taxi & Ride Hailing"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "google one",
+    "categoryPaths": [
+      [
+        "Software & Services",
+        "Cloud Storage"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "google",
+    "categoryPaths": [
+      [
+        "Software & Services",
+        "Digital Services"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "godfreys of hornchurch",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Butcher"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "gishotels di giselda b",
+    "categoryPaths": [
+      [
+        "Travel",
+        "Hotel"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "girola maria",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "gipsy moth",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "ginger lounge",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "gelateria ci gusta",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Snacks & Drinks"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "gails",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Bakery"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "g & g snc di giannetti",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "from william oliver m fenton",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Incoming Transfer"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "freemans event partner",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Events & Tickets"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "freddies flowers",
+    "categoryPaths": [
+      [
+        "Home & Lifestyle",
+        "Flowers"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "frangos ioannis",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "fotis",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "fontaine",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "flying horse",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "flat iron square r",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "finest fayre",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "finca monasterio event",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Events & Tickets"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "fig branch cafe",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "felicity spa",
+    "categoryPaths": [
+      [
+        "Personal Care",
+        "Spa & Beauty"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "fatling and firkin",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "farmer j (finsbury squ",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "farmacia reale",
+    "categoryPaths": [
+      [
+        "Health",
+        "Pharmacy & Toiletries"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "farmacia alla croce di",
+    "categoryPaths": [
+      [
+        "Health",
+        "Pharmacy & Toiletries"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "fairdeal food centre",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "exchanged to gbp",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Currency Exchange"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "exchanged to eur",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Currency Exchange"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "everbrite food and win",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "event tickets",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Events & Tickets"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "event catering sol",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "eurl kestener fr",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "estiatorio sarris",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "essex wildlife sales l",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Attractions"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "efc store ltd",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "eatviet",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "duke of edinburgh",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "drinky caffe'",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "drings butchers",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Butcher"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "donna",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "disney plus",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Streaming"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "dh seething lane",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "designmynight",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Events & Tickets"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "deptford supermarket",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "deptford super",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "deliveroo",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "decorum vending payter",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Snacks & Drinks"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "decodo",
+    "categoryPaths": [
+      [
+        "Software & Services",
+        "Web Tools"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "daznbet",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "davys at greenwich",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "dark sugars ltd",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "dandy grill palermo",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "dag supermarket",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cutty sark",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Attractions"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "crown bh",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cream and crumble bake",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Bakery"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "costcutter",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "costa coffee",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "coppins tootin",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "como caffe' stazione s",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "coffee beyond ltd",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "coach and horses greenwich",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "co-op",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "clapton hart",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "clacton pier",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Attractions"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "ckm.nord",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "chez gado gado",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "chez coffee & co",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "chacarero greenwich",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cash at the coperative food",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Cash Withdrawal"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "cash at changegroup open space fa",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Cash Withdrawal"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "casa 28",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "carrefour$1",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Supermarket"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "carrefour",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Supermarket"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cantina de' pucci",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cambridge blue",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cambridge belfry",
+    "categoryPaths": [
+      [
+        "Travel",
+        "Hotel"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "caffetteria san leonar",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "caffe' degli innocenti",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "caffe nero",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cafe lilou",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "cabify",
+    "categoryPaths": [
+      [
+        "Transport",
+        "Taxi & Ride Hailing"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "buster mantis",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "buller",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "brozziano-pacifico",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "brick bonanza",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "brewdog",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bread and truffle",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Bakery"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "boylesports",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "boxhall city (traders",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "boxfit uk - boxfit",
+    "categoryPaths": [
+      [
+        "Health",
+        "Sport & Fitness"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "boots$1",
+    "categoryPaths": [
+      [
+        "Health",
+        "Pharmacy & Toiletries"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "boots",
+    "categoryPaths": [
+      [
+        "Health",
+        "Pharmacy & Toiletries"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "booking.com",
+    "categoryPaths": [
+      [
+        "Travel",
+        "Travel Booking"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bomba mix snc",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Snacks & Drinks"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bolt",
+    "categoryPaths": [
+      [
+        "Transport",
+        "Taxi & Ride Hailing"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bodies in the booksho",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Events & Tickets"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "blossom bloom creation",
+    "categoryPaths": [
+      [
+        "Home & Lifestyle",
+        "Flowers"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "blackstar",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bistrot74",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bills - greenwich",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "betuk.com",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "betmgm",
+    "categoryPaths": [
+      [
+        "Betting",
+        "Betting Deposits"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bermondsey bier keller",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bb52 burgers canggu",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "barrow boy and banker se1",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "barrio snc",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bar sanremo",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bar rossi snc di brusc",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "banilla claudia$1",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bali om lounge pt ho",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "bailo sup veneziani",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "au des lisse",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "au coin bio",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "atre3",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "astiti artshop ho",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "assenheims 56 - wo",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "assenheims 56",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "asf autolinee",
+    "categoryPaths": [
+      [
+        "Transport",
+        "Public Transport"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "asda",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Supermarket"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "argos ltd",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "arena foods market",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "appropriate",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "apple pay top-up",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Card Top Up"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "apple pay payment",
+    "categoryPaths": [
+      [
+        "Transfers",
+        "Digital Wallet"
+      ]
+    ],
+    "ignore": true
+  },
+  {
+    "normalized_merchant": "apple",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "angeli fish & chips",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Takeaway"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "anchor",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "amazon prime",
+    "categoryPaths": [
+      [
+        "Entertainment",
+        "Streaming"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "amazon marketplace",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "amazon",
+    "categoryPaths": [
+      [
+        "Shopping",
+        "General Shopping"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "alle terrazze",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "all'arco",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Restaurant"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "all my friends",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "alimentari ortis",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "aldi",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Supermarket"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "albert schloss london",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "adagio caffe wine bar",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Pub & Bar"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "a2 foods ltd",
+    "categoryPaths": [
+      [
+        "Groceries",
+        "Convenience Store"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "9000 caddy s",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "7 hungry 2",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Snacks & Drinks"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "15grams",
+    "categoryPaths": [
+      [
+        "Eating Out",
+        "Coffee"
+      ]
+    ],
+    "ignore": false
+  },
+  {
+    "normalized_merchant": "#77206254",
+    "categoryPaths": [
+      [
+        "Unclear",
+        "Needs Review"
+      ]
+    ],
+    "ignore": false
+  }
+]

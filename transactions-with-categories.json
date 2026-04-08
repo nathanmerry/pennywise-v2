@@ -1,1722 +1,1311 @@
 [
   {
-    "description_group": "zonca antonio",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Personal name / unclear merchant."
-  },
-  {
-    "description_group": "zizi bar",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like bar spend."
-  },
-  {
-    "description_group": "zipcar",
-    "categories": ["Transport", "Car Rental"],
+    "description_group": "lot bar and restaurant",
+    "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Car sharing / short car hire."
+    "reason": "Explicit bar and restaurant."
   },
   {
-    "description_group": "ze-ze cafe and wine bar",
-    "categories": ["Eating Out", "Pub & Bar"],
+    "description_group": "loqbox",
+    "categories": ["Fees & Financial", "Credit Building"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Cafe/wine bar."
+    "reason": "Credit-building/financial service."
   },
   {
-    "description_group": "zara argentina sa$1",
-    "categories": ["Shopping", "Clothes"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Zara clothing retailer."
-  },
-  {
-    "description_group": "zable cards",
-    "categories": ["Fees & Financial", "Plan Fee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely card/credit product related charge."
-  },
-  {
-    "description_group": "your local cafe",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Cafe purchase."
-  },
-  {
-    "description_group": "ye olde smack",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like pub spend."
-  },
-  {
-    "description_group": "xoom",
-    "categories": ["Transfers", "Outgoing Transfer"],
+    "description_group": "lloyds fc",
+    "categories": ["Transfers", "Credit Card Payment"],
     "ignore": true,
     "confidence": "medium",
-    "reason": "Money transfer service; usually financial movement, not spending."
+    "reason": "Looks like Lloyds finance/card payment rather than merchant spend."
   },
   {
-    "description_group": "wyndham nordelta tigr0986",
-    "categories": ["Travel", "Hotel"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Hotel merchant."
-  },
-  {
-    "description_group": "www.yesidoitaly.com",
-    "categories": ["Travel", "Activities"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Travel/leisure sounding site, but unclear exact purchase."
-  },
-  {
-    "description_group": "www.kiwi.com*brno",
-    "categories": ["Travel", "Flights"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Kiwi is a flight/travel booking platform."
-  },
-  {
-    "description_group": "www.johnlewis.com",
-    "categories": ["Shopping", "General Shopping"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Retail purchase."
-  },
-  {
-    "description_group": "www.huel.com",
-    "categories": ["Groceries", "Food Delivery"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Meal product / food purchase."
-  },
-  {
-    "description_group": "www.dazn.com",
-    "categories": ["Entertainment", "Streaming"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Sports streaming subscription."
-  },
-  {
-    "description_group": "www.booksy.com",
-    "categories": ["Personal Care", "Hair & Beauty"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Booking platform; zero amounts suggest auth rows may need ignoring."
-  },
-  {
-    "description_group": "wrapped",
-    "categories": ["Gifts", "Gift Shop"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Name suggests gift/card shop, but not certain."
-  },
-  {
-    "description_group": "wp media",
-    "categories": ["Software & Services", "Web Tools"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely digital/software subscription."
-  },
-  {
-    "description_group": "worldremit",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Remittance service; financial movement."
-  },
-  {
-    "description_group": "worldpressit.com",
-    "categories": ["Software & Services", "Web Tools"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like WordPress/theme/plugin related digital purchase."
-  },
-  {
-    "description_group": "windsurf",
-    "categories": ["Software & Services", "AI Tools"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely software subscription."
-  },
-  {
-    "description_group": "wickes",
-    "categories": ["Home & Lifestyle", "Household"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "DIY / home improvement retailer."
-  },
-  {
-    "description_group": "wh smith",
-    "categories": ["Shopping", "General Shopping"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Mixed retailer; broad shopping bucket safest."
-  },
-  {
-    "description_group": "western union",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Money transfer service."
-  },
-  {
-    "description_group": "well & bucket",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like pub/bar."
-  },
-  {
-    "description_group": "welcome break-newport pag",
-    "categories": ["Eating Out", "Snacks & Drinks"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Motorway service stop small spend."
-  },
-  {
-    "description_group": "we love italy",
-    "categories": ["Travel", "Activities"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Travel/leisure sounding merchant, but vague."
-  },
-  {
-    "description_group": "waitrose",
-    "categories": ["Groceries", "Supermarket"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Supermarket."
-  },
-  {
-    "description_group": "vive cafe-vive cafe",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Cafe spend."
-  },
-  {
-    "description_group": "virgin bet",
+    "description_group": "livescorebet",
     "categories": ["Betting", "Betting Deposits"],
     "ignore": false,
     "confidence": "high",
     "reason": "Betting operator."
   },
   {
-    "description_group": "village food & win",
-    "categories": ["Groceries", "Convenience Store"],
+    "description_group": "little olive",
+    "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like local food/wine shop."
+    "confidence": "low",
+    "reason": "Likely food/hospitality, but merchant is vague."
   },
   {
-    "description_group": "viator$1",
-    "categories": ["Travel", "Activities"],
+    "description_group": "lime",
+    "categories": ["Transport", "Micromobility"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Travel experiences/tours platform."
+    "reason": "Bike/scooter rides."
   },
   {
-    "description_group": "vendnation",
+    "description_group": "lidl",
+    "categories": ["Groceries", "Supermarket"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Supermarket."
+  },
+  {
+    "description_group": "les parigots",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Restaurant/hospitality venue."
+  },
+  {
+    "description_group": "leon",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Fast casual food."
+  },
+  {
+    "description_group": "le bon moment",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely hospitality merchant."
+  },
+  {
+    "description_group": "lakito",
     "categories": ["Unclear", "Needs Review"],
     "ignore": false,
     "confidence": "low",
-    "reason": "Too vague from merchant name alone."
+    "reason": "Too vague."
   },
   {
-    "description_group": "vapexpress-italia",
-    "categories": ["Shopping", "Personal Items"],
+    "description_group": "la terrasse saint ja",
+    "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Likely vape-related retailer, but keep broad."
+    "confidence": "medium",
+    "reason": "Restaurant/terrace dining."
   },
   {
-    "description_group": "upwork",
-    "categories": ["Software & Services", "Freelance Platform"],
+    "description_group": "la comete",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Likely restaurant/hospitality venue."
+  },
+  {
+    "description_group": "kwiff",
+    "categories": ["Betting", "Betting Deposits"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "krystals express",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Low-value fast food/convenience food style spend."
+  },
+  {
+    "description_group": "klarna",
+    "categories": ["Transfers", "BNPL Payment"],
     "ignore": true,
     "confidence": "medium",
-    "reason": "Could be work/business related platform fees; I'd default to ignore for personal-spend reporting."
+    "reason": "Buy-now-pay-later/finance settlement rather than direct spend."
   },
   {
-    "description_group": "uniqlo",
+    "description_group": "kazumi",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely restaurant, but vague."
+  },
+  {
+    "description_group": "junction",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Venue-style name, but not safe enough for a narrower call."
+  },
+  {
+    "description_group": "joe then juice uk ltd",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Juice/coffee/casual food chain."
+  },
+  {
+    "description_group": "jerk yard",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Food takeaway/restaurant."
+  },
+  {
+    "description_group": "jazu",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely hospitality merchant."
+  },
+  {
+    "description_group": "jamila",
+    "categories": ["Personal Care", "Hair & Beauty"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Could be salon/beauty, but not confident."
+  },
+  {
+    "description_group": "jam circus",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bar/pub venue."
+  },
+  {
+    "description_group": "itsu",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Fast casual food."
+  },
+  {
+    "description_group": "irish pub the lion's f",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Explicit pub."
+  },
+  {
+    "description_group": "intan sari luwak coffe",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Coffee merchant."
+  },
+  {
+    "description_group": "il diavolo e l'aquasa",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Italian restaurant-style merchant."
+  },
+  {
+    "description_group": "ikea",
+    "categories": ["Home & Lifestyle", "Household"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Home/furniture retailer."
+  },
+  {
+    "description_group": "ignazio cardil",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Personal name/unclear merchant."
+  },
+  {
+    "description_group": "i love como srl",
+    "categories": ["Travel", "Activities"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Tourism/travel-sounding merchant, but unclear."
+  },
+  {
+    "description_group": "hongyun",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely food merchant, but uncertain."
+  },
+  {
+    "description_group": "hollywoodbets",
+    "categories": ["Betting", "Betting Deposits"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "hilton",
+    "categories": ["Travel", "Hotel"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Hotel."
+  },
+  {
+    "description_group": "heap's sausages cafe",
+    "categories": ["Eating Out", "Breakfast & Brunch"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Cafe/breakfast food merchant."
+  },
+  {
+    "description_group": "havering council",
+    "categories": ["Bills", "Government & Council"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Council/government payment."
+  },
+  {
+    "description_group": "harrow",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too vague; hospitality is safest guess from spend range."
+  },
+  {
+    "description_group": "hamilton hall",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pub/bar venue."
+  },
+  {
+    "description_group": "halai general stores",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Local grocery/convenience shop."
+  },
+  {
+    "description_group": "h & m",
     "categories": ["Shopping", "Clothes"],
     "ignore": false,
     "confidence": "high",
     "reason": "Clothing retailer."
   },
   {
-    "description_group": "uncommon liverpool",
+    "description_group": "greggs",
+    "categories": ["Eating Out", "Bakery"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bakery/quick food chain."
+  },
+  {
+    "description_group": "greenwich",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too broad/location-like."
+  },
+  {
+    "description_group": "greens coffee and comp",
     "categories": ["Eating Out", "Coffee"],
     "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like cafe/coffee shop."
-  },
-  {
-    "description_group": "ume coffee & dining u",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Coffee and dining; restaurant bucket safest."
-  },
-  {
-    "description_group": "uma ceking",
-    "categories": ["Travel", "Activities"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Likely travel/location-related spend, but unclear."
-  },
-  {
-    "description_group": "uber",
-    "categories": ["Transport", "Taxi & Ride Hailing"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Usually transport, but zero-value rows mean some are auth/reversal noise."
-  },
-  {
-    "description_group": "truehoa.app",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown merchant/app."
-  },
-  {
-    "description_group": "tris snc",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown merchant."
-  },
-  {
-    "description_group": "trip.com",
-    "categories": ["Travel", "Travel Booking"],
-    "ignore": false,
     "confidence": "high",
-    "reason": "Travel booking platform."
+    "reason": "Coffee merchant."
   },
   {
-    "description_group": "trinity streatham hill",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Could be venue/bar/restaurant; restaurant is safest guess."
-  },
-  {
-    "description_group": "treatwell",
-    "categories": ["Personal Care", "Hair & Beauty"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Booking platform; all-zero rows should likely be ignored."
-  },
-  {
-    "description_group": "tre rote camde",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Looks like restaurant/trattoria style merchant, but unclear."
-  },
-  {
-    "description_group": "trainline",
-    "categories": ["Transport", "Train"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Rail ticket purchase."
-  },
-  {
-    "description_group": "trafalgar tavern",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Pub/tavern."
-  },
-  {
-    "description_group": "to yucel gezer",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to william f",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to tom garnet",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to stuart brown",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to smarkets",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Transfer/deposit to betting exchange."
-  },
-  {
-    "description_group": "to shannon walsh",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to serena r",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to sarah merry",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to one misket ltd",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Looks like payment to a company/account rather than merchant card spend."
-  },
-  {
-    "description_group": "to olivia s",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to nathan merry",
-    "categories": ["Transfers", "Internal Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Looks like transfer to self."
-  },
-  {
-    "description_group": "to mr steven little",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to gbp",
-    "categories": ["Transfers", "Currency Exchange"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Currency conversion, not spend."
-  },
-  {
-    "description_group": "to ellie merry",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to copybet uk ltd",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Betting operator deposit."
-  },
-  {
-    "description_group": "to conor o brien",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to catarina c",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to capital one",
-    "categories": ["Transfers", "Credit Card Payment"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Looks like paying a credit card account, not spending."
-  },
-  {
-    "description_group": "to benjamin george ernest reynolds",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to andy o’nyan",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "to ag communications",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Looks like bank transfer to a business/payee rather than card spend."
-  },
-  {
-    "description_group": "to adrian carter",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Person-to-person transfer."
-  },
-  {
-    "description_group": "tiptoes (essex) ltd",
-    "categories": ["Personal Care", "Hair & Beauty"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like salon/beauty spend."
-  },
-  {
-    "description_group": "times beach warung",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Warung suggests food/dining."
-  },
-  {
-    "description_group": "tiger taxis",
+    "description_group": "grab",
     "categories": ["Transport", "Taxi & Ride Hailing"],
     "ignore": false,
-    "confidence": "high",
-    "reason": "Taxi service."
+    "confidence": "medium",
+    "reason": "Grab is often ride-hailing, though some rows could be food."
   },
   {
-    "description_group": "tickets help.liveit.io",
-    "categories": ["Entertainment", "Events & Tickets"],
+    "description_group": "google one",
+    "categories": ["Software & Services", "Cloud Storage"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Ticketing/event purchase."
+    "reason": "Google One subscription."
   },
   {
-    "description_group": "the tree stone butcher-gr",
+    "description_group": "google",
+    "categories": ["Software & Services", "Digital Services"],
+    "ignore": true,
+    "confidence": "medium",
+    "reason": "All-zero rows look like auth/noise rather than real spend."
+  },
+  {
+    "description_group": "godfreys of hornchurch",
     "categories": ["Groceries", "Butcher"],
     "ignore": false,
-    "confidence": "high",
-    "reason": "Butcher/food shop."
-  },
-  {
-    "description_group": "the sipping ho",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
     "confidence": "medium",
-    "reason": "Small spend pattern suggests cafe/coffee shop."
+    "reason": "Looks like local butcher/food shop."
   },
   {
-    "description_group": "the ship",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Common pub name; pub/bar is safest guess."
-  },
-  {
-    "description_group": "the plough (westcliff",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub."
-  },
-  {
-    "description_group": "the origin health and",
-    "categories": ["Health", "Supplements & Wellness"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Health/wellness sounding merchant, but unclear."
-  },
-  {
-    "description_group": "the new avocado factor",
-    "categories": ["Eating Out", "Breakfast & Brunch"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Sounds like cafe/brunch spot."
-  },
-  {
-    "description_group": "the mayflower leigh",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub/restaurant."
-  },
-  {
-    "description_group": "the master grooming",
-    "categories": ["Personal Care", "Hair & Beauty"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Grooming/barber style merchant."
-  },
-  {
-    "description_group": "the little scarlet do",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Feels like small cafe/food spot, but unclear."
-  },
-  {
-    "description_group": "the lawn canggu",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Venue/bar style merchant."
-  },
-  {
-    "description_group": "the hutton junction",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub."
-  },
-  {
-    "description_group": "the hook of halstead",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub."
-  },
-  {
-    "description_group": "the hiver taproom",
-    "categories": ["Eating Out", "Pub & Bar"],
+    "description_group": "gishotels di giselda b",
+    "categories": ["Travel", "Hotel"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Taproom/bar."
+    "reason": "Hotel/accommodation merchant."
   },
   {
-    "description_group": "the goat father",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Small-value casual food/drink purchase; exact merchant unclear."
-  },
-  {
-    "description_group": "the drip",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely cafe/coffee spot."
-  },
-  {
-    "description_group": "the drift",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Venue/restaurant/bar style merchant name."
-  },
-  {
-    "description_group": "the coffee room",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Explicit coffee shop."
-  },
-  {
-    "description_group": "the champlung bar & r",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Bar and restaurant."
-  },
-  {
-    "description_group": "the cambridge chop ho",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Restaurant."
-  },
-  {
-    "description_group": "the blue door bar clu",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Bar/club."
-  },
-  {
-    "description_group": "tfl",
-    "categories": ["Transport", "Public Transport"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "TfL transport charges. Some zero rows may be auth/reversal noise."
-  },
-  {
-    "description_group": "tesco",
-    "categories": ["Groceries", "Supermarket"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Supermarket."
-  },
-  {
-    "description_group": "terraza mikuna",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Restaurant/venue style merchant."
-  },
-  {
-    "description_group": "terrasse food",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Food/dining merchant."
-  },
-  {
-    "description_group": "tennis in lambeth",
-    "categories": ["Health", "Sport & Fitness"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Sports/court booking."
-  },
-  {
-    "description_group": "team master",
+    "description_group": "girola maria",
     "categories": ["Unclear", "Needs Review"],
     "ignore": false,
     "confidence": "low",
-    "reason": "Too vague to classify safely."
+    "reason": "Personal name/unclear merchant."
   },
   {
-    "description_group": "taca deptford market",
-    "categories": ["Eating Out", "Takeaway"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like food stall/casual takeaway."
-  },
-  {
-    "description_group": "tabacchi garretti",
-    "categories": ["Shopping", "Personal Items"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely tobacco/newsstand style purchase."
-  },
-  {
-    "description_group": "surrey meat and grocery s",
-    "categories": ["Groceries", "Convenience Store"],
+    "description_group": "gipsy moth",
+    "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Food/grocery merchant."
+    "reason": "Pub/bar venue."
   },
   {
-    "description_group": "superdrug stores plc",
-    "categories": ["Health", "Pharmacy & Toiletries"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Health/beauty/pharmacy retailer."
-  },
-  {
-    "description_group": "sun & san ho",
+    "description_group": "ginger lounge",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Likely restaurant, but unclear."
-  },
-  {
-    "description_group": "subway",
-    "categories": ["Eating Out", "Takeaway"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Fast food/takeaway."
-  },
-  {
-    "description_group": "stop once express",
-    "categories": ["Groceries", "Convenience Store"],
-    "ignore": false,
     "confidence": "medium",
-    "reason": "Local convenience-style shop."
+    "reason": "Restaurant/lounge venue."
   },
   {
-    "description_group": "station lane store",
-    "categories": ["Groceries", "Convenience Store"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely local shop."
-  },
-  {
-    "description_group": "star sports",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Betting operator."
-  },
-  {
-    "description_group": "stanleys of streatham",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Looks like a pub/bar/food venue."
-  },
-  {
-    "description_group": "st pancras",
-    "categories": ["Transport", "Train"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Could be station retail or train-related; train is safest broad transport guess."
-  },
-  {
-    "description_group": "sr limited",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Too vague."
-  },
-  {
-    "description_group": "sporting index",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Betting/spread betting operator."
-  },
-  {
-    "description_group": "spanish galleon",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub/bar."
-  },
-  {
-    "description_group": "southwark brew",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Brewery/bar type venue."
-  },
-  {
-    "description_group": "smokers paradise",
-    "categories": ["Shopping", "Personal Items"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Smoking/vape/tobacco retail."
-  },
-  {
-    "description_group": "slammin' events",
-    "categories": ["Entertainment", "Events & Tickets"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Event-related spend."
-  },
-  {
-    "description_group": "slammin events",
-    "categories": ["Entertainment", "Events & Tickets"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Same merchant, event-related spend."
-  },
-  {
-    "description_group": "sky betting & gaming",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Betting operator."
-  },
-  {
-    "description_group": "sky bet",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Betting operator, but zero rows may include noise/auth activity."
-  },
-  {
-    "description_group": "six restaurant",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Explicit restaurant."
-  },
-  {
-    "description_group": "simply market",
-    "categories": ["Groceries", "Convenience Store"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Small grocery/convenience style merchant."
-  },
-  {
-    "description_group": "scott dean ice",
+    "description_group": "gelateria ci gusta",
     "categories": ["Eating Out", "Snacks & Drinks"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Likely ice cream/snack vendor."
+    "confidence": "high",
+    "reason": "Gelato/dessert merchant."
   },
   {
-    "description_group": "scd montmartre",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Too vague."
-  },
-  {
-    "description_group": "satrincha s.a",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown merchant."
-  },
-  {
-    "description_group": "sarl oenothibaut",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Wine-related sounding merchant; pub/bar is safest guess."
-  },
-  {
-    "description_group": "sapori sas",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Italian food-related sounding merchant."
-  },
-  {
-    "description_group": "santorini greek",
-    "categories": ["Eating Out", "Takeaway"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Greek food merchant."
-  },
-  {
-    "description_group": "sainsburys",
-    "categories": ["Groceries", "Supermarket"],
+    "description_group": "gails",
+    "categories": ["Eating Out", "Bakery"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Supermarket."
+    "reason": "Bakery/cafe chain."
   },
   {
-    "description_group": "rudys spitalfields",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Restaurant."
-  },
-  {
-    "description_group": "rrsquare bermondsey",
+    "description_group": "g & g snc di giannetti",
     "categories": ["Unclear", "Needs Review"],
     "ignore": false,
     "confidence": "low",
     "reason": "Unknown merchant."
   },
   {
-    "description_group": "rok street foo",
-    "categories": ["Eating Out", "Takeaway"],
+    "description_group": "from william oliver m fenton",
+    "categories": ["Transfers", "Incoming Transfer"],
+    "ignore": true,
+    "confidence": "high",
+    "reason": "Inbound person-to-person transfer."
+  },
+  {
+    "description_group": "freemans event partner",
+    "categories": ["Entertainment", "Events & Tickets"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Looks like street food/casual food."
+    "reason": "Event-related merchant."
   },
   {
-    "description_group": "robert smith and son",
-    "categories": ["Groceries", "Butcher"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like butcher/food shop."
-  },
-  {
-    "description_group": "ristorante stilo",
-    "categories": ["Eating Out", "Restaurant"],
+    "description_group": "freddies flowers",
+    "categories": ["Home & Lifestyle", "Flowers"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Restaurant."
+    "reason": "Flower subscription/purchase."
   },
   {
-    "description_group": "ristorante rino srl",
+    "description_group": "frangos ioannis",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
-    "confidence": "high",
-    "reason": "Restaurant."
+    "confidence": "low",
+    "reason": "Likely hospitality merchant, but not certain."
   },
   {
-    "description_group": "richard the first",
+    "description_group": "fotis",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Vague merchant, but amount suggests dining/hospitality."
+  },
+  {
+    "description_group": "fontaine",
     "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub."
+    "confidence": "low",
+    "reason": "Venue-style merchant name."
   },
   {
-    "description_group": "rest mayan monk mxn sc",
+    "description_group": "flying horse",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pub venue."
+  },
+  {
+    "description_group": "flat iron square r",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Restaurant spend."
+    "reason": "Food market/restaurant venue."
   },
   {
-    "description_group": "relax&caffe' caffette",
+    "description_group": "finest fayre",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Local food/convenience merchant."
+  },
+  {
+    "description_group": "finca monasterio event",
+    "categories": ["Entertainment", "Events & Tickets"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Event-related merchant."
+  },
+  {
+    "description_group": "fig branch cafe",
     "categories": ["Eating Out", "Coffee"],
     "ignore": false,
     "confidence": "high",
     "reason": "Cafe/coffee merchant."
   },
   {
-    "description_group": "refund from zipcar",
-    "categories": [
-      "Transport",
-      "Car Rental",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Refund from prior Zipcar spend."
-  },
-  {
-    "description_group": "refund from www.booksy.com",
-    "categories": [
-      "Personal Care",
-      "Hair & Beauty",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Refund from prior Booksy charge."
-  },
-  {
-    "description_group": "refund from truehoa.app",
-    "categories": ["Refunds & Credits", "Merchant Refund"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Refund, but base merchant still unclear."
-  },
-  {
-    "description_group": "refund from tfl",
-    "categories": [
-      "Transport",
-      "Public Transport",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Transport refund."
-  },
-  {
-    "description_group": "refund from next directory",
-    "categories": [
-      "Shopping",
-      "Clothes",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Retail refund."
-  },
-  {
-    "description_group": "refund from cabify",
-    "categories": [
-      "Transport",
-      "Taxi & Ride Hailing",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Ride refund."
-  },
-  {
-    "description_group": "refund from brick bonanza",
-    "categories": [
-      "Shopping",
-      "General Shopping",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Refund from retail merchant."
-  },
-  {
-    "description_group": "refund from apple",
-    "categories": [
-      "Shopping",
-      "General Shopping",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Apple refund; exact original category unclear."
-  },
-  {
-    "description_group": "refund from amazon",
-    "categories": [
-      "Shopping",
-      "General Shopping",
-      "Refunds & Credits",
-      "Merchant Refund"
-    ],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Amazon refund; exact original category unclear."
-  },
-  {
-    "description_group": "referral reward",
-    "categories": ["Refunds & Credits", "Reward & Cashback"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Credit/reward, not spending."
-  },
-  {
-    "description_group": "real eating co",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Food/dining merchant."
-  },
-  {
-    "description_group": "razza",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Likely restaurant, but not certain."
-  },
-  {
-    "description_group": "ratp",
-    "categories": ["Transport", "Public Transport"],
+    "description_group": "felicity spa",
+    "categories": ["Personal Care", "Spa & Beauty"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Public transport operator."
+    "reason": "Spa/beauty merchant."
   },
   {
-    "description_group": "railway hotel",
+    "description_group": "fatling and firkin",
     "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
-    "confidence": "medium",
-    "reason": "Amounts look like pub/food spend rather than hotel stay."
+    "confidence": "high",
+    "reason": "Pub venue."
   },
   {
-    "description_group": "puregym",
-    "categories": ["Health", "Sport & Fitness"],
+    "description_group": "farmer j (finsbury squ",
+    "categories": ["Eating Out", "Takeaway"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Gym membership/fitness."
+    "reason": "Fast casual food."
   },
   {
-    "description_group": "pura desa adat batuan",
-    "categories": ["Travel", "Activities"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like attraction/entry fee while travelling."
-  },
-  {
-    "description_group": "punto casa castello",
-    "categories": ["Home & Lifestyle", "Household"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Home-related sounding merchant, but unclear."
-  },
-  {
-    "description_group": "puma-nordelta",
-    "categories": ["Transport", "Fuel"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely petrol station merchant."
-  },
-  {
-    "description_group": "progressplay ltd",
-    "categories": ["Betting", "Betting Deposits"],
+    "description_group": "farmacia reale",
+    "categories": ["Health", "Pharmacy & Toiletries"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Gambling operator/payment processor."
+    "reason": "Pharmacy."
   },
   {
-    "description_group": "princess alice hos",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Likely pub/hospitality venue."
-  },
-  {
-    "description_group": "prime video rent",
-    "categories": ["Entertainment", "Streaming"],
+    "description_group": "farmacia alla croce di",
+    "categories": ["Health", "Pharmacy & Toiletries"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Video rental/streaming spend."
+    "reason": "Pharmacy."
   },
   {
-    "description_group": "priced up",
-    "categories": ["Entertainment", "Events & Tickets"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like ticketing/event platform."
-  },
-  {
-    "description_group": "premium repricing 1 plan fee",
-    "categories": ["Fees & Financial", "Plan Fee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Recurring plan/account fee."
-  },
-  {
-    "description_group": "prebateo di toukabri f",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown merchant."
-  },
-  {
-    "description_group": "post office counter",
-    "categories": ["Shopping", "General Shopping"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Post Office counter purchase; exact purpose unclear."
-  },
-  {
-    "description_group": "pizza pilgrims",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Restaurant."
-  },
-  {
-    "description_group": "pimp my ramen",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Restaurant/casual dining."
-  },
-  {
-    "description_group": "photobotco",
-    "categories": ["Entertainment", "Events & Tickets"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Could be photo booth/event service."
-  },
-  {
-    "description_group": "pggroup",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Too vague."
-  },
-  {
-    "description_group": "peyton and byrne",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Cafe/bakery style merchant."
-  },
-  {
-    "description_group": "pets at home",
-    "categories": ["Pets", "Pet Supplies"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Pet retailer."
-  },
-  {
-    "description_group": "paypal",
-    "categories": ["Transfers", "Digital Wallet"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Zero-value rows look like wallet/auth noise rather than true spend."
-  },
-  {
-    "description_group": "payment from smarkets",
-    "categories": ["Betting", "Betting Withdrawals"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound payment from betting exchange; not spending."
-  },
-  {
-    "description_group": "payment from shannon walsh",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound person-to-person transfer."
-  },
-  {
-    "description_group": "payment from s merry",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound person-to-person transfer."
-  },
-  {
-    "description_group": "payment from s brown",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound person-to-person transfer."
-  },
-  {
-    "description_group": "payment from reynolds b g",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound person-to-person transfer."
-  },
-  {
-    "description_group": "payment from nathan joseph merry",
-    "categories": ["Transfers", "Internal Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Looks like inbound transfer from self/own account."
-  },
-  {
-    "description_group": "payment from n merry",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Likely inbound transfer from person; could be self if this alias is you."
-  },
-  {
-    "description_group": "payment from moneturn spv ltd",
-    "categories": ["Income", "Salary & Earnings"],
-    "ignore": true,
-    "confidence": "low",
-    "reason": "Large inbound business payments look income-like, but payer is unclear."
-  },
-  {
-    "description_group": "payment from mia harvey",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound person-to-person transfer."
-  },
-  {
-    "description_group": "payment from merry k & p/",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Inbound transfer from person/household account."
-  },
-  {
-    "description_group": "payment from intelliquence ltd",
-    "categories": ["Income", "Salary & Earnings"],
-    "ignore": true,
-    "confidence": "medium",
-    "reason": "Inbound company payment; likely income/business receipt."
-  },
-  {
-    "description_group": "payment from george style & rebecca style",
-    "categories": ["Transfers", "Incoming Transfer"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound transfer from people."
-  },
-  {
-    "description_group": "payment from copybet uk ltd",
-    "categories": ["Betting", "Betting Withdrawals"],
-    "ignore": true,
-    "confidence": "high",
-    "reason": "Inbound payment from betting operator."
-  },
-  {
-    "description_group": "payment from convertoo ltd",
-    "categories": ["Income", "Salary & Earnings"],
-    "ignore": true,
-    "confidence": "low",
-    "reason": "Inbound company payment; likely income or reimbursement."
-  },
-  {
-    "description_group": "pasticceria fuin",
-    "categories": ["Eating Out", "Bakery"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Pasticceria/bakery."
-  },
-  {
-    "description_group": "pasticceria alla brago",
-    "categories": ["Eating Out", "Bakery"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Pasticceria/bakery."
-  },
-  {
-    "description_group": "paddy power",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Betting operator. Could include mixed deposit/settlement activity if amounts vary a lot."
-  },
-  {
-    "description_group": "oyster brothers",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Food merchant."
-  },
-  {
-    "description_group": "osteria pesador",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Osteria/restaurant."
-  },
-  {
-    "description_group": "osteria de peccatori",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Osteria/restaurant."
-  },
-  {
-    "description_group": "osteria ae spezie",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Osteria/restaurant."
-  },
-  {
-    "description_group": "origin health and",
-    "categories": ["Health", "Supplements & Wellness"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Health/wellness sounding merchant."
-  },
-  {
-    "description_group": "orchards - retail",
-    "categories": ["Groceries", "Convenience Store"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Retail food/shop guess, but merchant is vague."
-  },
-  {
-    "description_group": "oncu food centre",
+    "description_group": "fairdeal food centre",
     "categories": ["Groceries", "Convenience Store"],
     "ignore": false,
     "confidence": "high",
     "reason": "Food centre/local grocery."
   },
   {
-    "description_group": "oliver bonas",
-    "categories": ["Shopping", "General Shopping"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Retail/lifestyle store."
-  },
-  {
-    "description_group": "odeon",
-    "categories": ["Entertainment", "Cinema"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Cinema."
-  },
-  {
-    "description_group": "odds monkey",
-    "categories": ["Betting", "Betting Tools"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Matched betting/betting support subscription."
-  },
-  {
-    "description_group": "ocado",
-    "categories": ["Groceries", "Supermarket"],
+    "description_group": "exchanged to gbp",
+    "categories": ["Transfers", "Currency Exchange"],
     "ignore": true,
-    "confidence": "medium",
-    "reason": "Groceries merchant, but all-zero row looks like auth/noise."
+    "confidence": "high",
+    "reason": "Currency conversion, not spend."
   },
   {
-    "description_group": "nrg",
-    "categories": ["Unclear", "Needs Review"],
+    "description_group": "exchanged to eur",
+    "categories": ["Transfers", "Currency Exchange"],
+    "ignore": true,
+    "confidence": "high",
+    "reason": "Currency conversion, not spend."
+  },
+  {
+    "description_group": "everbrite food and win",
+    "categories": ["Groceries", "Convenience Store"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Too vague."
-  },
-  {
-    "description_group": "novotel greenwich",
-    "categories": ["Travel", "Hotel"],
-    "ignore": false,
     "confidence": "medium",
-    "reason": "Hotel merchant, though small charges may be bar/cafe on site."
+    "reason": "Food/wine local shop."
   },
   {
-    "description_group": "next directory",
-    "categories": ["Shopping", "Clothes"],
+    "description_group": "event tickets",
+    "categories": ["Entertainment", "Events & Tickets"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Retail clothing/home catalogue merchant; clothes is best default."
+    "reason": "Explicit ticket/event purchase."
   },
   {
-    "description_group": "nexo",
-    "categories": ["Transfers", "Crypto Transfer"],
-    "ignore": true,
+    "description_group": "event catering sol",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
     "confidence": "medium",
-    "reason": "Crypto platform movement; not normal spending."
+    "reason": "Catering/food merchant."
   },
   {
-    "description_group": "nandre",
+    "description_group": "eurl kestener fr",
     "categories": ["Unclear", "Needs Review"],
     "ignore": false,
     "confidence": "low",
     "reason": "Unknown merchant."
   },
   {
-    "description_group": "nandos",
+    "description_group": "estiatorio sarris",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
     "confidence": "high",
     "reason": "Restaurant."
   },
   {
-    "description_group": "naked",
-    "categories": ["Unclear", "Needs Review"],
+    "description_group": "essex wildlife sales l",
+    "categories": ["Entertainment", "Attractions"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Too ambiguous from name alone."
+    "confidence": "medium",
+    "reason": "Wildlife/visitor attraction style merchant."
   },
   {
-    "description_group": "n1 london",
-    "categories": ["Eating Out", "Pub & Bar"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Venue/hospitality sounding merchant, but unclear."
-  },
-  {
-    "description_group": "n.o.t. uk limited",
+    "description_group": "efc store ltd",
     "categories": ["Shopping", "General Shopping"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown business purchase; broad shopping bucket safest."
+    "confidence": "medium",
+    "reason": "Retail/store purchase."
   },
   {
-    "description_group": "my optimum ltd",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown merchant."
-  },
-  {
-    "description_group": "mosi",
-    "categories": ["Health", "Sport & Fitness"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Could be museum, leisure, or fitness. Not confident."
-  },
-  {
-    "description_group": "morleys fried chicken",
+    "description_group": "eatviet",
     "categories": ["Eating Out", "Takeaway"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Fast food/takeaway."
+    "reason": "Food merchant."
   },
   {
-    "description_group": "moonpig",
-    "categories": ["Gifts", "Gift Shop"],
+    "description_group": "duke of edinburgh",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Likely pub venue."
+  },
+  {
+    "description_group": "drinky caffe'",
+    "categories": ["Eating Out", "Coffee"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Greeting cards/gifts."
+    "reason": "Cafe/coffee merchant."
   },
   {
-    "description_group": "monzo transfer",
-    "categories": ["Transfers", "Incoming Transfer"],
+    "description_group": "drings butchers",
+    "categories": ["Groceries", "Butcher"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Butcher."
+  },
+  {
+    "description_group": "donna",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely hospitality merchant."
+  },
+  {
+    "description_group": "disney plus",
+    "categories": ["Entertainment", "Streaming"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Streaming subscription."
+  },
+  {
+    "description_group": "dh seething lane",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely dining/hospitality venue."
+  },
+  {
+    "description_group": "designmynight",
+    "categories": ["Entertainment", "Events & Tickets"],
     "ignore": true,
     "confidence": "medium",
-    "reason": "Transfer movement rather than merchant spending."
+    "reason": "All-zero rows look like booking auth/noise rather than final spend."
   },
   {
-    "description_group": "monument",
+    "description_group": "deptford supermarket",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Local supermarket/convenience store."
+  },
+  {
+    "description_group": "deptford super",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Same as Deptford supermarket variation."
+  },
+  {
+    "description_group": "deliveroo",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Food delivery; some rows may include grocery orders but takeaway is best default."
+  },
+  {
+    "description_group": "decorum vending payter",
+    "categories": ["Eating Out", "Snacks & Drinks"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Vending machine/snack purchase."
+  },
+  {
+    "description_group": "decodo",
+    "categories": ["Software & Services", "Web Tools"],
+    "ignore": true,
+    "confidence": "low",
+    "reason": "All-zero row; likely auth/noise and merchant unclear."
+  },
+  {
+    "description_group": "daznbet",
+    "categories": ["Betting", "Betting Deposits"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "davys at greenwich",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Wine bar/pub hospitality venue."
+  },
+  {
+    "description_group": "dark sugars ltd",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Cafe/chocolate/coffee merchant."
+  },
+  {
+    "description_group": "dandy grill palermo",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Restaurant/grill."
+  },
+  {
+    "description_group": "dag supermarket",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Local supermarket/convenience store."
+  },
+  {
+    "description_group": "cutty sark",
+    "categories": ["Entertainment", "Attractions"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Could be attraction or nearby hospitality spend; attraction is safest broad call."
+  },
+  {
+    "description_group": "crown bh",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Likely pub/hospitality venue."
+  },
+  {
+    "description_group": "cream and crumble bake",
+    "categories": ["Eating Out", "Bakery"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bakery/dessert merchant."
+  },
+  {
+    "description_group": "costcutter",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Convenience store."
+  },
+  {
+    "description_group": "costa coffee",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Coffee chain."
+  },
+  {
+    "description_group": "coppins tootin",
     "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
     "confidence": "low",
-    "reason": "Very ambiguous merchant name."
+    "reason": "Looks like a venue/hospitality merchant, but I would not auto-rule it."
   },
   {
-    "description_group": "mm ub26",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown abbreviated merchant."
-  },
-  {
-    "description_group": "mm - pt11",
-    "categories": ["Unclear", "Needs Review"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Unknown abbreviated merchant."
-  },
-  {
-    "description_group": "minic asian pantry",
-    "categories": ["Groceries", "Convenience Store"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Asian grocery/pantry merchant."
-  },
-  {
-    "description_group": "mile end stadium",
-    "categories": ["Health", "Sport & Fitness"],
+    "description_group": "como caffe' stazione s",
+    "categories": ["Eating Out", "Coffee"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Sports facility booking."
+    "reason": "Cafe/coffee merchant."
   },
   {
-    "description_group": "miah sumon",
-    "categories": ["Transfers", "Outgoing Transfer"],
-    "ignore": true,
+    "description_group": "coffee beyond ltd",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Coffee merchant."
+  },
+  {
+    "description_group": "coach and horses greenwich",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pub."
+  },
+  {
+    "description_group": "co-op",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Co-op food/convenience."
+  },
+  {
+    "description_group": "clapton hart",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pub/venue."
+  },
+  {
+    "description_group": "clacton pier",
+    "categories": ["Entertainment", "Attractions"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pier/amusement attraction."
+  },
+  {
+    "description_group": "ckm.nord",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
     "confidence": "low",
-    "reason": "Looks like a personal name rather than merchant, but only one row."
+    "reason": "Too vague."
   },
   {
-    "description_group": "mexican mama l",
+    "description_group": "chez gado gado",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Looks like restaurant/casual dining."
+  },
+  {
+    "description_group": "chez coffee & co",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Coffee/cafe merchant."
+  },
+  {
+    "description_group": "chacarero greenwich",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
     "confidence": "medium",
     "reason": "Food merchant."
   },
   {
-    "description_group": "metland venya ubud",
-    "categories": ["Travel", "Hotel"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Accommodation/travel merchant."
-  },
-  {
-    "description_group": "merpago*taxi471",
-    "categories": ["Transport", "Taxi & Ride Hailing"],
-    "ignore": false,
+    "description_group": "cash at the coperative food",
+    "categories": ["Transfers", "Cash Withdrawal"],
+    "ignore": true,
     "confidence": "high",
-    "reason": "Taxi payment routed via Mercado Pago."
+    "reason": "Cash withdrawal, not spending."
   },
   {
-    "description_group": "merpago*mapcafe",
-    "categories": ["Eating Out", "Coffee"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Cafe payment routed via Mercado Pago."
+    "description_group": "cash at changegroup open space fa",
+    "categories": ["Transfers", "Cash Withdrawal"],
+    "ignore": true,
+    "confidence": "high",
+    "reason": "Cash withdrawal, not spending."
   },
   {
-    "description_group": "merpago*hoppe",
-    "categories": ["Shopping", "General Shopping"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Underlying merchant unclear."
-  },
-  {
-    "description_group": "merpago*bonair",
-    "categories": ["Eating Out", "Restaurant"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Underlying merchant unclear, but looks like hospitality."
-  },
-  {
-    "description_group": "merpago$1",
-    "categories": ["Transfers", "Digital Wallet"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Mercado Pago-routed spend but underlying merchant is unknown."
-  },
-  {
-    "description_group": "mercato centrale firen",
+    "description_group": "casa 28",
     "categories": ["Eating Out", "Restaurant"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Food hall/market dining."
+    "reason": "Hospitality/restaurant-style merchant."
   },
   {
-    "description_group": "mcdonalds",
-    "categories": ["Eating Out", "Takeaway"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Fast food/takeaway."
-  },
-  {
-    "description_group": "mayan monkey isla sc",
-    "categories": ["Travel", "Hotel"],
-    "ignore": false,
-    "confidence": "medium",
-    "reason": "Looks like hostel/hotel spend."
-  },
-  {
-    "description_group": "matchbook",
-    "categories": ["Betting", "Betting Deposits"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Betting exchange."
-  },
-  {
-    "description_group": "martesana srl",
-    "categories": ["Eating Out", "Bakery"],
-    "ignore": false,
-    "confidence": "low",
-    "reason": "Looks like bakery/cafe merchant, but not certain."
-  },
-  {
-    "description_group": "marks & spencer",
+    "description_group": "carrefour$1",
     "categories": ["Groceries", "Supermarket"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Mixed retailer, but your value range looks more like food/convenience than clothes."
+    "reason": "Carrefour supermarket variation."
   },
   {
-    "description_group": "mariners court",
-    "categories": ["Eating Out", "Restaurant"],
+    "description_group": "carrefour",
+    "categories": ["Groceries", "Supermarket"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Ambiguous venue/restaurant-style merchant."
+    "confidence": "high",
+    "reason": "Supermarket."
   },
   {
-    "description_group": "manor arms",
+    "description_group": "cantina de' pucci",
     "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Likely pub."
+    "reason": "Cantina/wine bar style merchant."
   },
   {
-    "description_group": "mandarin palace 01",
-    "categories": ["Eating Out", "Restaurant"],
+    "description_group": "cambridge blue",
+    "categories": ["Eating Out", "Pub & Bar"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Restaurant."
+    "reason": "Pub/bar venue."
   },
   {
-    "description_group": "maison isabelle",
-    "categories": ["Eating Out", "Bakery"],
+    "description_group": "cambridge belfry",
+    "categories": ["Travel", "Hotel"],
     "ignore": false,
     "confidence": "medium",
-    "reason": "Bakery/cafe."
+    "reason": "Hotel merchant, though some small rows may be on-site spend."
   },
   {
-    "description_group": "m6 toll",
-    "categories": ["Transport", "Road Tolls"],
-    "ignore": false,
-    "confidence": "high",
-    "reason": "Road toll charge."
-  },
-  {
-    "description_group": "lulu's",
+    "description_group": "caffetteria san leonar",
     "categories": ["Eating Out", "Coffee"],
     "ignore": false,
-    "confidence": "low",
-    "reason": "Likely cafe/food spot, but unclear."
+    "confidence": "high",
+    "reason": "Caffetteria/cafe."
   },
   {
-    "description_group": "ls bermondsey bar and",
-    "categories": ["Eating Out", "Pub & Bar"],
+    "description_group": "caffe' degli innocenti",
+    "categories": ["Eating Out", "Coffee"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Bar/hospitality venue."
+    "reason": "Cafe/coffee merchant."
   },
   {
-    "description_group": "lrs",
+    "description_group": "caffe nero",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Coffee chain."
+  },
+  {
+    "description_group": "cafe lilou",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Cafe."
+  },
+  {
+    "description_group": "cabify",
+    "categories": ["Transport", "Taxi & Ride Hailing"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Ride-hailing/taxi merchant."
+  },
+  {
+    "description_group": "buster mantis",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Looks like hospitality/food venue, but I would not auto-rule it."
+  },
+  {
+    "description_group": "buller",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too vague; venue/pub is safest guess."
+  },
+  {
+    "description_group": "brozziano-pacifico",
     "categories": ["Unclear", "Needs Review"],
     "ignore": false,
     "confidence": "low",
     "reason": "Too vague."
   },
   {
-    "description_group": "lottoland",
+    "description_group": "brick bonanza",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Retail purchase; exact niche unclear."
+  },
+  {
+    "description_group": "brewdog",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bar/pub venue."
+  },
+  {
+    "description_group": "bread and truffle",
+    "categories": ["Eating Out", "Bakery"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Bakery/casual food merchant."
+  },
+  {
+    "description_group": "boylesports",
     "categories": ["Betting", "Betting Deposits"],
     "ignore": false,
     "confidence": "high",
-    "reason": "Lottery/gambling operator."
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "boxhall city (traders",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Food hall/trader venue."
+  },
+  {
+    "description_group": "boxfit uk - boxfit",
+    "categories": ["Health", "Sport & Fitness"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Fitness/gym style spend."
+  },
+  {
+    "description_group": "boots$1",
+    "categories": ["Health", "Pharmacy & Toiletries"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Boots pharmacy variation."
+  },
+  {
+    "description_group": "boots",
+    "categories": ["Health", "Pharmacy & Toiletries"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pharmacy/health retailer."
+  },
+  {
+    "description_group": "booking.com",
+    "categories": ["Travel", "Travel Booking"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Travel/accommodation booking platform."
+  },
+  {
+    "description_group": "bomba mix snc",
+    "categories": ["Eating Out", "Snacks & Drinks"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely small food/drink purchase, but unclear."
+  },
+  {
+    "description_group": "bolt",
+    "categories": ["Transport", "Taxi & Ride Hailing"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Ride-hailing/taxi merchant."
+  },
+  {
+    "description_group": "bodies in the booksho",
+    "categories": ["Entertainment", "Events & Tickets"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Looks like ticketed event/experience."
+  },
+  {
+    "description_group": "blossom bloom creation",
+    "categories": ["Home & Lifestyle", "Flowers"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Flowers/florist."
+  },
+  {
+    "description_group": "blackstar",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Ambiguous venue-style name; I would not auto-rule it."
+  },
+  {
+    "description_group": "bistrot74",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bistrot/restaurant."
+  },
+  {
+    "description_group": "bills - greenwich",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Restaurant chain."
+  },
+  {
+    "description_group": "betuk.com",
+    "categories": ["Betting", "Betting Deposits"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "betmgm",
+    "categories": ["Betting", "Betting Deposits"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Betting operator."
+  },
+  {
+    "description_group": "bermondsey bier keller",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Beer hall/bar venue."
+  },
+  {
+    "description_group": "bb52 burgers canggu",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Burger/fast food merchant."
+  },
+  {
+    "description_group": "barrow boy and banker se1",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Pub/bar venue."
+  },
+  {
+    "description_group": "barrio snc",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely bar/hospitality venue."
+  },
+  {
+    "description_group": "bar sanremo",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bar merchant."
+  },
+  {
+    "description_group": "bar rossi snc di brusc",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bar merchant."
+  },
+  {
+    "description_group": "banilla claudia$1",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Personal name/unclear merchant."
+  },
+  {
+    "description_group": "bali om lounge pt ho",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Lounge/bar style merchant."
+  },
+  {
+    "description_group": "bailo sup veneziani",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Retail-sounding merchant, but unclear."
+  },
+  {
+    "description_group": "au des lisse",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Likely hospitality merchant."
+  },
+  {
+    "description_group": "au coin bio",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Bio/food shop."
+  },
+  {
+    "description_group": "atre3",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too vague."
+  },
+  {
+    "description_group": "astiti artshop ho",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Art/gift shop."
+  },
+  {
+    "description_group": "assenheims 56 - wo",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Prepared food/casual lunch merchant."
+  },
+  {
+    "description_group": "assenheims 56",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Prepared food/casual lunch merchant."
+  },
+  {
+    "description_group": "asf autolinee",
+    "categories": ["Transport", "Public Transport"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bus/public transport operator."
+  },
+  {
+    "description_group": "asda",
+    "categories": ["Groceries", "Supermarket"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Supermarket."
+  },
+  {
+    "description_group": "argos ltd",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "General retail."
+  },
+  {
+    "description_group": "arena foods market",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Food market/local grocery."
+  },
+  {
+    "description_group": "appropriate",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too vague."
+  },
+  {
+    "description_group": "apple pay top-up",
+    "categories": ["Transfers", "Card Top Up"],
+    "ignore": true,
+    "confidence": "high",
+    "reason": "Top-up movement, not direct spend."
+  },
+  {
+    "description_group": "apple pay payment",
+    "categories": ["Transfers", "Digital Wallet"],
+    "ignore": true,
+    "confidence": "medium",
+    "reason": "Wallet/payment movement rather than true merchant spend."
+  },
+  {
+    "description_group": "apple",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Apple purchase or service; exact subtype unclear."
+  },
+  {
+    "description_group": "angeli fish & chips",
+    "categories": ["Eating Out", "Takeaway"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Fish and chips/takeaway."
+  },
+  {
+    "description_group": "anchor",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "There are hospitality businesses using that name, but the merchant is too ambiguous to hard-rule from one word alone."
+  },
+  {
+    "description_group": "amazon prime",
+    "categories": ["Entertainment", "Streaming"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Prime subscription is usually entertainment/subscription-like in personal spend reporting."
+  },
+  {
+    "description_group": "amazon marketplace",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Marketplace retail purchase."
+  },
+  {
+    "description_group": "amazon",
+    "categories": ["Shopping", "General Shopping"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "General retail; some rows may be auth/refund noise."
+  },
+  {
+    "description_group": "alle terrazze",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Restaurant/hospitality venue."
+  },
+  {
+    "description_group": "all'arco",
+    "categories": ["Eating Out", "Restaurant"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Restaurant/hospitality venue."
+  },
+  {
+    "description_group": "all my friends",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Venue-style merchant name."
+  },
+  {
+    "description_group": "alimentari ortis",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Alimentari/grocery shop."
+  },
+  {
+    "description_group": "aldi",
+    "categories": ["Groceries", "Supermarket"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Supermarket."
+  },
+  {
+    "description_group": "albert schloss london",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Bar/restaurant venue."
+  },
+  {
+    "description_group": "adagio caffe wine bar",
+    "categories": ["Eating Out", "Pub & Bar"],
+    "ignore": false,
+    "confidence": "high",
+    "reason": "Cafe/wine bar."
+  },
+  {
+    "description_group": "a2 foods ltd",
+    "categories": ["Groceries", "Convenience Store"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Food merchant/local shop."
+  },
+  {
+    "description_group": "9000 caddy s",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Too vague."
+  },
+  {
+    "description_group": "7 hungry 2",
+    "categories": ["Eating Out", "Snacks & Drinks"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Looks like a small food/snack merchant."
+  },
+  {
+    "description_group": "15grams",
+    "categories": ["Eating Out", "Coffee"],
+    "ignore": false,
+    "confidence": "medium",
+    "reason": "Coffee/cafe style merchant."
+  },
+  {
+    "description_group": "#77206254",
+    "categories": ["Unclear", "Needs Review"],
+    "ignore": false,
+    "confidence": "low",
+    "reason": "Reference-like string, not a usable merchant name."
   }
 ]

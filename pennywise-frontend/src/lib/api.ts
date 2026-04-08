@@ -239,3 +239,281 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
+
+// ============================================================================
+// BUDGET TYPES
+// ============================================================================
+
+export interface BudgetGroup {
+  id: string;
+  name: string;
+  color: string | null;
+  sortOrder: number;
+  categoryMappings: { id: string; categoryId: string; category: Category }[];
+}
+
+export interface BudgetMonth {
+  id: string;
+  month: string;
+  expectedIncome: string;
+  paydayDate: string;
+  savingsTargetType: "fixed" | "percent";
+  savingsTargetValue: string;
+  notes: string | null;
+  fixedCommitments: BudgetFixedCommitment[];
+  plannedSpends: BudgetPlannedSpend[];
+  categoryPlans: BudgetCategoryPlan[];
+}
+
+export interface BudgetFixedCommitment {
+  id: string;
+  budgetMonthId: string;
+  name: string;
+  amount: string;
+  dueDate: string | null;
+  categoryId: string | null;
+  category: Category | null;
+}
+
+export interface BudgetPlannedSpend {
+  id: string;
+  budgetMonthId: string;
+  name: string;
+  amount: string;
+  plannedDate: string | null;
+  budgetGroupId: string | null;
+  categoryId: string | null;
+  isEssential: boolean;
+  budgetGroup: BudgetGroup | null;
+  category: Category | null;
+}
+
+export interface BudgetCategoryPlan {
+  id: string;
+  budgetMonthId: string;
+  budgetGroupId: string | null;
+  categoryId: string | null;
+  targetType: "fixed" | "percent";
+  targetValue: string;
+  budgetGroup: BudgetGroup | null;
+  category: Category | null;
+}
+
+export interface BudgetOverview {
+  month: string;
+  expectedIncome: number;
+  paydayDate: string;
+  savingsTarget: number;
+  fixedCommitments: number;
+  plannedOneOffs: number;
+  flexibleBudget: number;
+  actualSpend: number;
+  remainingFlexible: number;
+  daysUntilPayday: number;
+  weeksUntilPayday: number;
+  weeklyAllowance: number;
+  dailyAllowance: number;
+  moneyIn: number;
+  moneyOut: number;
+  netAfterIgnored: number;
+}
+
+export interface CategorySpend {
+  categoryId: string;
+  categoryName: string;
+  parentId: string | null;
+  parentName: string | null;
+  budgetGroupId: string | null;
+  budgetGroupName: string | null;
+  spent: number;
+  budget: number | null;
+  remaining: number | null;
+  percentUsed: number | null;
+}
+
+export interface SpendingBreakdown {
+  byParentCategory: CategorySpend[];
+  byChildCategory: CategorySpend[];
+  byBudgetGroup: { groupId: string; groupName: string; spent: number; budget: number | null; remaining: number | null }[];
+  topMerchants: { merchant: string; spent: number; count: number }[];
+  dailySpend: { date: string; spent: number }[];
+}
+
+// ============================================================================
+// BUDGET API
+// ============================================================================
+
+// Budget Groups
+export function fetchBudgetGroups() {
+  return request<BudgetGroup[]>("/budget/groups");
+}
+
+export function createBudgetGroup(data: { name: string; color?: string | null; sortOrder?: number; categoryIds?: string[] }) {
+  return request<BudgetGroup>("/budget/groups", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateBudgetGroup(id: string, data: { name?: string; color?: string | null; sortOrder?: number; categoryIds?: string[] }) {
+  return request<BudgetGroup>(`/budget/groups/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export function deleteBudgetGroup(id: string) {
+  return request<{ ok: boolean }>(`/budget/groups/${id}`, { method: "DELETE" });
+}
+
+// Budget Months
+export function fetchBudgetMonths() {
+  return request<BudgetMonth[]>("/budget/months");
+}
+
+export function fetchBudgetMonth(month: string) {
+  return request<BudgetMonth>(`/budget/months/${month}`);
+}
+
+export function createBudgetMonth(data: {
+  month: string;
+  expectedIncome: number;
+  paydayDate: string;
+  savingsTargetType?: "fixed" | "percent";
+  savingsTargetValue: number;
+  notes?: string | null;
+}) {
+  return request<BudgetMonth>("/budget/months", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateBudgetMonth(month: string, data: Partial<{
+  expectedIncome: number;
+  paydayDate: string;
+  savingsTargetType: "fixed" | "percent";
+  savingsTargetValue: number;
+  notes: string | null;
+}>) {
+  return request<BudgetMonth>(`/budget/months/${month}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export function deleteBudgetMonth(month: string) {
+  return request<{ ok: boolean }>(`/budget/months/${month}`, { method: "DELETE" });
+}
+
+// Fixed Commitments
+export function createFixedCommitment(month: string, data: { name: string; amount: number; dueDate?: string | null; categoryId?: string | null }) {
+  return request<BudgetFixedCommitment>(`/budget/months/${month}/commitments`, { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateFixedCommitment(id: string, data: Partial<{ name: string; amount: number; dueDate: string | null; categoryId: string | null }>) {
+  return request<BudgetFixedCommitment>(`/budget/commitments/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export function deleteFixedCommitment(id: string) {
+  return request<{ ok: boolean }>(`/budget/commitments/${id}`, { method: "DELETE" });
+}
+
+// Planned Spends
+export function createPlannedSpend(month: string, data: {
+  name: string;
+  amount: number;
+  plannedDate?: string | null;
+  budgetGroupId?: string | null;
+  categoryId?: string | null;
+  isEssential?: boolean;
+}) {
+  return request<BudgetPlannedSpend>(`/budget/months/${month}/planned`, { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updatePlannedSpend(id: string, data: Partial<{
+  name: string;
+  amount: number;
+  plannedDate: string | null;
+  budgetGroupId: string | null;
+  categoryId: string | null;
+  isEssential: boolean;
+}>) {
+  return request<BudgetPlannedSpend>(`/budget/planned/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export function deletePlannedSpend(id: string) {
+  return request<{ ok: boolean }>(`/budget/planned/${id}`, { method: "DELETE" });
+}
+
+// Category Plans
+export function createCategoryPlan(month: string, data: {
+  budgetGroupId?: string | null;
+  categoryId?: string | null;
+  targetType?: "fixed" | "percent";
+  targetValue: number;
+}) {
+  return request<BudgetCategoryPlan>(`/budget/months/${month}/plans`, { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateCategoryPlan(id: string, data: Partial<{
+  budgetGroupId: string | null;
+  categoryId: string | null;
+  targetType: "fixed" | "percent";
+  targetValue: number;
+}>) {
+  return request<BudgetCategoryPlan>(`/budget/plans/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export function deleteCategoryPlan(id: string) {
+  return request<{ ok: boolean }>(`/budget/plans/${id}`, { method: "DELETE" });
+}
+
+// Dashboard Endpoints
+export function fetchBudgetOverview(month: string) {
+  return request<BudgetOverview>(`/budget/overview/${month}`);
+}
+
+export function fetchCurrentBudgetOverview() {
+  return request<BudgetOverview>("/budget/current");
+}
+
+export function fetchSpendingBreakdown(month: string) {
+  return request<SpendingBreakdown>(`/budget/spending/${month}`);
+}
+
+export function fetchOverspendCategories(month: string) {
+  return request<CategorySpend[]>(`/budget/overspend/${month}`);
+}
+
+// ============================================================================
+// AI CATEGORISATION
+// ============================================================================
+
+export interface AiCategorisationResult {
+  runId: string;
+  transactionsConsidered: number;
+  transactionsCategorised: number;
+  categoriesCreated: number;
+  transactionsSkipped: number;
+  dryRun: boolean;
+  errors: string[];
+}
+
+export interface AiCategorisationOptions {
+  limit?: number;
+  includeIgnored?: boolean;
+  dryRun?: boolean;
+  minConfidence?: number;
+}
+
+export function runAiCategorisation(options: AiCategorisationOptions = {}) {
+  return request<AiCategorisationResult>("/admin/ai-categorisation/backfill", {
+    method: "POST",
+    body: JSON.stringify(options),
+  });
+}
+
+export function previewAiCategorisation(limit: number = 100) {
+  return request<{
+    transactionCount: number;
+    transactions: Array<{
+      id: string;
+      description: string;
+      merchantName: string | null;
+      normalizedMerchant: string | null;
+      amount: number;
+      currency: string;
+      transactionDate: string;
+    }>;
+    categoryCount: number;
+  }>(`/admin/ai-categorisation/preview?limit=${limit}`);
+}

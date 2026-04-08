@@ -8,7 +8,7 @@ import { logger } from "../lib/logger.js";
  */
 export async function expandCategoryIds(
   categoryIds: string[],
-  source: "rule" | "manual",
+  source: "rule" | "manual" | "ai",
   sourceRuleId?: string | null
 ): Promise<{ categoryId: string; source: string; sourceRuleId: string | null }[]> {
   if (categoryIds.length === 0) return [];

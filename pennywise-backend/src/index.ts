@@ -10,6 +10,8 @@ import transactionRoutes from "./routes/transactions.js";
 import categoryRoutes from "./routes/categories.js";
 import ruleRoutes from "./routes/rules.js";
 import syncRoutes from "./routes/sync.js";
+import budgetRoutes from "./routes/budget.js";
+import adminRoutes from "./routes/admin.js";
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/rules", ruleRoutes);
 app.use("/api/sync", syncRoutes);
+app.use("/api/budget", budgetRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, timestamp: new Date().toISOString() });

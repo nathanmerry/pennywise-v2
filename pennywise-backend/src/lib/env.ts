@@ -10,6 +10,7 @@ const envSchema = z.object({
   TRUELAYER_API_URL: z.string().default("https://api.truelayer-sandbox.com"),
   PORT: z.string().default("3382"),
   FRONTEND_URL: z.string().default("http://localhost:5173"),
+  OPENAI_API_KEY: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

@@ -6,12 +6,14 @@ import {
   ListFilter,
   Tags,
   RefreshCw,
+  PieChart,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-type Page = "transactions" | "connections" | "categories" | "rules";
+type Page = "overview" | "spending" | "budget" | "transactions" | "connections" | "categories" | "rules";
 
 interface LayoutProps {
   activePage: Page;
@@ -22,6 +24,9 @@ interface LayoutProps {
 }
 
 const navItems: { page: Page; label: string; icon: typeof LayoutDashboard }[] = [
+  { page: "overview", label: "Overview", icon: LayoutDashboard },
+  { page: "spending", label: "Spending", icon: PieChart },
+  { page: "budget", label: "Budget", icon: Wallet },
   { page: "transactions", label: "Transactions", icon: ArrowLeftRight },
   { page: "connections", label: "Connections", icon: Building2 },
   { page: "categories", label: "Categories", icon: Tags },

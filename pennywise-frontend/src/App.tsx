@@ -2,6 +2,9 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { Layout } from "./components/layout";
+import { OverviewPage } from "./pages/overview-page";
+import { SpendingPage } from "./pages/spending-page";
+import { BudgetPage } from "./pages/budget-page";
 import { TransactionsPage } from "./pages/transactions-page";
 import { ConnectionsPage } from "./pages/connections-page";
 import { CategoriesPage } from "./pages/categories-page";
@@ -17,10 +20,10 @@ const queryClient = new QueryClient({
   },
 });
 
-type Page = "transactions" | "connections" | "categories" | "rules";
+type Page = "overview" | "spending" | "budget" | "transactions" | "connections" | "categories" | "rules";
 
 function AppContent() {
-  const [page, setPage] = useState<Page>("transactions");
+  const [page, setPage] = useState<Page>("overview");
   const syncAll = useSyncAll();
 
   return (
@@ -30,6 +33,9 @@ function AppContent() {
       onSync={() => syncAll.mutate()}
       isSyncing={syncAll.isPending}
     >
+      {page === "overview" && <OverviewPage />}
+      {page === "spending" && <SpendingPage />}
+      {page === "budget" && <BudgetPage />}
       {page === "transactions" && <TransactionsPage />}
       {page === "connections" && <ConnectionsPage />}
       {page === "categories" && <CategoriesPage />}

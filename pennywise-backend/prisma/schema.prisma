@@ -105,6 +105,10 @@ model Category {
 
   transactionCategories TransactionCategory[]
   ruleCategories        RecurringRuleCategory[]
+  budgetGroupMappings   BudgetGroupCategory[]
+  fixedCommitments      BudgetFixedCommitment[]
+  plannedSpends         BudgetPlannedSpend[]
+  categoryPlans         BudgetCategoryPlan[]
 
   @@map("categories")
 }
@@ -136,4 +140,152 @@ model RecurringRuleCategory {
   @@index([ruleId])
   @@index([categoryId])
   @@map("recurring_rule_categories")
+}
+
+// ============================================================================
+// BUDGET PLANNING MODELS
+// ============================================================================
+
+model BudgetGroup {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categoryMappings BudgetGroupCategory[]
+  categoryPlans    BudgetCategoryPlan[]
+  plannedSpends    BudgetPlannedSpend[]
+
+  @@map("budget_groups")
+}
+
+model BudgetGroupCategory {
+  id            String   @id @default(cuid())
+  budgetGroupId String   @map("budget_group_id")
+  categoryId    String   @map("category_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  budgetGroup BudgetGroup @relation(fields: [budgetGroupId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetGroupId, categoryId])
+  @@unique([categoryId]) // Each category can only belong to one budget group
+  @@map("budget_group_categories")
+}
+
+model BudgetMonth {
+  id                 String   @id @default(cuid())
+  month              String   @unique // Format: YYYY-MM
+  expectedIncome     Decimal  @map("expected_income") @db.Decimal(12, 2)
+  paydayDate         DateTime @map("payday_date")
+  savingsTargetType  String   @default("fixed") @map("savings_target_type") // fixed | percent
+  savingsTargetValue Decimal  @map("savings_target_value") @db.Decimal(12, 2)
+  notes              String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  fixedCommitments BudgetFixedCommitment[]
+  plannedSpends    BudgetPlannedSpend[]
+  categoryPlans    BudgetCategoryPlan[]
+
+  @@map("budget_months")
+}
+
+model BudgetFixedCommitment {
+  id            String    @id @default(cuid())
+  budgetMonthId String    @map("budget_month_id")
+  name          String
+  amount        Decimal   @db.Decimal(12, 2)
+  dueDate       DateTime? @map("due_date")
+  categoryId    String?   @map("category_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  budgetMonth BudgetMonth @relation(fields: [budgetMonthId], references: [id], onDelete: Cascade)
+  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("budget_fixed_commitments")
+}
+
+model BudgetPlannedSpend {
+  id            String    @id @default(cuid())
+  budgetMonthId String    @map("budget_month_id")
+  name          String
+  amount        Decimal   @db.Decimal(12, 2)
+  plannedDate   DateTime? @map("planned_date")
+  budgetGroupId String?   @map("budget_group_id")
+  categoryId    String?   @map("category_id")
+  isEssential   Boolean   @default(false) @map("is_essential")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  budgetMonth BudgetMonth  @relation(fields: [budgetMonthId], references: [id], onDelete: Cascade)
+  budgetGroup BudgetGroup? @relation(fields: [budgetGroupId], references: [id], onDelete: SetNull)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("budget_planned_spends")
+}
+
+model BudgetCategoryPlan {
+  id            String   @id @default(cuid())
+  budgetMonthId String   @map("budget_month_id")
+  budgetGroupId String?  @map("budget_group_id")
+  categoryId    String?  @map("category_id")
+  targetType    String   @default("fixed") @map("target_type") // fixed | percent
+  targetValue   Decimal  @map("target_value") @db.Decimal(12, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  budgetMonth BudgetMonth  @relation(fields: [budgetMonthId], references: [id], onDelete: Cascade)
+  budgetGroup BudgetGroup? @relation(fields: [budgetGroupId], references: [id], onDelete: Cascade)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetMonthId, budgetGroupId])
+  @@unique([budgetMonthId, categoryId])
+  @@map("budget_category_plans")
+}
+
+// ============================================================================
+// AI CATEGORISATION AUDIT MODELS
+// ============================================================================
+
+model AiCategorisationRun {
+  id                       String   @id @default(cuid())
+  startedAt                DateTime @default(now()) @map("started_at")
+  finishedAt               DateTime? @map("finished_at")
+  dryRun                   Boolean  @default(false) @map("dry_run")
+  model                    String   @default("gpt-4o")
+  minConfidence            Decimal  @default(0.85) @map("min_confidence") @db.Decimal(3, 2)
+  includeIgnored           Boolean  @default(false) @map("include_ignored")
+  transactionsConsidered   Int      @default(0) @map("transactions_considered")
+  transactionsCategorised  Int      @default(0) @map("transactions_categorised")
+  categoriesCreated        Int      @default(0) @map("categories_created")
+  transactionsSkipped      Int      @default(0) @map("transactions_skipped")
+  errorMessage             String?  @map("error_message")
+
+  decisions AiCategorisationDecision[]
+
+  @@map("ai_categorisation_runs")
+}
+
+model AiCategorisationDecision {
+  id              String   @id @default(cuid())
+  runId           String   @map("run_id")
+  transactionId   String   @map("transaction_id")
+  decision        String   // assign_existing | create_category | skip
+  confidence      Decimal  @db.Decimal(3, 2)
+  reason          String?
+  directCategoryIds String[] @map("direct_category_ids")
+  proposedCategoryName String? @map("proposed_category_name")
+  proposedParentId String? @map("proposed_parent_id")
+  applied         Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  run AiCategorisationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([transactionId])
+  @@map("ai_categorisation_decisions")
 }
