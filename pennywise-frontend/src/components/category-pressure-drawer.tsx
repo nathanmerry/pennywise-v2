@@ -64,7 +64,7 @@ export function CategoryPressureDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:w-[700px] overflow-y-auto">
         {isLoading ? (
           <div className="space-y-4 p-4">
             <Skeleton className="h-8 w-48" />

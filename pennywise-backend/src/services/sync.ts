@@ -136,6 +136,9 @@ async function syncAccount(
 
   let synced = 0;
 
+  // console.dir(pending.find((p) => p.description.includes("Wagtail")), { depth: null });
+  console.dir(posted)
+
   // Process posted transactions
   for (const tx of posted) {
     await upsertTransaction(accountId, tx, false);

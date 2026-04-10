@@ -21,9 +21,17 @@ import {
   fetchBudgetOverview,
   fetchCurrentBudgetOverview,
   fetchSpendingBreakdown,
+  fetchSpendingAnalysis,
+  fetchCategoryDrilldown,
   fetchOverspendCategories,
   fetchMonthlyPace,
   fetchCategoryPressureDetail,
+  fetchSpendingHistory,
+  fetchCategoryEvidence,
+  generateBudgetRecommendations,
+  applyBudgetRecommendations,
+  type ApplySelection,
+  type SpendingAnalysisFilters,
 } from "@/lib/api";
 
 // Budget Groups
@@ -232,6 +240,22 @@ export function useSpendingBreakdown(month: string) {
   });
 }
 
+export function useSpendingAnalysis(filters: SpendingAnalysisFilters) {
+  return useQuery({
+    queryKey: ["spendingAnalysis", filters],
+    queryFn: () => fetchSpendingAnalysis(filters),
+    enabled: !!filters.start && !!filters.end,
+  });
+}
+
+export function useCategoryDrilldown(categoryId: string | null, filters: SpendingAnalysisFilters) {
+  return useQuery({
+    queryKey: ["categoryDrilldown", categoryId, filters],
+    queryFn: () => fetchCategoryDrilldown(categoryId!, filters),
+    enabled: !!categoryId && !!filters.start && !!filters.end,
+  });
+}
+
 export function useOverspendCategories(month: string) {
   return useQuery({
     queryKey: ["overspendCategories", month],
@@ -256,5 +280,58 @@ export function useCategoryPressureDetail(month: string, categoryId: string | nu
     queryKey: ["categoryPressureDetail", month, categoryId],
     queryFn: () => fetchCategoryPressureDetail(month, categoryId!),
     enabled: !!month && !!categoryId,
+  });
+}
+
+// ============================================================================
+// BUDGET RECOMMENDATIONS - Layer 5
+// ============================================================================
+
+// Spending History Analysis
+export function useSpendingHistory(month: string) {
+  return useQuery({
+    queryKey: ["spendingHistory", month],
+    queryFn: () => fetchSpendingHistory(month),
+    enabled: !!month,
+  });
+}
+
+// Category Evidence (top merchants, biggest transactions, monthly totals)
+export function useCategoryEvidence(month: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ["categoryEvidence", month],
+    queryFn: () => fetchCategoryEvidence(month),
+    enabled: !!month && enabled,
+  });
+}
+
+// Generate Budget Recommendations (mutation - triggers AI call)
+export function useGenerateBudgetRecommendations() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (month: string) => generateBudgetRecommendations(month),
+    onSuccess: (_, month) => {
+      qc.invalidateQueries({ queryKey: ["budgetRecommendations", month] });
+    },
+  });
+}
+
+// Apply Budget Recommendations
+export function useApplyBudgetRecommendations() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ month, runId, selections }: { 
+      month: string; 
+      runId: string; 
+      selections: ApplySelection[] 
+    }) => applyBudgetRecommendations(month, runId, selections),
+    onSuccess: (_, { month }) => {
+      qc.invalidateQueries({ queryKey: ["budgetMonth", month] });
+      qc.invalidateQueries({ queryKey: ["budgetOverview", month] });
+      qc.invalidateQueries({ queryKey: ["spendingBreakdown", month] });
+      qc.invalidateQueries({ queryKey: ["monthlyPace", month] });
+      qc.invalidateQueries({ queryKey: ["overspendCategories", month] });
+      qc.invalidateQueries({ queryKey: ["categoryPlans"] });
+    },
   });
 }

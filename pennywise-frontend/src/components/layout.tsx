@@ -25,7 +25,7 @@ interface LayoutProps {
 
 const navItems: { page: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { page: "overview", label: "Overview", icon: LayoutDashboard },
-  { page: "spending", label: "Spending", icon: PieChart },
+  { page: "spending", label: "Spending Analysis", icon: PieChart },
   { page: "budget", label: "Budget", icon: Wallet },
   { page: "transactions", label: "Transactions", icon: ArrowLeftRight },
   { page: "connections", label: "Connections", icon: Building2 },

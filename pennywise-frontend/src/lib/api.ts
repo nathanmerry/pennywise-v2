@@ -66,6 +66,16 @@ export function updateTransaction(
   });
 }
 
+export function bulkUpdateTransactions(
+  ids: string[],
+  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }
+) {
+  return request<{ updated: number }>("/transactions/bulk", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, ...data }),
+  });
+}
+
 // Categories
 export function fetchCategories() {
   return request<Category[]>("/categories");
@@ -337,6 +347,168 @@ export interface SpendingBreakdown {
   byBudgetGroup: { groupId: string; groupName: string; spent: number; budget: number | null; remaining: number | null }[];
   topMerchants: { merchant: string; spent: number; count: number }[];
   dailySpend: { date: string; spent: number }[];
+}
+
+export type AnalysisPreset =
+  | "this_month"
+  | "last_month"
+  | "last_3_months"
+  | "last_6_months"
+  | "ytd"
+  | "custom";
+
+export interface SpendingAnalysisFilters {
+  start: string;
+  end: string;
+  compare?: boolean;
+  preset?: AnalysisPreset;
+  accountId?: string;
+  categoryId?: string;
+  includeIgnored?: boolean;
+}
+
+export interface AnalysisPeriod {
+  start: string;
+  end: string;
+  dayCount: number;
+}
+
+export interface AnalysisCategoryBudget {
+  monthlyBudget: number | null;
+  expectedSpendByNow: number | null;
+  remainingBudget: number | null;
+  paceDelta: number | null;
+  status: CategoryPaceStatus | null;
+}
+
+export interface AnalysisBudgetContext {
+  applicable: boolean;
+  month: string | null;
+  hasBudget: boolean;
+  overall: MonthlyBudgetPace["overall"] | null;
+}
+
+export interface AnalysisSummary {
+  totalSpend: number;
+  previousTotalSpend: number | null;
+  changeAmount: number | null;
+  changePercent: number | null;
+  avgPerDay: number;
+  transactionCount: number;
+  recurringSpend: number;
+  highestCategory: {
+    categoryId: string;
+    categoryName: string;
+    spend: number;
+  } | null;
+}
+
+export interface AnalysisTimeSeriesPoint {
+  index: number;
+  label: string;
+  currentDate: string;
+  previousDate: string | null;
+  currentSpend: number;
+  previousSpend: number | null;
+  currentCumulative: number;
+  previousCumulative: number | null;
+}
+
+export interface AnalysisMerchantRow {
+  merchant: string;
+  spend: number;
+  transactionCount: number;
+  averageTransaction: number;
+}
+
+export interface CategoryAnalysisRow {
+  categoryId: string;
+  categoryName: string;
+  spend: number;
+  previousSpend: number | null;
+  changeAmount: number | null;
+  changePercent: number | null;
+  shareOfTotal: number;
+  transactionCount: number;
+  averageTransaction: number;
+  sparkline: number[];
+  budget: AnalysisCategoryBudget | null;
+}
+
+export interface SpendingAnalysisResponse {
+  currentPeriod: AnalysisPeriod;
+  previousPeriod: AnalysisPeriod | null;
+  budgetContext: AnalysisBudgetContext;
+  summary: AnalysisSummary;
+  series: AnalysisTimeSeriesPoint[];
+  categories: CategoryAnalysisRow[];
+  topMerchants: AnalysisMerchantRow[];
+}
+
+export interface CategoryDrilldownResponse {
+  currentPeriod: AnalysisPeriod;
+  previousPeriod: AnalysisPeriod | null;
+  budget: AnalysisCategoryBudget | null;
+  category: {
+    categoryId: string;
+    categoryName: string;
+    spend: number;
+    previousSpend: number | null;
+    changeAmount: number | null;
+    changePercent: number | null;
+    transactionCount: number;
+    averageTransaction: number;
+  };
+  series: AnalysisTimeSeriesPoint[];
+  topMerchants: AnalysisMerchantRow[];
+  largestTransactions: Array<{
+    transactionId: string;
+    transactionDate: string;
+    merchantName: string | null;
+    description: string;
+    amount: number;
+  }>;
+  monthlyHistory: Array<{
+    month: string;
+    label: string;
+    spend: number;
+  }>;
+  recurringSplit: {
+    recurringSpend: number;
+    recurringTransactionCount: number;
+    oneOffSpend: number;
+    oneOffTransactionCount: number;
+  };
+  weekdayWeekendSplit: {
+    weekdaySpend: number;
+    weekendSpend: number;
+    weekdayTransactionCount: number;
+    weekendTransactionCount: number;
+  };
+}
+
+export function fetchSpendingAnalysis(filters: SpendingAnalysisFilters) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+
+  return request<SpendingAnalysisResponse>(`/budget/analysis?${params.toString()}`);
+}
+
+export function fetchCategoryDrilldown(categoryId: string, filters: SpendingAnalysisFilters) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+
+  return request<CategoryDrilldownResponse>(`/budget/analysis/category/${categoryId}?${params.toString()}`);
 }
 
 // ============================================================================
@@ -617,4 +789,194 @@ export function previewAiCategorisation(limit: number = 100) {
     }>;
     categoryCount: number;
   }>(`/admin/ai-categorisation/preview?limit=${limit}`);
+}
+
+// ============================================================================
+// BUDGET RECOMMENDATIONS - Layer 5
+// ============================================================================
+
+export type VariabilityClass = 
+  | "stable" 
+  | "regular_lifestyle" 
+  | "variable" 
+  | "spiky" 
+  | "low_signal";
+
+export type RecommendationStatus =
+  | "recommended"
+  | "close_to_history"
+  | "trimmed_for_savings"
+  | "low_confidence"
+  | "needs_budget_no_recommendation"
+  | "skip";
+
+export type Confidence = "high" | "medium" | "low";
+export type SavingsTargetPressure = "low" | "medium" | "high";
+export type BudgetLevel = "parent" | "child";
+
+export interface CategoryHistoryMetrics {
+  categoryId: string;
+  categoryName: string;
+  parentCategoryId: string | null;
+  monthsObserved: number;
+  monthlyTotals: { month: string; total: number }[];
+  averageMonthlySpend: number;
+  medianMonthlySpend: number;
+  minMonthlySpend: number;
+  maxMonthlySpend: number;
+  latestMonthSpend: number;
+  coefficientOfVariation: number;
+  totalSpendAcrossWindow: number;
+  shareOfFlexibleSpend: number;
+  currentBudget: number | null;
+  hasBudget: boolean;
+  variabilityClass: VariabilityClass;
+}
+
+export interface SpendingHistoryAnalysis {
+  targetMonth: string;
+  windowMonths: string[];
+  monthsAvailable: number;
+  totalFlexibleSpendHistory: number;
+  averageMonthlyFlexibleSpend: number;
+  categories: CategoryHistoryMetrics[];
+  multiCategorySpend: number;
+  multiCategoryTransactionCount: number;
+  budgetCoverage: {
+    historicalSpendWithBudgets: number;
+    historicalSpendWithoutBudgets: number;
+    coveragePercent: number;
+  };
+  inputHash: string;
+}
+
+export interface CategoryRecommendation {
+  categoryId: string;
+  categoryName: string;
+  branchCategoryId: string;
+  branchCategoryName: string;
+  budgetLevel: BudgetLevel;
+  variabilityClass: VariabilityClass;
+  historicalAverage: number;
+  historicalMedian: number;
+  latestMonthSpend: number;
+  currentBudget: number | null;
+  needsBudget: boolean;
+  recommendedBudget: number | null;
+  confidence: Confidence;
+  recommendationStatus: RecommendationStatus;
+  adjustmentVsAverage: number | null;
+  rationale: string;
+}
+
+export interface RecommendationDriverCategory {
+  categoryId: string;
+  categoryName: string;
+  historicalAverage: number;
+  shareOfBranchSpend: number;
+  currentBudget: number | null;
+  hasBudget: boolean;
+}
+
+export interface RecommendationBranch {
+  branchCategoryId: string;
+  branchCategoryName: string;
+  budgetLevel: BudgetLevel;
+  resolutionReason: string;
+  historicalAverage: number;
+  driverCategories: RecommendationDriverCategory[];
+  recommendedCategoryIds: string[];
+}
+
+export interface TrimInfo {
+  categoryId: string;
+  categoryName: string;
+  historicalAverage: number;
+  recommendedBudget: number;
+  trimAmount: number;
+  trimPercent: number;
+  rationale: string;
+}
+
+export interface UncoveredHighSpend {
+  categoryId: string;
+  categoryName: string;
+  historicalAverage: number;
+  shareOfFlexibleSpend: number;
+}
+
+export interface BudgetRecommendationResponse {
+  runId: string;
+  source: "ai" | "fallback";
+  stale: boolean;
+  summary: {
+    windowMonths: string[];
+    targetFlexibleBudget: number;
+    historicalFlexibleAverage: number;
+    totalRecommendedBudget: number;
+    savingsTargetPressure: SavingsTargetPressure;
+    budgetCoveragePercent: number;
+    overallRationale: string;
+  };
+  branches: RecommendationBranch[];
+  categories: CategoryRecommendation[];
+  trims: TrimInfo[];
+  uncoveredHighSpend: UncoveredHighSpend[];
+  diagnostics: {
+    multiCategorySpend: number;
+    multiCategoryTransactionCount: number;
+    categoriesWithInsufficientData: number;
+  };
+}
+
+export interface ApplySelection {
+  categoryId: string;
+  recommendedBudget: number;
+  editedBudget?: number;
+  apply: boolean;
+}
+
+export interface ApplyRecommendationsResult {
+  applied: number;
+  skipped: number;
+}
+
+export interface CategoryEvidence {
+  categoryId: string;
+  categoryName: string;
+  monthlyTotals: { month: string; total: number }[];
+  topMerchants: { merchantName: string; totalSpend: number; transactionCount: number }[];
+  biggestTransactions: {
+    date: string;
+    merchantName: string | null;
+    description: string;
+    amount: number;
+  }[];
+  spikeMonth: string | null;
+  spikeAmount: number | null;
+}
+
+export function fetchSpendingHistory(month: string) {
+  return request<SpendingHistoryAnalysis>(`/budget/spending-history/${month}`);
+}
+
+export function fetchCategoryEvidence(month: string) {
+  return request<Record<string, CategoryEvidence>>(`/budget/category-evidence/${month}`);
+}
+
+export function generateBudgetRecommendations(month: string) {
+  return request<BudgetRecommendationResponse>(`/budget/recommendations/${month}`, {
+    method: "POST",
+  });
+}
+
+export function applyBudgetRecommendations(
+  month: string,
+  runId: string,
+  selections: ApplySelection[]
+) {
+  return request<ApplyRecommendationsResult>(`/budget/recommendations/${month}/apply`, {
+    method: "POST",
+    body: JSON.stringify({ runId, selections }),
+  });
 }

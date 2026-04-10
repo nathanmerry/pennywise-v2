@@ -2,8 +2,23 @@ import { Router } from "express";
 import { z } from "zod/v4";
 import { prisma } from "../lib/prisma.js";
 import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget, getMonthlyBudgetPace, getCategoryPressureDetail } from "../services/budget.js";
+import { getSpendingHistoryAnalysis, getCategoryEvidenceBatch } from "../services/spending-history.js";
+import { generateBudgetRecommendations, applyBudgetRecommendations } from "../services/budget-recommendations.js";
+import { getCategoryDrilldown, getSpendingAnalysis } from "../services/spending-analysis.js";
 
 const router = Router();
+
+const analysisQuerySchema = z.object({
+  start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  compare: z.union([z.literal("true"), z.literal("false")]).optional(),
+  preset: z
+    .enum(["this_month", "last_month", "last_3_months", "last_6_months", "ytd", "custom"])
+    .optional(),
+  accountId: z.string().optional(),
+  categoryId: z.string().optional(),
+  includeIgnored: z.union([z.literal("true"), z.literal("false")]).optional(),
+});
 
 // ============================================================================
 // BUDGET GROUPS
@@ -439,6 +454,55 @@ router.get("/spending/:month", async (req, res) => {
   res.json(breakdown);
 });
 
+// GET /api/budget/analysis - Range-based spending analysis workspace
+router.get("/analysis", async (req, res) => {
+  const parsed = analysisQuerySchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const analysis = await getSpendingAnalysis({
+    start: parsed.data.start,
+    end: parsed.data.end,
+    compare: parsed.data.compare === "true",
+    preset: parsed.data.preset,
+    accountId: parsed.data.accountId,
+    categoryId: parsed.data.categoryId,
+    includeIgnored: parsed.data.includeIgnored === "true",
+  });
+
+  res.json(analysis);
+});
+
+// GET /api/budget/analysis/category/:categoryId - Range-based category drilldown
+router.get("/analysis/category/:categoryId", async (req, res) => {
+  const parsed = analysisQuerySchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const detail = await getCategoryDrilldown(req.params.categoryId, {
+    start: parsed.data.start,
+    end: parsed.data.end,
+    compare: parsed.data.compare === "true",
+    preset: parsed.data.preset,
+    accountId: parsed.data.accountId,
+    categoryId: parsed.data.categoryId,
+    includeIgnored: parsed.data.includeIgnored === "true",
+  });
+
+  if (!detail) {
+    res.status(404).json({ error: "Category not found" });
+    return;
+  }
+
+  res.json(detail);
+});
+
 // GET /api/budget/overspend/:month - Categories over budget
 router.get("/overspend/:month", async (req, res) => {
   const overBudget = await getCategoriesOverBudget(req.params.month);
@@ -481,6 +545,79 @@ router.get("/category-pressure/:month/:categoryId", async (req, res) => {
   }
 
   res.json(detail);
+});
+
+// ============================================================================
+// BUDGET RECOMMENDATIONS - Layer 5
+// ============================================================================
+
+// GET /api/budget/spending-history/:month - Deterministic spending history analysis
+router.get("/spending-history/:month", async (req, res) => {
+  try {
+    const analysis = await getSpendingHistoryAnalysis(req.params.month);
+    res.json(analysis);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
+
+// GET /api/budget/category-evidence/:month - Batch category evidence for "Why?" UI
+router.get("/category-evidence/:month", async (req, res) => {
+  try {
+    const evidenceMap = await getCategoryEvidenceBatch(req.params.month);
+    // Convert Map to plain object for JSON serialization
+    const evidence: Record<string, unknown> = {};
+    for (const [key, value] of evidenceMap) {
+      evidence[key] = value;
+    }
+    res.json(evidence);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
+
+// POST /api/budget/recommendations/:month - Generate AI budget recommendations
+router.post("/recommendations/:month", async (req, res) => {
+  try {
+    const recommendations = await generateBudgetRecommendations(req.params.month);
+    res.json(recommendations);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
+
+// POST /api/budget/recommendations/:month/apply - Apply selected recommendations
+const applyRecommendationsSchema = z.object({
+  runId: z.string(),
+  selections: z.array(z.object({
+    categoryId: z.string(),
+    recommendedBudget: z.number(),
+    editedBudget: z.number().optional(),
+    apply: z.boolean(),
+  })),
+});
+
+router.post("/recommendations/:month/apply", async (req, res) => {
+  const parsed = applyRecommendationsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  try {
+    const result = await applyBudgetRecommendations(
+      req.params.month,
+      parsed.data.runId,
+      parsed.data.selections
+    );
+    res.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
 });
 
 export default router;

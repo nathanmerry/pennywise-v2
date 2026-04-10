@@ -289,3 +289,27 @@ model AiCategorisationDecision {
   @@index([transactionId])
   @@map("ai_categorisation_decisions")
 }
+
+// ============================================================================
+// BUDGET RECOMMENDATION MODELS - Layer 5
+// ============================================================================
+
+model BudgetRecommendationRun {
+  id                    String    @id @default(cuid())
+  month                 String
+  inputHash             String    @map("input_hash")
+  expectedIncome        Decimal   @map("expected_income") @db.Decimal(12, 2)
+  savingsTarget         Decimal   @map("savings_target") @db.Decimal(12, 2)
+  targetFlexibleBudget  Decimal   @map("target_flexible_budget") @db.Decimal(12, 2)
+  windowMonths          String[]  @map("window_months")
+  source                String    // 'ai' | 'fallback'
+  aiModelUsed           String?   @map("ai_model_used")
+  rawAiResponse         Json?     @map("raw_ai_response")
+  normalizedResponse    Json      @map("normalized_response")
+  appliedAt             DateTime? @map("applied_at")
+  appliedSelections     Json?     @map("applied_selections")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  @@index([month])
+  @@map("budget_recommendation_runs")
+}

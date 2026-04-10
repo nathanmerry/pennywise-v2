@@ -22,7 +22,6 @@ import {
 import {
   useBudgetMonth,
   useCreateBudgetMonth,
-  useUpdateBudgetMonth,
   useCreateFixedCommitment,
   useDeleteFixedCommitment,
   useCreatePlannedSpend,
@@ -31,7 +30,8 @@ import {
   useDeleteCategoryPlan,
 } from "@/hooks/use-budget";
 import { useCategories } from "@/hooks/use-categories";
-import { Plus, Trash2, Calendar, PiggyBank, Home, ShoppingBag } from "lucide-react";
+import { BudgetRecommendationsPanel } from "@/components/budget-recommendations-panel";
+import { Plus, Trash2, Calendar, PiggyBank, Home, ShoppingBag, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BudgetFixedCommitment, BudgetPlannedSpend, BudgetCategoryPlan } from "@/lib/api";
 
@@ -53,12 +53,6 @@ function formatMonthDisplay(month: string): string {
   const [year, monthNum] = month.split("-");
   const date = new Date(parseInt(year), parseInt(monthNum) - 1);
   return date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-}
-
-function getDefaultPayday(month: string): string {
-  const [year, monthNum] = month.split("-").map(Number);
-  const lastDay = new Date(year, monthNum, 0).getDate();
-  return new Date(year, monthNum - 1, Math.min(25, lastDay)).toISOString();
 }
 
 interface AddCommitmentDialogProps {
@@ -374,6 +368,7 @@ export function BudgetPage() {
   const [commitmentDialogOpen, setCommitmentDialogOpen] = useState(false);
   const [plannedDialogOpen, setPlannedDialogOpen] = useState(false);
   const [categoryPlanDialogOpen, setCategoryPlanDialogOpen] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
 
   if (isLoading) {
     return (
@@ -610,68 +605,98 @@ export function BudgetPage() {
         </TabsContent>
 
         <TabsContent value="budgets">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Category Budgets</CardTitle>
-                <CardDescription>
-                  Set spending limits for budget groups like Eating Out, Transport, Shopping.
-                </CardDescription>
-              </div>
-              <Dialog open={categoryPlanDialogOpen} onOpenChange={setCategoryPlanDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Category Budget</DialogTitle>
-                  </DialogHeader>
-                  <AddCategoryPlanDialog
-                    month={month}
-                    onClose={() => setCategoryPlanDialogOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent>
-              {budget.categoryPlans.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No category budgets set yet.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {budget.categoryPlans.map((plan: BudgetCategoryPlan) => (
-                    <div
-                      key={plan.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                    >
-                      <span className="font-medium">
-                        {plan.category?.name || "Unknown"}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">
-                          {plan.targetType === "fixed"
-                            ? formatCurrency(parseFloat(plan.targetValue))
-                            : `${plan.targetValue}%`}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => deletePlan.mutate(plan.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+          <div className="space-y-4">
+            {/* AI Recommendations Panel */}
+            {showRecommendations ? (
+              <BudgetRecommendationsPanel
+                month={month}
+                onClose={() => setShowRecommendations(false)}
+              />
+            ) : (
+              <Card className="border-dashed">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium">Get AI Budget Recommendations</p>
+                        <p className="text-sm text-muted-foreground">
+                          Based on your last 4 months of spending
+                        </p>
                       </div>
                     </div>
-                  ))}
+                    <Button onClick={() => setShowRecommendations(true)}>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Get Recommendations
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Category Budgets</CardTitle>
+                  <CardDescription>
+                    Set spending limits for budget groups like Eating Out, Transport, Shopping.
+                  </CardDescription>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <Dialog open={categoryPlanDialogOpen} onOpenChange={setCategoryPlanDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Category Budget</DialogTitle>
+                    </DialogHeader>
+                    <AddCategoryPlanDialog
+                      month={month}
+                      onClose={() => setCategoryPlanDialogOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {budget.categoryPlans.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    No category budgets set yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {budget.categoryPlans.map((plan: BudgetCategoryPlan) => (
+                      <div
+                        key={plan.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                      >
+                        <span className="font-medium">
+                          {plan.category?.name || "Unknown"}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold">
+                            {plan.targetType === "fixed"
+                              ? formatCurrency(parseFloat(plan.targetValue))
+                              : `${plan.targetValue}%`}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => deletePlan.mutate(plan.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

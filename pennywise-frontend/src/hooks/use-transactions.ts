@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchTransactions,
   updateTransaction,
+  bulkUpdateTransactions,
   type TransactionFilters,
 } from "../lib/api";
 
@@ -22,6 +23,22 @@ export function useUpdateTransaction() {
       id: string;
       data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean };
     }) => updateTransaction(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
+export function useBulkUpdateTransactions() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      ids,
+      data,
+    }: {
+      ids: string[];
+      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean };
+    }) => bulkUpdateTransactions(ids, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
     },

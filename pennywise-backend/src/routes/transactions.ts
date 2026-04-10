@@ -81,6 +81,60 @@ router.get("/", async (req, res) => {
   });
 });
 
+// PATCH /api/transactions/bulk — bulk update transactions
+const bulkUpdateSchema = z.object({
+  ids: z.array(z.string()).min(1),
+  note: z.string().nullable().optional(),
+  categoryIds: z.array(z.string()).nullable().optional(),
+  isIgnored: z.boolean().optional(),
+});
+
+router.patch("/bulk", async (req, res) => {
+  const parsed = bulkUpdateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const { ids, note, categoryIds, isIgnored } = parsed.data;
+  const txData: Record<string, unknown> = {};
+
+  if (note !== undefined) {
+    txData.note = note;
+  }
+
+  if (isIgnored !== undefined) {
+    txData.isIgnored = isIgnored;
+    txData.ignoreSource = "manual";
+  }
+
+  // Handle categories for each transaction
+  if (categoryIds !== undefined) {
+    if (categoryIds === null || categoryIds.length === 0) {
+      // Clear all categories for all transactions
+      for (const id of ids) {
+        await setTransactionCategories(id, []);
+      }
+    } else {
+      const expanded = await expandCategoryIds(categoryIds, "manual");
+      for (const id of ids) {
+        await setTransactionCategories(id, expanded);
+      }
+    }
+    txData.categoriesLockedByUser = true;
+  }
+
+  // Update scalar fields on all transactions
+  if (Object.keys(txData).length > 0) {
+    await prisma.transaction.updateMany({
+      where: { id: { in: ids } },
+      data: txData,
+    });
+  }
+
+  res.json({ updated: ids.length });
+});
+
 // PATCH /api/transactions/:id — update note, categories, ignore
 const updateSchema = z.object({
   note: z.string().nullable().optional(),

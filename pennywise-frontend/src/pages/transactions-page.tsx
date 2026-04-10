@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTransactions, useUpdateTransaction } from "../hooks/use-transactions";
+import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions } from "../hooks/use-transactions";
 import { useCategories } from "../hooks/use-categories";
 import { useAccounts } from "../hooks/use-accounts";
 import { TransactionFilterBar } from "../components/transactions/transaction-filters";
 import { TransactionTable } from "../components/transactions/transaction-table";
+import { BulkNoteDialog } from "../components/transactions/bulk-note-dialog";
+import { BulkCategoryDialog } from "../components/transactions/bulk-category-dialog";
 import { runAiCategorisation, type TransactionFilters, type AiCategorisationResult } from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -16,12 +18,17 @@ export function TransactionsPage() {
   });
   const [aiRunning, setAiRunning] = useState(false);
   const [aiResult, setAiResult] = useState<AiCategorisationResult | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkNoteOpen, setBulkNoteOpen] = useState(false);
+  const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
+  const [pendingBulkIds, setPendingBulkIds] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
   const { data, isLoading } = useTransactions(filters);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
   const updateTx = useUpdateTransaction();
+  const bulkUpdateTx = useBulkUpdateTransactions();
 
   const pagination = data?.pagination;
 
@@ -31,8 +38,8 @@ export function TransactionsPage() {
     try {
       const result = await runAiCategorisation({ limit: 100, minConfidence: 0.85 });
       setAiResult(result);
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
     } catch (err) {
       console.error("AI categorisation failed:", err);
       setAiResult(null);
@@ -98,6 +105,10 @@ export function TransactionsPage() {
             categories={categories}
             onUpdate={(id, data) => updateTx.mutate({ id, data })}
             isUpdating={updateTx.isPending}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onBulkAction={handleBulkAction}
+            isBulkUpdating={bulkUpdateTx.isPending}
           />
 
           {/* Pagination */}
@@ -128,6 +139,73 @@ export function TransactionsPage() {
           )}
         </>
       )}
+
+      <BulkNoteDialog
+        count={pendingBulkIds.length}
+        open={bulkNoteOpen}
+        onOpenChange={setBulkNoteOpen}
+        onSave={(note) => {
+          bulkUpdateTx.mutate(
+            { ids: pendingBulkIds, data: { note } },
+            {
+              onSuccess: () => {
+                setBulkNoteOpen(false);
+                setSelectedIds(new Set());
+                queryClient.invalidateQueries({ queryKey: ["transactions"] });
+              },
+            }
+          );
+        }}
+      />
+
+      <BulkCategoryDialog
+        count={pendingBulkIds.length}
+        categories={categories}
+        open={bulkCategoryOpen}
+        onOpenChange={setBulkCategoryOpen}
+        onSave={(categoryIds) => {
+          bulkUpdateTx.mutate(
+            { ids: pendingBulkIds, data: { categoryIds } },
+            {
+              onSuccess: () => {
+                setBulkCategoryOpen(false);
+                setSelectedIds(new Set());
+                queryClient.invalidateQueries({ queryKey: ["transactions"] });
+              },
+            }
+          );
+        }}
+      />
     </div>
   );
+
+  function handleBulkAction(action: "ignore" | "unignore" | "note" | "category", ids: string[]) {
+    setPendingBulkIds(ids);
+    
+    if (action === "ignore") {
+      bulkUpdateTx.mutate(
+        { ids, data: { isIgnored: true } },
+        {
+          onSuccess: () => {
+            setSelectedIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ["transactions"] });
+          },
+        }
+      );
+    } else if (action === "unignore") {
+      bulkUpdateTx.mutate(
+        { ids, data: { isIgnored: false } },
+        {
+          onSuccess: () => {
+            setSelectedIds(new Set());
+            queryClient.invalidateQueries({ queryKey: ["transactions"] });
+          },
+        }
+      );
+    } else if (action === "note") {
+      setBulkNoteOpen(true);
+    } else if (action === "category") {
+      setBulkCategoryOpen(true);
+    }
+  }
 }

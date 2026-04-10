@@ -8,7 +8,9 @@ import {
   StickyNote,
   ListFilter,
   Loader2,
+  X,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -37,6 +39,10 @@ interface TransactionTableProps {
   categories: Category[];
   onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }) => void;
   isUpdating: boolean;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
+  onBulkAction: (action: "ignore" | "unignore" | "note" | "category", ids: string[]) => void;
+  isBulkUpdating: boolean;
 }
 
 export function TransactionTable({
@@ -44,10 +50,37 @@ export function TransactionTable({
   categories,
   onUpdate,
   isUpdating,
+  selectedIds,
+  onSelectionChange,
+  onBulkAction,
+  isBulkUpdating,
 }: TransactionTableProps) {
   const [noteDialog, setNoteDialog] = useState<Transaction | null>(null);
   const [categoryDialog, setCategoryDialog] = useState<Transaction | null>(null);
   const [ruleDialog, setRuleDialog] = useState<Transaction | null>(null);
+
+  const allSelected = transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
+  const someSelected = transactions.some((tx) => selectedIds.has(tx.id));
+
+  const toggleAll = () => {
+    if (allSelected) {
+      onSelectionChange(new Set());
+    } else {
+      onSelectionChange(new Set(transactions.map((tx) => tx.id)));
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    onSelectionChange(next);
+  };
+
+  const selectedArray = Array.from(selectedIds);
 
   const formatAmount = (amount: string, currency: string) => {
     const num = parseFloat(amount);
@@ -59,10 +92,71 @@ export function TransactionTable({
 
   return (
     <>
+      {/* Bulk Actions Toolbar */}
+      {selectedArray.length > 0 && (
+        <div className="flex items-center gap-2 rounded-md border bg-muted/50 p-2 mb-2">
+          <span className="text-sm font-medium">
+            {selectedArray.length} selected
+          </span>
+          <div className="flex-1" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBulkAction("ignore", selectedArray)}
+            disabled={isBulkUpdating}
+          >
+            <EyeOff className="mr-2 h-4 w-4" />
+            Ignore
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBulkAction("unignore", selectedArray)}
+            disabled={isBulkUpdating}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Unignore
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBulkAction("note", selectedArray)}
+            disabled={isBulkUpdating}
+          >
+            <StickyNote className="mr-2 h-4 w-4" />
+            Add Note
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBulkAction("category", selectedArray)}
+            disabled={isBulkUpdating}
+          >
+            <Tag className="mr-2 h-4 w-4" />
+            Set Category
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onSelectionChange(new Set())}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={toggleAll}
+                  aria-label="Select all"
+                  {...(someSelected && !allSelected ? { "data-state": "indeterminate" } : {})}
+                />
+              </TableHead>
               <TableHead className="w-28">Date</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="w-28 text-right">Amount</TableHead>
@@ -76,7 +170,7 @@ export function TransactionTable({
           <TableBody>
             {transactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   No transactions found.
                 </TableCell>
               </TableRow>
@@ -84,8 +178,18 @@ export function TransactionTable({
               transactions.map((tx) => (
                 <TableRow
                   key={tx.id}
-                  className={cn(tx.isIgnored && "opacity-50")}
+                  className={cn(
+                    tx.isIgnored && "opacity-50",
+                    selectedIds.has(tx.id) && "bg-muted/50"
+                  )}
                 >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(tx.id)}
+                      onCheckedChange={() => toggleOne(tx.id)}
+                      aria-label={`Select transaction ${tx.description}`}
+                    />
+                  </TableCell>
                   <TableCell className="text-sm tabular-nums">
                     {format(new Date(tx.transactionDate), "dd MMM yy")}
                   </TableCell>
