@@ -21,12 +21,12 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
+  RotateCcw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -72,6 +72,7 @@ const PRESET_OPTIONS: Array<{ value: AnalysisPreset; label: string }> = [
   { value: "this_month", label: "This month" },
   { value: "last_month", label: "Last month" },
   { value: "last_3_months", label: "Last 3 months" },
+  { value: "last_4_months", label: "Last 4 months" },
   { value: "last_6_months", label: "Last 6 months" },
   { value: "ytd", label: "Year to date" },
   { value: "custom", label: "Custom range" },
@@ -118,6 +119,10 @@ function formatDateRangeLabel(start: string, end: string): string {
   return `${format(startDate, "d MMM yyyy")} - ${format(endDate, "d MMM yyyy")}`;
 }
 
+function getPresetLabel(preset: AnalysisPreset): string {
+  return PRESET_OPTIONS.find((option) => option.value === preset)?.label ?? "Custom range";
+}
+
 function getCurrentDate(): Date {
   const today = new Date();
   return new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -138,6 +143,8 @@ function resolvePresetRange(
     }
     case "last_3_months":
       return { start: startOfMonth(subMonths(today, 2)), end: today };
+    case "last_4_months":
+      return { start: startOfMonth(subMonths(today, 3)), end: today };
     case "last_6_months":
       return { start: startOfMonth(subMonths(today, 5)), end: today };
     case "ytd":
@@ -218,6 +225,7 @@ function getBudgetBadge(row: CategoryAnalysisRow) {
 
 export function SpendingPage() {
   const [preset, setPreset] = useState<AnalysisPreset>("this_month");
+  const [chartMode, setChartMode] = useState<"daily" | "cumulative">("daily");
   const [comparePrevious, setComparePrevious] = useState(false);
   const [includeIgnored, setIncludeIgnored] = useState(false);
   const [accountId, setAccountId] = useState<string | undefined>();
@@ -272,40 +280,119 @@ export function SpendingPage() {
   };
 
   const periodLabel = formatDateRangeLabel(filters.start, filters.end);
+  const selectedAccountLabel =
+    accountId ? accounts.find((account) => account.id === accountId)?.accountName ?? "Selected account" : "all accounts";
+  const selectedCategoryLabel =
+    categoryId ? categories.find((category) => category.id === categoryId)?.name ?? "selected category" : "all categories";
+  const hasCustomFilters =
+    preset !== "this_month" || !!accountId || !!categoryId || comparePrevious || includeIgnored;
+
+  const resetFilters = () => {
+    setPreset("this_month");
+    setComparePrevious(false);
+    setIncludeIgnored(false);
+    setAccountId(undefined);
+    setCategoryId(undefined);
+    setCustomRange({ start: null, end: null });
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="space-y-2">
         <div>
           <h1 className="text-2xl font-bold">Spending Analysis</h1>
           <p className="text-muted-foreground">
             Drill into what changed, where the spend came from, and whether it looks fixable.
           </p>
         </div>
-        <div className="text-sm text-muted-foreground">{periodLabel}</div>
       </div>
 
-      <Card>
-        <CardContent className="flex flex-col gap-4 pt-6">
-          <div className="grid gap-3 lg:grid-cols-[220px,220px,220px,1fr]">
-            <Select value={preset} onValueChange={(value) => setPreset(value as AnalysisPreset)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select range" />
-              </SelectTrigger>
-              <SelectContent>
+      <div className="space-y-3 rounded-2xl border bg-card/60 px-4 py-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Time range
+              </span>
+              <div className="flex flex-wrap items-center gap-1 rounded-xl bg-muted p-1">
                 {PRESET_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <Button
+                    key={option.value}
+                    variant={preset === option.value ? "default" : "ghost"}
+                    size={option.value === preset ? "default" : "sm"}
+                    className={cn(
+                      "rounded-lg",
+                      preset === option.value
+                        ? "shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setPreset(option.value)}
+                  >
                     {option.label}
-                  </SelectItem>
+                  </Button>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </div>
 
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="rounded-xl border bg-background px-4 py-2">
+                <p className="text-sm font-semibold">{getPresetLabel(preset)}</p>
+                <p className="text-sm text-muted-foreground">{periodLabel}</p>
+              </div>
+
+              {preset === "custom" && (
+                <>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {customRange.start ? format(customRange.start, "dd MMM yyyy") : "Start date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={customRange.start ?? undefined}
+                        onSelect={(date) => setCustomRange((current) => ({ ...current, start: date ?? null }))}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {customRange.end ? format(customRange.end, "dd MMM yyyy") : "End date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={customRange.end ?? undefined}
+                        onSelect={(date) => setCustomRange((current) => ({ ...current, end: date ?? null }))}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-background px-4 py-2 text-sm">
+            <p className="text-muted-foreground">Showing posted outflows for {selectedAccountLabel} in {selectedCategoryLabel}.</p>
+            <p className="font-medium">
+              {comparePrevious ? "Comparing with the previous period." : "No comparison applied."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
             <Select
               value={accountId || "all"}
               onValueChange={(value) => setAccountId(value === "all" ? undefined : value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="min-w-44 bg-background">
                 <SelectValue placeholder="All accounts" />
               </SelectTrigger>
               <SelectContent>
@@ -322,7 +409,7 @@ export function SpendingPage() {
               value={categoryId || "all"}
               onValueChange={(value) => setCategoryId(value === "all" ? undefined : value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="min-w-44 bg-background">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
@@ -344,80 +431,51 @@ export function SpendingPage() {
               </SelectContent>
             </Select>
 
-            {preset === "custom" ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {customRange.start ? format(customRange.start, "dd MMM yyyy") : "Start date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={customRange.start ?? undefined}
-                      onSelect={(date) => setCustomRange((current) => ({ ...current, start: date ?? null }))}
-                    />
-                  </PopoverContent>
-                </Popover>
+            <div className="flex items-center gap-1 rounded-xl border bg-background p-1">
+              <Button
+                variant={comparePrevious ? "ghost" : "default"}
+                size="sm"
+                onClick={() => setComparePrevious(false)}
+              >
+                No comparison
+              </Button>
+              <Button
+                variant={comparePrevious ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setComparePrevious(true)}
+              >
+                Vs previous
+              </Button>
+            </div>
 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {customRange.end ? format(customRange.end, "dd MMM yyyy") : "End date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={customRange.end ?? undefined}
-                      onSelect={(date) => setCustomRange((current) => ({ ...current, end: date ?? null }))}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center gap-4 rounded-lg border px-4 py-3">
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={comparePrevious}
-                    onCheckedChange={(checked) => setComparePrevious(checked === true)}
-                  />
-                  Compare to previous period
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={includeIgnored}
-                    onCheckedChange={(checked) => setIncludeIgnored(checked === true)}
-                  />
-                  Include ignored
-                </label>
-              </div>
-            )}
+            <Button
+              variant={includeIgnored ? "secondary" : "ghost"}
+              size="sm"
+              className={cn("rounded-xl", !includeIgnored && "text-muted-foreground")}
+              onClick={() => setIncludeIgnored((current) => !current)}
+            >
+              Include ignored
+            </Button>
           </div>
 
-          {preset === "custom" && (
-            <div className="flex flex-wrap items-center gap-4 rounded-lg border px-4 py-3">
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={comparePrevious}
-                  onCheckedChange={(checked) => setComparePrevious(checked === true)}
-                />
-                Compare to previous period
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={includeIgnored}
-                  onCheckedChange={(checked) => setIncludeIgnored(checked === true)}
-                />
-                Include ignored
-              </label>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2">
+            {(accountId || categoryId || includeIgnored) && (
+              <div className="hidden flex-wrap items-center gap-2 lg:flex">
+                {accountId && <Badge variant="outline">{selectedAccountLabel}</Badge>}
+                {categoryId && <Badge variant="outline">{selectedCategoryLabel}</Badge>}
+                {includeIgnored && <Badge variant="outline">Ignored included</Badge>}
+              </div>
+            )}
+
+            {hasCustomFilters && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="space-y-6">
@@ -484,15 +542,15 @@ export function SpendingPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="daily" className="space-y-4">
+                <Tabs value={chartMode} onValueChange={(value) => setChartMode(value as "daily" | "cumulative")} className="space-y-4">
                   <TabsList>
                     <TabsTrigger value="daily">Daily spend</TabsTrigger>
                     <TabsTrigger value="cumulative">Cumulative spend</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="daily" className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={analysis.series}>
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height={320}>
+                      <LineChart data={analysis.series} key={chartMode}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="label" minTickGap={24} />
                         <YAxis tickFormatter={formatCompactCurrency} width={56} />
@@ -505,58 +563,54 @@ export function SpendingPage() {
                               : "";
                           }}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="currentSpend"
-                          stroke="var(--chart-1)"
-                          strokeWidth={2}
-                          dot={false}
-                          name="Current period"
-                        />
-                        {comparePrevious && analysis.previousPeriod && (
-                          <Line
-                            type="monotone"
-                            dataKey="previousSpend"
-                            stroke="var(--muted-foreground)"
-                            strokeDasharray="4 4"
-                            strokeWidth={2}
-                            dot={false}
-                            name="Previous period"
-                          />
+                        {chartMode === "daily" ? (
+                          <>
+                            <Line
+                              type="linear"
+                              dataKey="currentSpend"
+                              stroke="var(--chart-1)"
+                              strokeWidth={2}
+                              dot={false}
+                              name="Current period"
+                            />
+                            {comparePrevious && analysis.previousPeriod && (
+                              <Line
+                                type="linear"
+                                dataKey="previousSpend"
+                                stroke="var(--muted-foreground)"
+                                strokeDasharray="4 4"
+                                strokeWidth={2}
+                                dot={false}
+                                name="Previous period"
+                              />
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Line
+                              type="linear"
+                              dataKey="currentCumulative"
+                              stroke="var(--chart-1)"
+                              strokeWidth={2}
+                              dot={false}
+                              name="Current period"
+                            />
+                            {comparePrevious && analysis.previousPeriod && (
+                              <Line
+                                type="linear"
+                                dataKey="previousCumulative"
+                                stroke="var(--muted-foreground)"
+                                strokeDasharray="4 4"
+                                strokeWidth={2}
+                                dot={false}
+                                name="Previous period"
+                              />
+                            )}
+                          </>
                         )}
                       </LineChart>
                     </ResponsiveContainer>
-                  </TabsContent>
-
-                  <TabsContent value="cumulative" className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={analysis.series}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="label" minTickGap={24} />
-                        <YAxis tickFormatter={formatCompactCurrency} width={56} />
-                        <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
-                        <Line
-                          type="monotone"
-                          dataKey="currentCumulative"
-                          stroke="var(--chart-1)"
-                          strokeWidth={2}
-                          dot={false}
-                          name="Current period"
-                        />
-                        {comparePrevious && analysis.previousPeriod && (
-                          <Line
-                            type="monotone"
-                            dataKey="previousCumulative"
-                            stroke="var(--muted-foreground)"
-                            strokeDasharray="4 4"
-                            strokeWidth={2}
-                            dot={false}
-                            name="Previous period"
-                          />
-                        )}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </TabsContent>
+                  </div>
                 </Tabs>
               </CardContent>
             </Card>

@@ -240,6 +240,15 @@ function getRationale(category: CategoryRecommendation): string {
   return category.rationale?.trim() || generateFallbackRationale(category);
 }
 
+function needsManualAttention(category: CategoryRecommendation): boolean {
+  return (
+    category.recommendedBudget === null ||
+    category.confidence === "low" ||
+    category.variabilityClass === "low_signal" ||
+    category.recommendationStatus === "needs_budget_no_recommendation"
+  );
+}
+
 interface RecommendationRowProps {
   category: CategoryRecommendation;
   branch?: RecommendationBranch;
@@ -274,9 +283,10 @@ function RecommendationRow({
   return (
     <div
       className={cn(
-        "rounded-lg border p-3 transition-colors",
-        selected ? "border-primary bg-primary/5" : "border-border",
-        !hasRecommendation && "opacity-70",
+        "rounded-xl border p-4 transition-colors",
+        selected ? "border-primary bg-primary/5" : "border-border bg-background",
+        isLowConfidence && "border-dashed border-amber-300 bg-amber-50/60",
+        !hasRecommendation && "opacity-85",
       )}
     >
       <div className="flex items-start gap-3">
@@ -288,8 +298,8 @@ function RecommendationRow({
         />
 
         <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={cn("truncate text-sm font-medium", !hasRecommendation && "text-muted-foreground")}>
                   {category.categoryName}
@@ -304,46 +314,51 @@ function RecommendationRow({
                   </Badge>
                 )}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                avg {formatCurrency(category.historicalAverage)}
+              <p className="text-sm text-muted-foreground">
+                Typical month <span className="font-medium text-foreground">{formatCurrency(category.historicalAverage)}</span>
                 {category.currentBudget !== null && (
-                  <span> · current {formatCurrency(category.currentBudget)}</span>
+                  <span> · current budget {formatCurrency(category.currentBudget)}</span>
                 )}
               </p>
+
+              {topDrivers.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Top drivers:{" "}
+                  {topDrivers.map((driver, index) => (
+                    <span key={driver.categoryId}>
+                      {index > 0 && ", "}
+                      <span className="font-medium text-foreground">{driver.categoryName}</span>
+                      <span> {formatCurrency(driver.historicalAverage)}</span>
+                    </span>
+                  ))}
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="w-32 shrink-0 rounded-xl border bg-background p-2 shadow-sm">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {hasRecommendation ? "Suggested" : "Manual review"}
+              </p>
               {isTrimmed && category.adjustmentVsAverage !== null && (
-                <span className="flex items-center gap-1 text-xs text-amber-600">
+                <div className="mb-2 flex items-center gap-1 text-xs text-amber-600">
                   <TrendingDown className="h-3 w-3" />
                   {formatCurrency(Math.abs(category.adjustmentVsAverage))}
-                </span>
+                </div>
               )}
               {hasRecommendation ? (
                 <Input
                   type="number"
                   value={displayBudget ?? ""}
                   onChange={(e) => onEditBudget(e.target.value ? Number(e.target.value) : null)}
-                  className="h-8 w-24 text-sm"
+                  className="h-10 w-full text-base font-semibold"
                 />
               ) : (
-                <span className="text-xs text-muted-foreground">No suggestion</span>
+                <div className="rounded-md bg-muted px-2 py-2 text-xs text-muted-foreground">
+                  Review manually
+                </div>
               )}
             </div>
           </div>
-
-          {topDrivers.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Top drivers:{" "}
-              {topDrivers.map((driver, index) => (
-                <span key={driver.categoryId}>
-                  {index > 0 && ", "}
-                  <span className="font-medium text-foreground">{driver.categoryName}</span>
-                  <span> {formatCurrency(driver.historicalAverage)}</span>
-                </span>
-              ))}
-            </p>
-          )}
 
           <Collapsible open={expanded} onOpenChange={setExpanded}>
             <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
@@ -374,6 +389,7 @@ interface BranchCardProps {
   categories: CategoryRecommendation[];
   selections: Map<string, { selected: boolean; editedBudget: number | null }>;
   evidence: Record<string, CategoryEvidence> | undefined;
+  manualAttention?: boolean;
   onToggle: (categoryId: string) => void;
   onEditBudget: (categoryId: string, value: number | null) => void;
   onSelectBranch: () => void;
@@ -385,6 +401,7 @@ function BranchCard({
   categories,
   selections,
   evidence,
+  manualAttention = false,
   onToggle,
   onEditBudget,
   onSelectBranch,
@@ -395,14 +412,19 @@ function BranchCard({
   const parentCategory = branch.budgetLevel === "parent" ? categories[0] : null;
 
   return (
-    <div className="rounded-xl border p-4 space-y-4">
+    <div className={cn("rounded-xl border p-4 space-y-4", manualAttention && "border-amber-300 bg-amber-50/40")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="truncate font-medium">{branch.branchCategoryName}</h3>
             <Badge variant="secondary">
               {branch.budgetLevel === "parent" ? "Parent budget" : "Preserving child split"}
             </Badge>
+            {manualAttention && (
+              <Badge className="border-0 bg-amber-100 text-amber-800">
+                Manual attention
+              </Badge>
+            )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {branch.resolutionReason}
@@ -573,26 +595,20 @@ export function BudgetRecommendationsPanel({
       .sort((a, b) => b.historicalAverage - a.historicalAverage);
   }, [recommendations]);
 
-  const planStats = useMemo(() => {
-    if (!recommendations) return null;
+  const groupedBranches = useMemo(() => {
+    const ready: typeof branches = [];
+    const manual: typeof branches = [];
 
-    const recommendationLines = recommendations.categories.filter(
-      (category) => category.recommendedBudget !== null
-    ).length;
-    const childBranches = recommendations.branches.filter((branch) => branch.budgetLevel === "child").length;
-    const fitsTarget = recommendations.summary.totalRecommendedBudget <= recommendations.summary.targetFlexibleBudget;
-    const topBranches = [...recommendations.branches]
-      .sort((a, b) => b.historicalAverage - a.historicalAverage)
-      .slice(0, 3);
+    for (const branch of branches) {
+      if (branch.categories.some((category) => needsManualAttention(category))) {
+        manual.push(branch);
+      } else {
+        ready.push(branch);
+      }
+    }
 
-    return {
-      recommendationLines,
-      branchCount: recommendations.branches.length,
-      childBranches,
-      fitsTarget,
-      topBranches,
-    };
-  }, [recommendations]);
+    return { ready, manual };
+  }, [branches]);
 
   const selectedCount = useMemo(() => {
     let count = 0;
@@ -613,6 +629,36 @@ export function BudgetRecommendationsPanel({
     }
     return total;
   }, [recommendations, selections]);
+
+  const planStats = useMemo(() => {
+    if (!recommendations) return null;
+
+    const recommendationLines = recommendations.categories.filter(
+      (category) => category.recommendedBudget !== null
+    ).length;
+    const selectedRecommendedLines = recommendations.categories.filter((category) => {
+      const selection = selections.get(category.categoryId);
+      return selection?.selected && category.recommendedBudget !== null;
+    }).length;
+    const childBranches = recommendations.branches.filter((branch) => branch.budgetLevel === "child").length;
+    const fitsTarget = totalSelectedBudget <= recommendations.summary.targetFlexibleBudget;
+    const topBranches = [...recommendations.branches]
+      .sort((a, b) => b.historicalAverage - a.historicalAverage)
+      .slice(0, 3);
+    const selectedGap = recommendations.summary.targetFlexibleBudget - totalSelectedBudget;
+
+    return {
+      recommendationLines,
+      selectedRecommendedLines,
+      branchCount: recommendations.branches.length,
+      childBranches,
+      fitsTarget,
+      topBranches,
+      manualAttentionBranches: groupedBranches.manual.length,
+      uncoveredCount: recommendations.uncoveredHighSpend.length,
+      selectedGap,
+    };
+  }, [recommendations, selections, totalSelectedBudget, groupedBranches.manual.length]);
 
   if (!recommendations && !generateMutation.isPending) {
     return (
@@ -715,18 +761,18 @@ export function BudgetRecommendationsPanel({
           <div className="space-y-3 rounded-lg bg-muted/50 p-4">
             <div className="flex items-baseline gap-6">
               <div>
-                <span className="text-2xl font-bold">{formatCurrency(summary.totalRecommendedBudget)}</span>
-                <span className="ml-2 text-sm text-muted-foreground">suggested</span>
+                <span className="text-2xl font-bold">{formatCurrency(totalSelectedBudget)}</span>
+                <span className="ml-2 text-sm text-muted-foreground">selected so far</span>
               </div>
               <div className="text-sm">
                 <span className="text-muted-foreground">of </span>
                 <span className="font-medium">{formatCurrency(summary.targetFlexibleBudget)}</span>
-                <span className="text-muted-foreground"> target</span>
+                <span className="text-muted-foreground"> target flexible budget</span>
               </div>
               {planStats.fitsTarget ? (
                 <Badge className="border-0 bg-green-100 text-green-700">
                   <Check className="mr-1 h-3 w-3" />
-                  Fits budget
+                  Within target
                 </Badge>
               ) : (
                 <Badge className="border-0 bg-amber-100 text-amber-700">
@@ -737,36 +783,43 @@ export function BudgetRecommendationsPanel({
 
             <div className="space-y-1.5 text-sm text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">{planStats.recommendationLines}</span> budget lines
+                <span className="font-medium text-foreground">{planStats.selectedRecommendedLines}</span> selected lines so far
+                from <span className="font-medium text-foreground">{planStats.recommendationLines}</span> suggested lines
                 across <span className="font-medium text-foreground">{planStats.branchCount}</span> branches
                 {planStats.childBranches > 0 && (
                   <span> · <span className="font-medium text-foreground">{planStats.childBranches}</span> preserving manual child splits</span>
                 )}
               </p>
-              {recommendations.trims.length > 0 && (
+              <p className="text-amber-700">
+                This is a starting point, not a finished budget.
+                {planStats.manualAttentionBranches > 0 && (
+                  <span> You still need to review <span className="font-medium text-foreground">{planStats.manualAttentionBranches}</span> branches manually.</span>
+                )}
+              </p>
+              {planStats.selectedGap > 0 && (
+                <p>
+                  Current selected recommendations leave <span className="font-medium text-foreground">{formatCurrency(planStats.selectedGap)}</span> unallocated.
+                </p>
+              )}
+              {planStats.selectedGap < 0 && (
+                <p className="text-amber-600">
+                  Current selected recommendations are <span className="font-medium text-foreground">{formatCurrency(Math.abs(planStats.selectedGap))}</span> over target.
+                </p>
+              )}
+              {recommendations.trims.length > 0 && recommendations.trims.reduce((sum, t) => sum + t.trimAmount, 0) > 0 && (
                 <p>
                   <span className="font-medium text-foreground">{recommendations.trims.length}</span> categories trimmed by{" "}
                   {formatCurrency(recommendations.trims.reduce((sum, t) => sum + t.trimAmount, 0))} total to keep the plan realistic.
                 </p>
               )}
-              {planStats.fitsTarget && (summary.targetFlexibleBudget - summary.totalRecommendedBudget) > summary.targetFlexibleBudget * 0.25 && (
-                <p>
-                  The suggested total is {formatCurrency(summary.targetFlexibleBudget - summary.totalRecommendedBudget)} below your target — you have room to raise key categories or keep the headroom as a buffer.
-                </p>
-              )}
-              {!planStats.fitsTarget && (
-                <p className="text-amber-600">
-                  The suggested total exceeds your flexible budget. Consider trimming the largest categories or raising your income target.
-                </p>
-              )}
               {summary.budgetCoveragePercent === 0 && (
                 <p className="text-amber-600">
-                  You haven't budgeted any of these categories yet. These suggestions give you a complete starting point based on your actual spending.
+                  You have not budgeted any of these categories yet, so the panel is intentionally conservative and still needs manual review.
                 </p>
               )}
-              {recommendations.uncoveredHighSpend.length > 0 && (
+              {planStats.uncoveredCount > 0 && (
                 <p>
-                  <span className="font-medium text-foreground">{recommendations.uncoveredHighSpend.length}</span> high-spend categories still need manual attention.
+                  <span className="font-medium text-foreground">{planStats.uncoveredCount}</span> high-spend categories still need manual budgets.
                 </p>
               )}
             </div>
@@ -786,41 +839,116 @@ export function BudgetRecommendationsPanel({
           </div>
         )}
 
-        <div className="space-y-4 grid grid-cols-2 gap-4">
-          {branches.map((branch) => (
-            <BranchCard
-              key={branch.branchCategoryId}
-              branch={branch}
-              categories={branch.categories}
-              selections={selections}
-              evidence={evidenceData}
-              onToggle={handleToggle}
-              onEditBudget={handleEditBudget}
-              onSelectBranch={() => {
-                setSelections((prev) => {
-                  const next = new Map(prev);
-                  for (const category of branch.categories) {
-                    if (category.recommendedBudget !== null) {
-                      const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
-                      next.set(category.categoryId, { ...current, selected: true });
-                    }
-                  }
-                  return next;
-                });
-              }}
-              onDeselectBranch={() => {
-                setSelections((prev) => {
-                  const next = new Map(prev);
-                  for (const category of branch.categories) {
-                    const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
-                    next.set(category.categoryId, { ...current, selected: false });
-                  }
-                  return next;
-                });
-              }}
-            />
-          ))}
-        </div>
+        {groupedBranches.manual.length > 0 && (
+          <div className="space-y-3 rounded-lg border border-amber-300 bg-amber-50/50 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-700" />
+              <div className="space-y-1">
+                <h3 className="font-medium text-amber-900">Needs manual attention</h3>
+                <p className="text-sm text-amber-800">
+                  These branches have low-data or weak recommendations. Review them manually before treating this as a finished budget.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              {groupedBranches.manual.map((branch) => (
+                <BranchCard
+                  key={branch.branchCategoryId}
+                  branch={branch}
+                  categories={branch.categories}
+                  selections={selections}
+                  evidence={evidenceData}
+                  manualAttention
+                  onToggle={handleToggle}
+                  onEditBudget={handleEditBudget}
+                  onSelectBranch={() => {
+                    setSelections((prev) => {
+                      const next = new Map(prev);
+                      for (const category of branch.categories) {
+                        if (category.recommendedBudget !== null) {
+                          const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
+                          next.set(category.categoryId, { ...current, selected: true });
+                        }
+                      }
+                      return next;
+                    });
+                  }}
+                  onDeselectBranch={() => {
+                    setSelections((prev) => {
+                      const next = new Map(prev);
+                      for (const category of branch.categories) {
+                        const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
+                        next.set(category.categoryId, { ...current, selected: false });
+                      }
+                      return next;
+                    });
+                  }}
+                />
+              ))}
+            </div>
+
+            {recommendations.uncoveredHighSpend.length > 0 && (
+              <div className="rounded-lg border border-amber-200 bg-background/80 p-3">
+                <p className="mb-2 text-sm font-medium">High-spend categories still needing manual budgets</p>
+                <div className="flex flex-wrap gap-2">
+                  {recommendations.uncoveredHighSpend.map((category) => (
+                    <Badge key={category.categoryId} variant="outline" className="bg-background">
+                      {category.categoryName} {formatCurrency(category.historicalAverage)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {groupedBranches.ready.length > 0 && (
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-medium">Ready to apply</h3>
+              <p className="text-sm text-muted-foreground">
+                These branches have stronger recommendations and can usually be accepted with only light editing.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              {groupedBranches.ready.map((branch) => (
+                <BranchCard
+                  key={branch.branchCategoryId}
+                  branch={branch}
+                  categories={branch.categories}
+                  selections={selections}
+                  evidence={evidenceData}
+                  onToggle={handleToggle}
+                  onEditBudget={handleEditBudget}
+                  onSelectBranch={() => {
+                    setSelections((prev) => {
+                      const next = new Map(prev);
+                      for (const category of branch.categories) {
+                        if (category.recommendedBudget !== null) {
+                          const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
+                          next.set(category.categoryId, { ...current, selected: true });
+                        }
+                      }
+                      return next;
+                    });
+                  }}
+                  onDeselectBranch={() => {
+                    setSelections((prev) => {
+                      const next = new Map(prev);
+                      for (const category of branch.categories) {
+                        const current = next.get(category.categoryId) || { selected: false, editedBudget: null };
+                        next.set(category.categoryId, { ...current, selected: false });
+                      }
+                      return next;
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {(diagnostics.multiCategorySpend > 0 || diagnostics.categoriesWithInsufficientData > 0) && (
           <div className="space-y-1 border-t pt-3 text-xs text-muted-foreground">

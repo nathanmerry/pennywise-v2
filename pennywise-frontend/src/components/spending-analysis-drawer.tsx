@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -19,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useCategoryDrilldown } from "@/hooks/use-budget";
 import type { SpendingAnalysisFilters } from "@/lib/api";
 
@@ -92,6 +94,7 @@ export function SpendingAnalysisDrawer({
   filters,
 }: SpendingAnalysisDrawerProps) {
   const { data, isLoading } = useCategoryDrilldown(categoryId, filters);
+  const [showAllMerchants, setShowAllMerchants] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -216,7 +219,7 @@ export function SpendingAnalysisDrawer({
                         }}
                       />
                       <Line
-                        type="monotone"
+                        type="linear"
                         dataKey="currentSpend"
                         stroke="var(--chart-1)"
                         strokeWidth={2}
@@ -225,7 +228,7 @@ export function SpendingAnalysisDrawer({
                       />
                       {data.previousPeriod && (
                         <Line
-                          type="monotone"
+                          type="linear"
                           dataKey="previousSpend"
                           stroke="var(--muted-foreground)"
                           strokeDasharray="4 4"
@@ -241,13 +244,23 @@ export function SpendingAnalysisDrawer({
 
               <div className="grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
                 <Card>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardTitle className="text-sm">Top merchants</CardTitle>
+                    {data.topMerchants.length > 5 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllMerchants(!showAllMerchants)}
+                        className="h-8 text-xs"
+                      >
+                        {showAllMerchants ? "Show less" : `Show all (${data.topMerchants.length})`}
+                      </Button>
+                    )}
                   </CardHeader>
-                  <CardContent className="h-72">
+                  <CardContent className={showAllMerchants ? "h-auto" : "h-72"}>
                     {data.topMerchants.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data.topMerchants} layout="vertical" margin={{ left: 10, right: 8 }}>
+                      <ResponsiveContainer width="100%" height={showAllMerchants ? data.topMerchants.length * 40 + 40 : 288}>
+                        <BarChart data={showAllMerchants ? data.topMerchants : data.topMerchants.slice(0, 5)} layout="vertical" margin={{ left: 10, right: 8 }}>
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                           <XAxis type="number" tickFormatter={formatCompact} />
                           <YAxis

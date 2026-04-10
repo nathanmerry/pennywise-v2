@@ -641,8 +641,7 @@ export async function getCategoryPressureDetail(
 
   const topMerchants = Array.from(merchantSpend.entries())
     .map(([merchantName, data]) => ({ merchantName, ...data }))
-    .sort((a, b) => b.spend - a.spend)
-    .slice(0, 5);
+    .sort((a, b) => b.spend - a.spend);
 
   // Get largest transactions
   const largestTransactions = transactions.slice(0, 5).map((tx) => ({

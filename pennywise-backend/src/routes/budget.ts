@@ -13,7 +13,7 @@ const analysisQuerySchema = z.object({
   end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   compare: z.union([z.literal("true"), z.literal("false")]).optional(),
   preset: z
-    .enum(["this_month", "last_month", "last_3_months", "last_6_months", "ytd", "custom"])
+    .enum(["this_month", "last_month", "last_3_months", "last_4_months", "last_6_months", "ytd", "custom"])
     .optional(),
   accountId: z.string().optional(),
   categoryId: z.string().optional(),

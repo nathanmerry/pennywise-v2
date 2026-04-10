@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { NavLink } from "react-router-dom";
 import {
   ArrowLeftRight,
   Building2,
@@ -13,27 +14,23 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-type Page = "overview" | "spending" | "budget" | "transactions" | "connections" | "categories" | "rules";
-
 interface LayoutProps {
-  activePage: Page;
-  onNavigate: (page: Page) => void;
   children: ReactNode;
   onSync?: () => void;
   isSyncing?: boolean;
 }
 
-const navItems: { page: Page; label: string; icon: typeof LayoutDashboard }[] = [
-  { page: "overview", label: "Overview", icon: LayoutDashboard },
-  { page: "spending", label: "Spending Analysis", icon: PieChart },
-  { page: "budget", label: "Budget", icon: Wallet },
-  { page: "transactions", label: "Transactions", icon: ArrowLeftRight },
-  { page: "connections", label: "Connections", icon: Building2 },
-  { page: "categories", label: "Categories", icon: Tags },
-  { page: "rules", label: "Rules", icon: ListFilter },
+const navItems: { to: string; label: string; icon: typeof LayoutDashboard; end?: boolean }[] = [
+  { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/spending", label: "Spending Analysis", icon: PieChart },
+  { to: "/budget", label: "Budget", icon: Wallet },
+  { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
+  { to: "/connections", label: "Connections", icon: Building2 },
+  { to: "/categories", label: "Categories", icon: Tags },
+  { to: "/rules", label: "Rules", icon: ListFilter },
 ];
 
-export function Layout({ activePage, onNavigate, children, onSync, isSyncing }: LayoutProps) {
+export function Layout({ children, onSync, isSyncing }: LayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -56,20 +53,23 @@ export function Layout({ activePage, onNavigate, children, onSync, isSyncing }: 
         </div>
         <Separator />
         <nav className="flex-1 py-2 px-2 space-y-1">
-          {navItems.map(({ page, label, icon: Icon }) => (
-            <button
-              key={page}
-              onClick={() => onNavigate(page)}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                activePage === page
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-              )}
+          {navItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                )
+              }
             >
               <Icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span>{label}</span>}
-            </button>
+            </NavLink>
           ))}
         </nav>
         <div className="p-2">

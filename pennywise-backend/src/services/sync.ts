@@ -3,6 +3,7 @@ import { logger } from "../lib/logger.js";
 import * as truelayer from "./truelayer.js";
 import { applyRulesToTransaction } from "./rules.js";
 import { normalizeMerchant } from "./normalize.js";
+import {format} from 'date-fns'
 
 export async function syncConnection(connectionId: string) {
   const connection = await prisma.bankConnection.findUniqueOrThrow({
@@ -137,7 +138,19 @@ async function syncAccount(
   let synced = 0;
 
   // console.dir(pending.find((p) => p.description.includes("Wagtail")), { depth: null });
-  console.dir(posted)
+  const filteredPosted = posted.filter(t => {
+    try {
+      // console.log(t)
+      const date = format(new Date(t.timestamp), 'yyyy-MM-dd');
+      console.log(date);
+      return date === '2026-04-07'
+    } catch (err) {
+      logger.error({ err }, "Failed to format date");
+    }
+  })
+
+  console.dir([{}], { depth: null });
+  console.dir(filteredPosted, { depth: null });
 
   // Process posted transactions
   for (const tx of posted) {

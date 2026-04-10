@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Layout } from "./components/layout";
 import { OverviewPage } from "./pages/overview-page";
@@ -20,27 +20,24 @@ const queryClient = new QueryClient({
   },
 });
 
-type Page = "overview" | "spending" | "budget" | "transactions" | "connections" | "categories" | "rules";
-
 function AppContent() {
-  const [page, setPage] = useState<Page>("overview");
   const syncAll = useSyncAll();
 
   return (
-    <Layout
-      activePage={page}
-      onNavigate={setPage}
-      onSync={() => syncAll.mutate()}
-      isSyncing={syncAll.isPending}
-    >
-      {page === "overview" && <OverviewPage />}
-      {page === "spending" && <SpendingPage />}
-      {page === "budget" && <BudgetPage />}
-      {page === "transactions" && <TransactionsPage />}
-      {page === "connections" && <ConnectionsPage />}
-      {page === "categories" && <CategoriesPage />}
-      {page === "rules" && <RulesPage />}
-    </Layout>
+    <BrowserRouter>
+      <Layout onSync={() => syncAll.mutate()} isSyncing={syncAll.isPending}>
+        <Routes>
+          <Route path="/" element={<OverviewPage />} />
+          <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/rules" element={<RulesPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }
 

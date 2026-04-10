@@ -353,6 +353,7 @@ export type AnalysisPreset =
   | "this_month"
   | "last_month"
   | "last_3_months"
+  | "last_4_months"
   | "last_6_months"
   | "ytd"
   | "custom";
