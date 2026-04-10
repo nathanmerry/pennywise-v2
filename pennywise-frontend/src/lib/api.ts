@@ -462,6 +462,107 @@ export function fetchBudgetOverview(month: string) {
   return request<BudgetOverview>(`/budget/overview/${month}`);
 }
 
+// Monthly Pace (Layer 2)
+export type OverallPaceStatus = "on_track" | "over_pace" | "over_budget" | "overspent";
+export type CategoryPaceStatus = "on_track" | "over_pace" | "over_budget" | "no_budget";
+
+export interface CategoryPace {
+  categoryId: string;
+  categoryName: string;
+  monthlyBudget: number | null;
+  actualSpendToDate: number;
+  expectedSpendByNow: number | null;
+  paceDelta: number | null;
+  remainingBudget: number | null;
+  status: CategoryPaceStatus;
+}
+
+export interface MonthlyBudgetPace {
+  month: string;
+  totalDaysInMonth: number;
+  elapsedDays: number;
+  remainingDays: number;
+  elapsedRatio: number;
+  isCurrentMonth: boolean;
+  isPastMonth: boolean;
+  isFutureMonth: boolean;
+
+  overall: {
+    flexibleBudget: number;
+    actualFlexibleSpendToDate: number;
+    expectedFlexibleSpendByNow: number;
+    paceDelta: number;
+    remainingFlexibleBudget: number;
+    safeDailySpend: number;
+    weeklyAllowance: number;
+    status: OverallPaceStatus;
+  };
+
+  categories: CategoryPace[];
+
+  highlights: {
+    topOverPaceCategories: Array<{
+      categoryId: string;
+      categoryName: string;
+      actualSpendToDate: number;
+      monthlyBudget: number;
+      expectedSpendByNow: number;
+      paceDelta: number;
+    }>;
+    topOverBudgetCategories: Array<{
+      categoryId: string;
+      categoryName: string;
+      actualSpendToDate: number;
+      monthlyBudget: number;
+      overAmount: number;
+    }>;
+  };
+}
+
+export function fetchMonthlyPace(month: string) {
+  return request<MonthlyBudgetPace>(`/budget/pace/${month}`);
+}
+
+// Category Pressure Detail (Layer 4)
+export interface CategoryPressureDetail {
+  month: string;
+  category: {
+    id: string;
+    name: string;
+    status: CategoryPaceStatus;
+    actualSpend: number;
+    monthlyBudget: number | null;
+    expectedByNow: number | null;
+    paceDelta: number | null;
+    overBudgetAmount: number | null;
+  };
+  subcategories: Array<{
+    id: string;
+    name: string;
+    spend: number;
+  }>;
+  topMerchants: Array<{
+    merchantName: string;
+    spend: number;
+    transactionCount: number;
+  }>;
+  largestTransactions: Array<{
+    transactionId: string;
+    transactionDate: string;
+    merchantName: string | null;
+    description: string;
+    amount: number;
+  }>;
+  summary: {
+    dominantSubcategory: string | null;
+    dominantMerchant: string | null;
+  };
+}
+
+export function fetchCategoryPressureDetail(month: string, categoryId: string) {
+  return request<CategoryPressureDetail>(`/budget/category-pressure/${month}/${categoryId}`);
+}
+
 export function fetchCurrentBudgetOverview() {
   return request<BudgetOverview>("/budget/current");
 }

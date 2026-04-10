@@ -27,7 +27,6 @@ import {
   useDeleteFixedCommitment,
   useCreatePlannedSpend,
   useDeletePlannedSpend,
-  useBudgetGroups,
   useCreateCategoryPlan,
   useDeleteCategoryPlan,
 } from "@/hooks/use-budget";
@@ -191,20 +190,23 @@ interface AddCategoryPlanDialogProps {
 }
 
 function AddCategoryPlanDialog({ month, onClose }: AddCategoryPlanDialogProps) {
-  const [budgetGroupId, setBudgetGroupId] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
   const [targetValue, setTargetValue] = useState("");
   const [targetType, setTargetType] = useState<"fixed" | "percent">("fixed");
-  const { data: groups } = useBudgetGroups();
+  const { data: categories } = useCategories();
   const createPlan = useCreateCategoryPlan();
+
+  // Only show parent categories (top-level) for budgeting
+  const parentCategories = categories?.filter((c) => !c.parentId) ?? [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!budgetGroupId || !targetValue) return;
+    if (!categoryId || !targetValue) return;
 
     await createPlan.mutateAsync({
       month,
       data: {
-        budgetGroupId,
+        categoryId,
         targetType,
         targetValue: parseFloat(targetValue),
       },
@@ -215,15 +217,15 @@ function AddCategoryPlanDialog({ month, onClose }: AddCategoryPlanDialogProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>Budget Group</Label>
-        <Select value={budgetGroupId} onValueChange={setBudgetGroupId}>
+        <Label>Category</Label>
+        <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a budget group" />
+            <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
-            {groups?.map((group) => (
-              <SelectItem key={group.id} value={group.id}>
-                {group.name}
+            {parentCategories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -637,7 +639,7 @@ export function BudgetPage() {
             <CardContent>
               {budget.categoryPlans.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
-                  No category budgets set yet. Add budget groups first, then set budgets here.
+                  No category budgets set yet.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -647,7 +649,7 @@ export function BudgetPage() {
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                     >
                       <span className="font-medium">
-                        {plan.budgetGroup?.name || plan.category?.name || "Unknown"}
+                        {plan.category?.name || "Unknown"}
                       </span>
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">

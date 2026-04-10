@@ -22,6 +22,8 @@ import {
   fetchCurrentBudgetOverview,
   fetchSpendingBreakdown,
   fetchOverspendCategories,
+  fetchMonthlyPace,
+  fetchCategoryPressureDetail,
 } from "@/lib/api";
 
 // Budget Groups
@@ -235,5 +237,24 @@ export function useOverspendCategories(month: string) {
     queryKey: ["overspendCategories", month],
     queryFn: () => fetchOverspendCategories(month),
     enabled: !!month,
+  });
+}
+
+// Monthly Pace (Layer 2)
+export function useMonthlyPace(month: string) {
+  return useQuery({
+    queryKey: ["monthlyPace", month],
+    queryFn: () => fetchMonthlyPace(month),
+    enabled: !!month,
+    retry: false,
+  });
+}
+
+// Category Pressure Detail (Layer 4)
+export function useCategoryPressureDetail(month: string, categoryId: string | null) {
+  return useQuery({
+    queryKey: ["categoryPressureDetail", month, categoryId],
+    queryFn: () => fetchCategoryPressureDetail(month, categoryId!),
+    enabled: !!month && !!categoryId,
   });
 }

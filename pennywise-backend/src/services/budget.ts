@@ -370,3 +370,526 @@ export async function getProjectedOverspend(month: string): Promise<CategorySpen
     })
     .filter((c) => c.projectedRemaining < 0);
 }
+
+// ============================================================================
+// MONTHLY PACE SERVICE - Layer 2
+// ============================================================================
+
+export type OverallPaceStatus = "on_track" | "over_pace" | "over_budget" | "overspent";
+export type CategoryPaceStatus = "on_track" | "over_pace" | "over_budget" | "no_budget";
+
+export interface CategoryPace {
+  categoryId: string;
+  categoryName: string;
+  monthlyBudget: number | null;
+  actualSpendToDate: number;
+  expectedSpendByNow: number | null;
+  paceDelta: number | null;
+  remainingBudget: number | null;
+  status: CategoryPaceStatus;
+}
+
+export interface MonthlyBudgetPace {
+  month: string;
+  totalDaysInMonth: number;
+  elapsedDays: number;
+  remainingDays: number;
+  elapsedRatio: number;
+  isCurrentMonth: boolean;
+  isPastMonth: boolean;
+  isFutureMonth: boolean;
+
+  overall: {
+    flexibleBudget: number;
+    actualFlexibleSpendToDate: number;
+    expectedFlexibleSpendByNow: number;
+    paceDelta: number;
+    remainingFlexibleBudget: number;
+    safeDailySpend: number;
+    weeklyAllowance: number;
+    status: OverallPaceStatus;
+  };
+
+  categories: CategoryPace[];
+
+  highlights: {
+    topOverPaceCategories: Array<{
+      categoryId: string;
+      categoryName: string;
+      actualSpendToDate: number;
+      monthlyBudget: number;
+      expectedSpendByNow: number;
+      paceDelta: number;
+    }>;
+    topOverBudgetCategories: Array<{
+      categoryId: string;
+      categoryName: string;
+      actualSpendToDate: number;
+      monthlyBudget: number;
+      overAmount: number;
+    }>;
+  };
+}
+
+function getMonthPaceContext(month: string): {
+  totalDaysInMonth: number;
+  elapsedDays: number;
+  remainingDays: number;
+  elapsedRatio: number;
+  isCurrentMonth: boolean;
+  isPastMonth: boolean;
+  isFutureMonth: boolean;
+} {
+  const [year, monthNum] = month.split("-").map(Number);
+  const monthStart = new Date(year, monthNum - 1, 1);
+  const monthEnd = new Date(year, monthNum, 0); // Last day of month
+  const totalDaysInMonth = monthEnd.getDate();
+  
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  
+  const isCurrentMonth = year === currentYear && monthNum === currentMonth;
+  const isPastMonth = year < currentYear || (year === currentYear && monthNum < currentMonth);
+  const isFutureMonth = year > currentYear || (year === currentYear && monthNum > currentMonth);
+  
+  let elapsedDays: number;
+  if (isCurrentMonth) {
+    elapsedDays = now.getDate();
+  } else if (isPastMonth) {
+    elapsedDays = totalDaysInMonth;
+  } else {
+    elapsedDays = 0;
+  }
+  
+  const remainingDays = totalDaysInMonth - elapsedDays;
+  const elapsedRatio = elapsedDays / totalDaysInMonth;
+  
+  return {
+    totalDaysInMonth,
+    elapsedDays,
+    remainingDays,
+    elapsedRatio,
+    isCurrentMonth,
+    isPastMonth,
+    isFutureMonth,
+  };
+}
+
+// ============================================================================
+// CATEGORY PRESSURE DETAIL - Layer 4
+// ============================================================================
+
+export interface CategoryPressureDetail {
+  month: string;
+  category: {
+    id: string;
+    name: string;
+    status: CategoryPaceStatus;
+    actualSpend: number;
+    monthlyBudget: number | null;
+    expectedByNow: number | null;
+    paceDelta: number | null;
+    overBudgetAmount: number | null;
+  };
+  subcategories: Array<{
+    id: string;
+    name: string;
+    spend: number;
+  }>;
+  topMerchants: Array<{
+    merchantName: string;
+    spend: number;
+    transactionCount: number;
+  }>;
+  largestTransactions: Array<{
+    transactionId: string;
+    transactionDate: string;
+    merchantName: string | null;
+    description: string;
+    amount: number;
+  }>;
+  summary: {
+    dominantSubcategory: string | null;
+    dominantMerchant: string | null;
+  };
+}
+
+export async function getCategoryPressureDetail(
+  month: string,
+  categoryId: string
+): Promise<CategoryPressureDetail | null> {
+  const { start, end } = getMonthDateRange(month);
+  const paceContext = getMonthPaceContext(month);
+
+  // Get the category
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    include: { children: true },
+  });
+
+  if (!category) return null;
+
+  // Get budget for this category
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month },
+    include: {
+      categoryPlans: {
+        where: { categoryId },
+      },
+    },
+  });
+
+  const monthlyBudget = budgetMonth?.categoryPlans[0]
+    ? toNumber(budgetMonth.categoryPlans[0].targetValue)
+    : null;
+
+  // Get all transactions for this category and its children
+  const categoryIds = [categoryId, ...category.children.map((c) => c.id)];
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      transactionDate: { gte: start, lte: end },
+      isIgnored: false,
+      amount: { lt: 0 },
+      categories: {
+        some: {
+          categoryId: { in: categoryIds },
+        },
+      },
+    },
+    include: {
+      categories: {
+        include: {
+          category: true,
+        },
+      },
+    },
+    orderBy: { amount: "asc" }, // Most negative (largest spend) first
+  });
+
+  // Calculate actual spend
+  const actualSpend = transactions.reduce(
+    (sum, t) => sum + Math.abs(toNumber(t.amount)),
+    0
+  );
+
+  // Calculate pace metrics
+  const expectedByNow = monthlyBudget !== null 
+    ? monthlyBudget * paceContext.elapsedRatio 
+    : null;
+  const paceDelta = expectedByNow !== null 
+    ? actualSpend - expectedByNow 
+    : null;
+  const overBudgetAmount = monthlyBudget !== null && actualSpend > monthlyBudget
+    ? actualSpend - monthlyBudget
+    : null;
+
+  // Determine status
+  let status: CategoryPaceStatus;
+  if (monthlyBudget === null) {
+    status = "no_budget";
+  } else if (actualSpend > monthlyBudget) {
+    status = "over_budget";
+  } else if (paceDelta !== null && paceDelta > 0) {
+    status = "over_pace";
+  } else {
+    status = "on_track";
+  }
+
+  // Aggregate by subcategory
+  const subcategorySpend = new Map<string, { name: string; spend: number }>();
+  for (const tx of transactions) {
+    const amount = Math.abs(toNumber(tx.amount));
+    for (const tc of tx.categories) {
+      if (tc.category.parentId === categoryId) {
+        const existing = subcategorySpend.get(tc.categoryId) || {
+          name: tc.category.name,
+          spend: 0,
+        };
+        subcategorySpend.set(tc.categoryId, {
+          ...existing,
+          spend: existing.spend + amount,
+        });
+      }
+    }
+  }
+
+  const subcategories = Array.from(subcategorySpend.entries())
+    .map(([id, data]) => ({ id, name: data.name, spend: data.spend }))
+    .sort((a, b) => b.spend - a.spend);
+
+  // Aggregate by merchant
+  const merchantSpend = new Map<
+    string,
+    { spend: number; transactionCount: number }
+  >();
+  for (const tx of transactions) {
+    const amount = Math.abs(toNumber(tx.amount));
+    const merchant = tx.normalizedMerchant || tx.merchantName || tx.description;
+    if (merchant) {
+      const existing = merchantSpend.get(merchant) || {
+        spend: 0,
+        transactionCount: 0,
+      };
+      merchantSpend.set(merchant, {
+        spend: existing.spend + amount,
+        transactionCount: existing.transactionCount + 1,
+      });
+    }
+  }
+
+  const topMerchants = Array.from(merchantSpend.entries())
+    .map(([merchantName, data]) => ({ merchantName, ...data }))
+    .sort((a, b) => b.spend - a.spend)
+    .slice(0, 5);
+
+  // Get largest transactions
+  const largestTransactions = transactions.slice(0, 5).map((tx) => ({
+    transactionId: tx.id,
+    transactionDate: tx.transactionDate.toISOString().split("T")[0],
+    merchantName: tx.normalizedMerchant || tx.merchantName,
+    description: tx.description,
+    amount: Math.abs(toNumber(tx.amount)),
+  }));
+
+  // Build summary
+  const dominantSubcategory =
+    subcategories.length > 0 && subcategories[0].spend > actualSpend * 0.4
+      ? subcategories[0].name
+      : null;
+  const dominantMerchant =
+    topMerchants.length > 0 && topMerchants[0].spend > actualSpend * 0.3
+      ? topMerchants[0].merchantName
+      : null;
+
+  return {
+    month,
+    category: {
+      id: categoryId,
+      name: category.name,
+      status,
+      actualSpend,
+      monthlyBudget,
+      expectedByNow,
+      paceDelta,
+      overBudgetAmount,
+    },
+    subcategories,
+    topMerchants,
+    largestTransactions,
+    summary: {
+      dominantSubcategory,
+      dominantMerchant,
+    },
+  };
+}
+
+export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudgetPace | null> {
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month },
+    include: {
+      fixedCommitments: true,
+      plannedSpends: true,
+      categoryPlans: {
+        include: { category: true },
+      },
+    },
+  });
+
+  if (!budgetMonth) return null;
+
+  const paceContext = getMonthPaceContext(month);
+  const { start, end } = getMonthDateRange(month);
+
+  // Get all non-ignored, non-pending spending transactions for the month
+  // Only use direct category assignments (source != 'inherited') to avoid double counting
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      transactionDate: { gte: start, lte: end },
+      isIgnored: false,
+      pending: false,
+      amount: { lt: 0 }, // Only outflows (spending)
+    },
+    include: {
+      categories: {
+        where: {
+          source: { not: "inherited" }, // Exclude inherited to avoid double counting
+        },
+        include: {
+          category: {
+            include: { parent: true },
+          },
+        },
+      },
+    },
+  });
+
+  // Calculate overall flexible budget
+  const expectedIncome = toNumber(budgetMonth.expectedIncome);
+  let savingsTarget: number;
+  if (budgetMonth.savingsTargetType === "percent") {
+    savingsTarget = expectedIncome * (toNumber(budgetMonth.savingsTargetValue) / 100);
+  } else {
+    savingsTarget = toNumber(budgetMonth.savingsTargetValue);
+  }
+  const fixedCommitments = budgetMonth.fixedCommitments.reduce(
+    (sum, c) => sum + toNumber(c.amount),
+    0
+  );
+  const plannedOneOffs = budgetMonth.plannedSpends.reduce(
+    (sum, s) => sum + toNumber(s.amount),
+    0
+  );
+  const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
+
+  // Calculate actual flexible spend to date
+  const actualFlexibleSpendToDate = transactions.reduce(
+    (sum, t) => sum + Math.abs(toNumber(t.amount)),
+    0
+  );
+
+  // Overall pace calculations
+  const expectedFlexibleSpendByNow = flexibleBudget * paceContext.elapsedRatio;
+  const overallPaceDelta = actualFlexibleSpendToDate - expectedFlexibleSpendByNow;
+  const remainingFlexibleBudget = flexibleBudget - actualFlexibleSpendToDate;
+  const safeDailySpend = paceContext.remainingDays > 0
+    ? Math.max(remainingFlexibleBudget / paceContext.remainingDays, 0)
+    : Math.max(remainingFlexibleBudget, 0);
+  const weeklyAllowance = safeDailySpend * 7;
+
+  // Determine overall status
+  let overallStatus: OverallPaceStatus;
+  if (remainingFlexibleBudget < -50) {
+    overallStatus = "overspent";
+  } else if (remainingFlexibleBudget <= 0) {
+    overallStatus = "over_budget";
+  } else if (overallPaceDelta > 0) {
+    overallStatus = "over_pace";
+  } else {
+    overallStatus = "on_track";
+  }
+
+  // Build category budgets map from plans
+  const categoryBudgets = new Map<string, { budget: number; categoryName: string }>();
+  for (const plan of budgetMonth.categoryPlans) {
+    if (plan.categoryId && plan.category) {
+      categoryBudgets.set(plan.categoryId, {
+        budget: toNumber(plan.targetValue),
+        categoryName: plan.category.name,
+      });
+    }
+  }
+
+  // Aggregate spend by category (using parent category for hierarchy)
+  // Only count transactions with a single direct budgeted category to avoid ambiguity
+  const categorySpendMap = new Map<string, number>();
+  
+  for (const tx of transactions) {
+    const amount = Math.abs(toNumber(tx.amount));
+    
+    // Get direct category assignments
+    const directCategories = tx.categories.filter(tc => tc.source !== "inherited");
+    
+    if (directCategories.length === 0) continue;
+    
+    // Find which categories have budgets (check both direct and parent)
+    const budgetedCategories: string[] = [];
+    for (const tc of directCategories) {
+      const cat = tc.category;
+      // Check if this category or its parent has a budget
+      if (categoryBudgets.has(cat.id)) {
+        budgetedCategories.push(cat.id);
+      } else if (cat.parentId && categoryBudgets.has(cat.parentId)) {
+        budgetedCategories.push(cat.parentId);
+      }
+    }
+    
+    // Only count if exactly one budgeted category to avoid double counting
+    if (budgetedCategories.length === 1) {
+      const catId = budgetedCategories[0];
+      categorySpendMap.set(catId, (categorySpendMap.get(catId) || 0) + amount);
+    }
+    // If multiple budgeted categories, we skip this transaction for category pace
+    // This is conservative but avoids fake accuracy
+  }
+
+  // Build category pace array
+  const categories: CategoryPace[] = [];
+  
+  for (const [categoryId, budgetInfo] of categoryBudgets) {
+    const actualSpendToDate = categorySpendMap.get(categoryId) || 0;
+    const monthlyBudget = budgetInfo.budget;
+    const expectedSpendByNow = monthlyBudget * paceContext.elapsedRatio;
+    const paceDelta = actualSpendToDate - expectedSpendByNow;
+    const remainingBudget = monthlyBudget - actualSpendToDate;
+    
+    let status: CategoryPaceStatus;
+    if (remainingBudget < 0) {
+      status = "over_budget";
+    } else if (paceDelta > 0) {
+      status = "over_pace";
+    } else {
+      status = "on_track";
+    }
+    
+    categories.push({
+      categoryId,
+      categoryName: budgetInfo.categoryName,
+      monthlyBudget,
+      actualSpendToDate,
+      expectedSpendByNow,
+      paceDelta,
+      remainingBudget,
+      status,
+    });
+  }
+
+  // Sort categories by pace delta descending (worst first)
+  categories.sort((a, b) => (b.paceDelta || 0) - (a.paceDelta || 0));
+
+  // Build highlights
+  const topOverPaceCategories = categories
+    .filter(c => c.status === "over_pace" && c.paceDelta !== null && c.paceDelta > 0)
+    .slice(0, 3)
+    .map(c => ({
+      categoryId: c.categoryId,
+      categoryName: c.categoryName,
+      actualSpendToDate: c.actualSpendToDate,
+      monthlyBudget: c.monthlyBudget!,
+      expectedSpendByNow: c.expectedSpendByNow!,
+      paceDelta: c.paceDelta!,
+    }));
+
+  const topOverBudgetCategories = categories
+    .filter(c => c.status === "over_budget" && c.remainingBudget !== null)
+    .sort((a, b) => (a.remainingBudget || 0) - (b.remainingBudget || 0)) // Most over first
+    .slice(0, 3)
+    .map(c => ({
+      categoryId: c.categoryId,
+      categoryName: c.categoryName,
+      actualSpendToDate: c.actualSpendToDate,
+      monthlyBudget: c.monthlyBudget!,
+      overAmount: Math.abs(c.remainingBudget!),
+    }));
+
+  return {
+    month,
+    ...paceContext,
+    overall: {
+      flexibleBudget,
+      actualFlexibleSpendToDate,
+      expectedFlexibleSpendByNow,
+      paceDelta: overallPaceDelta,
+      remainingFlexibleBudget,
+      safeDailySpend,
+      weeklyAllowance,
+      status: overallStatus,
+    },
+    categories,
+    highlights: {
+      topOverPaceCategories,
+      topOverBudgetCategories,
+    },
+  };
+}

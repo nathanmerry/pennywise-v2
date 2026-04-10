@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod/v4";
 import { prisma } from "../lib/prisma.js";
-import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget } from "../services/budget.js";
+import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget, getMonthlyBudgetPace, getCategoryPressureDetail } from "../services/budget.js";
 
 const router = Router();
 
@@ -148,15 +148,23 @@ router.post("/months", async (req, res) => {
     return;
   }
 
-  const month = await prisma.budgetMonth.create({
-    data: {
+  const month = await prisma.budgetMonth.upsert({
+    where: { month: parsed.data.month },
+    create: {
       ...parsed.data,
       paydayDate: new Date(parsed.data.paydayDate),
+    },
+    update: {
+      expectedIncome: parsed.data.expectedIncome,
+      paydayDate: new Date(parsed.data.paydayDate),
+      savingsTargetType: parsed.data.savingsTargetType,
+      savingsTargetValue: parsed.data.savingsTargetValue,
+      notes: parsed.data.notes,
     },
     include: budgetMonthInclude,
   });
 
-  res.status(201).json(month);
+  res.status(200).json(month);
 });
 
 // PATCH /api/budget/months/:month
@@ -449,6 +457,30 @@ router.get("/current", async (_req, res) => {
   }
 
   res.json(overview);
+});
+
+// GET /api/budget/pace/:month - Monthly pace calculations (Layer 2)
+router.get("/pace/:month", async (req, res) => {
+  const pace = await getMonthlyBudgetPace(req.params.month);
+
+  if (!pace) {
+    res.status(404).json({ error: "Budget month not found. Create a budget for this month first." });
+    return;
+  }
+
+  res.json(pace);
+});
+
+// GET /api/budget/category-pressure/:month/:categoryId - Category pressure detail (Layer 4)
+router.get("/category-pressure/:month/:categoryId", async (req, res) => {
+  const detail = await getCategoryPressureDetail(req.params.month, req.params.categoryId);
+
+  if (!detail) {
+    res.status(404).json({ error: "Category not found" });
+    return;
+  }
+
+  res.json(detail);
 });
 
 export default router;

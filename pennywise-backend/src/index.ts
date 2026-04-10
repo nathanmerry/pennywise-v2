@@ -17,7 +17,7 @@ const app = express();
 
 app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
-app.use(pinoHttp({ logger }));
+// app.use(pinoHttp({ logger }));
 
 app.use("/api/connections", connectionRoutes);
 app.use("/api/accounts", accountRoutes);

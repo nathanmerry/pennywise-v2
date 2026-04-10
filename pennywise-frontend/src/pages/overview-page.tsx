@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBudgetOverview,
   useSpendingBreakdown,
   useOverspendCategories,
+  useMonthlyPace,
 } from "@/hooks/use-budget";
 import {
   TrendingDown,
@@ -15,10 +15,13 @@ import {
   Calendar,
   Wallet,
   PiggyBank,
-  AlertTriangle,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MonthlyStatusStrip } from "@/components/monthly-status-strip";
+import { PaceExplanation } from "@/components/pace-explanation";
+import { MainBudgetPressuresCard } from "@/components/main-budget-pressures-card";
+import { CategoryPressureDrawer } from "@/components/category-pressure-drawer";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-GB", {
@@ -51,9 +54,11 @@ function formatMonthDisplay(month: string): string {
 
 export function OverviewPage() {
   const [month] = useState(getCurrentMonth());
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const { data: overview, isLoading: overviewLoading, error: overviewError } = useBudgetOverview(month);
   const { data: spending, isLoading: spendingLoading } = useSpendingBreakdown(month);
   const { data: overspend } = useOverspendCategories(month);
+  const { data: pace } = useMonthlyPace(month);
 
   if (overviewLoading) {
     return (
@@ -99,7 +104,34 @@ export function OverviewPage() {
         </div>
       </div>
 
-      {/* Key Numbers - The "Am I okay?" section */}
+      {/* Monthly Status Strip - Layer 2: Use pace data if available */}
+      {pace ? (
+        <MonthlyStatusStrip pace={pace} />
+      ) : overspend ? (
+        <MonthlyStatusStrip
+          remainingFlexibleBudget={overview.remainingFlexible}
+          flexibleBudget={overview.flexibleBudget}
+          safeDailySpend={overview.dailyAllowance}
+          overBudgetCategories={overspend.map((cat) => ({
+            categoryId: cat.categoryId,
+            categoryName: cat.categoryName,
+            spent: cat.spent,
+            budget: cat.budget!,
+            remaining: cat.remaining!,
+          }))}
+          daysUntilPayday={overview.daysUntilPayday}
+        />
+      ) : (
+        <MonthlyStatusStrip
+          remainingFlexibleBudget={overview.remainingFlexible}
+          flexibleBudget={overview.flexibleBudget}
+          safeDailySpend={overview.dailyAllowance}
+          overBudgetCategories={[]}
+          daysUntilPayday={overview.daysUntilPayday}
+        />
+      )}
+
+      {/* Key Numbers */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className={cn(isOverBudget && "border-destructive")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -108,11 +140,17 @@ export function OverviewPage() {
           </CardHeader>
           <CardContent>
             <div className={cn("text-2xl font-bold", isOverBudget && "text-destructive")}>
-              {formatCurrency(Math.max(0, overview.weeklyAllowance))}
+              {formatCurrency(Math.max(0, pace?.overall.weeklyAllowance ?? overview.weeklyAllowance))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrencyPrecise(Math.max(0, overview.dailyAllowance))}/day safe to spend
+            <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+              {formatCurrencyPrecise(Math.max(0, pace?.overall.safeDailySpend ?? overview.dailyAllowance))}/day safe to spend
+              <PaceExplanation type="daily" />
             </p>
+            {pace && pace.remainingDays > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {pace.remainingDays} days left in month
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -127,22 +165,51 @@ export function OverviewPage() {
           </CardHeader>
           <CardContent>
             <div className={cn("text-2xl font-bold", overview.remainingFlexible < 0 && "text-destructive")}>
-              {formatCurrency(overview.remainingFlexible)}
+              {formatCurrency(pace?.overall.remainingFlexibleBudget ?? overview.remainingFlexible)}
             </div>
             <p className="text-xs text-muted-foreground">
               of {formatCurrency(overview.flexibleBudget)} flexible budget
             </p>
+            {/* Layer 2: Pace context */}
+            {pace && pace.overall.paceDelta !== 0 && (
+              <p className={cn(
+                "text-xs font-medium inline-flex items-center gap-1",
+                pace.overall.paceDelta > 0 ? "text-amber-600" : "text-green-600"
+              )}>
+                {pace.overall.paceDelta > 0 
+                  ? `${formatCurrency(pace.overall.paceDelta)} over expected by now`
+                  : `${formatCurrency(Math.abs(pace.overall.paceDelta))} under expected by now`
+                }
+                <PaceExplanation type="overall" />
+              </p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Spent This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">Flexible Spend</CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(overview.actualSpend)}</div>
-            <Progress value={budgetUsedPercent} className="mt-2" />
+            <div className="text-2xl font-bold">{formatCurrency(pace?.overall.actualFlexibleSpendToDate ?? overview.actualSpend)}</div>
+            {/* Layer 2: Expected by now context */}
+            {pace ? (
+              <p className="text-xs text-muted-foreground mb-2">
+                Expected by now: {formatCurrency(pace.overall.expectedFlexibleSpendByNow)}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground mb-2">
+                {formatCurrency(overview.actualSpend)} of {formatCurrency(overview.flexibleBudget)} used
+              </p>
+            )}
+            <Progress 
+              value={budgetUsedPercent} 
+              className={cn(
+                budgetUsedPercent >= 100 && "[&>div]:bg-destructive",
+                budgetUsedPercent >= 85 && budgetUsedPercent < 100 && "[&>div]:bg-amber-500"
+              )}
+            />
           </CardContent>
         </Card>
 
@@ -158,7 +225,7 @@ export function OverviewPage() {
         </Card>
       </div>
 
-      {/* Budget Breakdown */}
+      {/* Budget Breakdown & Main Budget Pressures */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -195,63 +262,56 @@ export function OverviewPage() {
                 {formatCurrency(overview.remainingFlexible)}
               </span>
             </div>
+
+            {/* Pace Comparison Block */}
+            {pace && (
+              <div className="border-t pt-4 mt-4 space-y-2 bg-muted/30 -mx-6 px-6 py-4 -mb-6 rounded-b-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground inline-flex items-center gap-1">
+                    Expected by now
+                    <PaceExplanation type="overall" />
+                  </span>
+                  <span className="text-sm font-medium">
+                    {formatCurrency(pace.overall.expectedFlexibleSpendByNow)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Actual spend</span>
+                  <span className="text-sm font-medium">
+                    {formatCurrency(pace.overall.actualFlexibleSpendToDate)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="text-sm font-medium">Variance</span>
+                  <span className={cn(
+                    "text-sm font-semibold",
+                    pace.overall.paceDelta > 0 ? "text-amber-600" : "text-green-600"
+                  )}>
+                    {pace.overall.paceDelta > 0 
+                      ? `${formatCurrency(pace.overall.paceDelta)} over`
+                      : `${formatCurrency(Math.abs(pace.overall.paceDelta))} under`
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Money Flow</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Money In</span>
-              <span className="font-medium text-green-600">+{formatCurrency(overview.moneyIn)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Money Out</span>
-              <span className="font-medium text-red-600">-{formatCurrency(overview.moneyOut)}</span>
-            </div>
-            <div className="border-t pt-4 flex justify-between items-center">
-              <span className="font-medium">Net (excl. ignored)</span>
-              <span className={cn("font-bold", overview.netAfterIgnored >= 0 ? "text-green-600" : "text-red-600")}>
-                {formatCurrency(overview.netAfterIgnored)}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Transfers, refunds, and other ignored transactions are excluded from the net figure.
-            </p>
-          </CardContent>
-        </Card>
+        <MainBudgetPressuresCard 
+          pace={pace} 
+          spending={spending} 
+          onCategoryClick={setSelectedCategoryId}
+        />
       </div>
 
-      {/* Warnings */}
-      {overspend && overspend.length > 0 && (
-        <Card className="border-amber-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              Categories Over Budget
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {overspend.slice(0, 5).map((cat) => (
-                <div key={cat.categoryId} className="flex justify-between items-center">
-                  <span className="text-sm">{cat.categoryName}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {formatCurrency(cat.spent)} / {formatCurrency(cat.budget!)}
-                    </span>
-                    <Badge variant="destructive" className="text-xs">
-                      {formatCurrency(Math.abs(cat.remaining!))} over
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Category Pressure Drawer */}
+      <CategoryPressureDrawer
+        open={selectedCategoryId !== null}
+        onOpenChange={(open) => !open && setSelectedCategoryId(null)}
+        month={month}
+        categoryId={selectedCategoryId}
+      />
 
       {/* Top Categories & Merchants */}
       <div className="grid gap-4 md:grid-cols-2">

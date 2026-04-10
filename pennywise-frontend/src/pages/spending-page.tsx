@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSpendingBreakdown } from "@/hooks/use-budget";
+import { useSpendingBreakdown, useMonthlyPace } from "@/hooks/use-budget";
+import type { CategoryPace } from "@/lib/api";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CategorySpend } from "@/lib/api";
@@ -35,12 +36,70 @@ interface CategoryRowProps {
   childCategories?: CategorySpend[];
   isExpanded?: boolean;
   onToggle?: () => void;
+  paceData?: CategoryPace;
 }
 
-function CategoryRow({ category, childCategories, isExpanded, onToggle }: CategoryRowProps) {
+function getPaceStatusLabel(status: CategoryPace["status"]): { label: string; className: string } | null {
+  switch (status) {
+    case "over_budget":
+      return { label: "Over budget", className: "bg-destructive text-destructive-foreground" };
+    case "over_pace":
+      return { label: "Over pace", className: "bg-amber-500 text-white" };
+    case "on_track":
+      return { label: "On track", className: "bg-green-500 text-white" };
+    case "no_budget":
+      return null;
+  }
+}
+
+function CategoryRow({ category, childCategories, isExpanded, onToggle, paceData }: CategoryRowProps) {
   const hasChildren = childCategories && childCategories.length > 0;
   const percentUsed = category.budget ? Math.min(100, (category.spent / category.budget) * 100) : null;
   const isOverBudget = category.remaining !== null && category.remaining < 0;
+  const isOverPace = paceData?.status === "over_pace";
+  const paceStatus = paceData ? getPaceStatusLabel(paceData.status) : null;
+
+  // Determine primary numeric callout and secondary context based on status
+  let primaryCallout: { text: string; className: string } | null = null;
+  let secondaryContext: string | null = null;
+
+  if (paceData?.status === "over_budget" && category.remaining !== null) {
+    primaryCallout = {
+      text: `${formatCurrency(Math.abs(category.remaining))} over budget`,
+      className: "text-destructive font-medium",
+    };
+    if (paceData.expectedSpendByNow !== null) {
+      secondaryContext = `Expected by now: ${formatCurrency(paceData.expectedSpendByNow)}`;
+    }
+  } else if (paceData?.status === "over_pace" && paceData.paceDelta !== null) {
+    primaryCallout = {
+      text: `${formatCurrency(paceData.paceDelta)} over pace`,
+      className: "text-amber-600 font-medium",
+    };
+    secondaryContext = `${formatCurrency(category.spent)} of ${formatCurrency(category.budget!)} budget`;
+  } else if (paceData?.status === "on_track" && category.remaining !== null) {
+    primaryCallout = {
+      text: `${formatCurrency(category.remaining)} left`,
+      className: "text-green-600 font-medium",
+    };
+    if (paceData.expectedSpendByNow !== null) {
+      secondaryContext = `Expected by now: ${formatCurrency(paceData.expectedSpendByNow)}`;
+    }
+  } else if (category.budget !== null && category.remaining !== null) {
+    // Fallback for categories without pace data but with budget
+    if (isOverBudget) {
+      primaryCallout = {
+        text: `${formatCurrency(Math.abs(category.remaining))} over`,
+        className: "text-destructive font-medium",
+      };
+    } else {
+      primaryCallout = {
+        text: `${formatCurrency(category.remaining)} left`,
+        className: "text-green-600 font-medium",
+      };
+    }
+    secondaryContext = `${formatCurrency(category.spent)} of ${formatCurrency(category.budget)}`;
+  }
 
   return (
     <div className="space-y-2">
@@ -63,7 +122,14 @@ function CategoryRow({ category, childCategories, isExpanded, onToggle }: Catego
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <span className="font-medium truncate">{category.categoryName}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium truncate">{category.categoryName}</span>
+              {paceStatus && (
+                <Badge className={cn("text-xs", paceStatus.className)}>
+                  {paceStatus.label}
+                </Badge>
+              )}
+            </div>
             <span className={cn("font-semibold", isOverBudget && "text-destructive")}>
               {formatCurrency(category.spent)}
             </span>
@@ -71,21 +137,29 @@ function CategoryRow({ category, childCategories, isExpanded, onToggle }: Catego
 
           {category.budget !== null && (
             <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>
-                  {formatCurrency(category.spent)} of {formatCurrency(category.budget)}
-                </span>
-                {category.remaining !== null && (
-                  <span className={cn(isOverBudget ? "text-destructive" : "text-green-600")}>
-                    {isOverBudget ? `${formatCurrency(Math.abs(category.remaining))} over` : `${formatCurrency(category.remaining)} left`}
-                  </span>
-                )}
-              </div>
+              {/* Primary callout - single most important number */}
+              {primaryCallout && (
+                <div className="flex justify-between items-center">
+                  <span className={primaryCallout.className}>{primaryCallout.text}</span>
+                  {secondaryContext && (
+                    <span className="text-xs text-muted-foreground">{secondaryContext}</span>
+                  )}
+                </div>
+              )}
               <Progress
                 value={percentUsed ?? 0}
-                className={cn("h-2", isOverBudget && "[&>div]:bg-destructive")}
+                className={cn(
+                  "h-2", 
+                  isOverBudget && "[&>div]:bg-destructive",
+                  isOverPace && !isOverBudget && "[&>div]:bg-amber-500"
+                )}
               />
             </div>
+          )}
+
+          {/* No budget categories - just show spend */}
+          {category.budget === null && paceData?.status === "no_budget" && (
+            <p className="text-xs text-muted-foreground mt-1">No budget set</p>
           )}
         </div>
       </div>
@@ -104,10 +178,14 @@ function CategoryRow({ category, childCategories, isExpanded, onToggle }: Catego
   );
 }
 
+type PressureFilter = "all" | "pressures" | "over_budget" | "over_pace" | "no_budget";
+
 export function SpendingPage() {
   const [month] = useState(getCurrentMonth());
   const { data: spending, isLoading } = useSpendingBreakdown(month);
+  const { data: pace } = useMonthlyPace(month);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<PressureFilter>("all");
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) => {
@@ -122,7 +200,63 @@ export function SpendingPage() {
   };
 
   const getChildCategories = (parentId: string): CategorySpend[] => {
-    return spending?.byChildCategory.filter((c) => c.parentId === parentId) ?? [];
+    return spending?.byChildCategory.filter((c: CategorySpend) => c.parentId === parentId) ?? [];
+  };
+
+  const getCategoryPace = (categoryId: string): CategoryPace | undefined => {
+    return pace?.categories.find((c: CategoryPace) => c.categoryId === categoryId);
+  };
+
+  // Sort categories by pressure priority: over_budget > over_pace > highest spend > no_budget
+  const getSortedCategories = (): CategorySpend[] => {
+    if (!spending?.byParentCategory) return [];
+    
+    return [...spending.byParentCategory].sort((a, b) => {
+      const paceA = getCategoryPace(a.categoryId);
+      const paceB = getCategoryPace(b.categoryId);
+      
+      const getPriority = (paceData: CategoryPace | undefined): number => {
+        if (!paceData) return 4;
+        switch (paceData.status) {
+          case "over_budget": return 0;
+          case "over_pace": return 1;
+          case "on_track": return 2;
+          case "no_budget": return 3;
+          default: return 4;
+        }
+      };
+      
+      const priorityA = getPriority(paceA);
+      const priorityB = getPriority(paceB);
+      
+      if (priorityA !== priorityB) return priorityA - priorityB;
+      return b.spent - a.spent; // Secondary sort by spend
+    });
+  };
+
+  // Filter categories based on selected filter
+  const getFilteredCategories = (): CategorySpend[] => {
+    const sorted = getSortedCategories();
+    
+    if (filter === "all") return sorted;
+    
+    return sorted.filter((cat) => {
+      const paceData = getCategoryPace(cat.categoryId);
+      if (!paceData) return filter === "no_budget";
+      
+      switch (filter) {
+        case "pressures":
+          return paceData.status === "over_budget" || paceData.status === "over_pace";
+        case "over_budget":
+          return paceData.status === "over_budget";
+        case "over_pace":
+          return paceData.status === "over_pace";
+        case "no_budget":
+          return paceData.status === "no_budget";
+        default:
+          return true;
+      }
+    });
   };
 
   if (isLoading) {
@@ -160,22 +294,66 @@ export function SpendingPage() {
         </TabsList>
 
         <TabsContent value="categories" className="space-y-4">
+          {/* Quick Filters */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={filter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("all")}
+            >
+              All
+            </Button>
+            <Button
+              variant={filter === "pressures" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("pressures")}
+            >
+              Pressures
+            </Button>
+            <Button
+              variant={filter === "over_budget" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("over_budget")}
+              className={filter === "over_budget" ? "bg-destructive hover:bg-destructive/90" : ""}
+            >
+              Over budget
+            </Button>
+            <Button
+              variant={filter === "over_pace" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("over_pace")}
+              className={filter === "over_pace" ? "bg-amber-500 hover:bg-amber-500/90" : ""}
+            >
+              Over pace
+            </Button>
+            <Button
+              variant={filter === "no_budget" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("no_budget")}
+            >
+              No budget
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Spend by Category</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {spending?.byParentCategory.map((category) => (
+              {getFilteredCategories().map((category: CategorySpend) => (
                 <CategoryRow
                   key={category.categoryId}
                   category={category}
                   childCategories={getChildCategories(category.categoryId)}
                   isExpanded={expandedCategories.has(category.categoryId)}
                   onToggle={() => toggleCategory(category.categoryId)}
+                  paceData={getCategoryPace(category.categoryId)}
                 />
               ))}
-              {(!spending?.byParentCategory || spending.byParentCategory.length === 0) && (
-                <p className="text-center text-muted-foreground py-8">No spending data for this month</p>
+              {getFilteredCategories().length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  {filter === "all" ? "No spending data for this month" : `No categories matching "${filter.replace("_", " ")}"`}
+                </p>
               )}
             </CardContent>
           </Card>
