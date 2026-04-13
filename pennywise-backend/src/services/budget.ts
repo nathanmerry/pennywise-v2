@@ -707,7 +707,6 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
     where: {
       transactionDate: { gte: start, lte: end },
       isIgnored: false,
-      pending: false,
       amount: { lt: 0 }, // Only outflows (spending)
     },
     include: {

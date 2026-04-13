@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { env } from "../lib/env.js";
 import { logger } from "../lib/logger.js";
 import { expandCategoryIds, setTransactionCategories } from "./rules.js";
+import { subMonths } from "date-fns";
 
 // ============================================================================
 // TYPES
@@ -103,14 +104,14 @@ export async function getUncategorisedTransactions(options: {
   const baseWhere = {
     categories: { none: {} },
     categoriesLockedByUser: false,
-    pending: false,
+    transactionDate: { gte: subMonths(new Date(), 4) },
     ...(includeIgnored ? {} : { isIgnored: false }),
     ...(transactionIds && transactionIds.length > 0 ? { id: { in: transactionIds } } : {}),
   };
 
   return prisma.transaction.findMany({
     where: baseWhere,
-    take: limit,
+    // take: limit,
     orderBy: { transactionDate: "desc" },
     select: {
       id: true,

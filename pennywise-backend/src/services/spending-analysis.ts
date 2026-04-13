@@ -374,7 +374,6 @@ async function getAttributedTransactions(
   const rawTransactions = await prisma.transaction.findMany({
     where: {
       transactionDate: { gte: range.start, lte: range.end },
-      pending: false,
       amount: { lt: 0 },
       ...(filters.includeIgnored ? {} : { isIgnored: false }),
       ...(filters.accountId ? { accountId: filters.accountId } : {}),

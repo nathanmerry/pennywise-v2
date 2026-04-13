@@ -184,8 +184,9 @@ async function upsertTransaction(
   const sourceTransactionId = tx.transaction_id;
   const merchantName = tx.meta?.provider_merchant_name || null;
   const normalizedMerchant = normalizeMerchant(merchantName, tx.description) || null;
+  const transactionDate = new Date(tx.timestamp);
 
-  // Check if transaction already exists
+  // Check if transaction already exists by source ID
   const existing = await prisma.transaction.findUnique({
     where: { source_sourceTransactionId: { source, sourceTransactionId } },
   });
@@ -195,7 +196,7 @@ async function upsertTransaction(
     const updateData: Record<string, unknown> = {
       amount: tx.amount,
       currency: tx.currency,
-      transactionDate: new Date(tx.timestamp),
+      transactionDate,
       description: tx.description,
       merchantName,
       normalizedMerchant,
@@ -207,27 +208,60 @@ async function upsertTransaction(
       where: { id: existing.id },
       data: updateData,
     });
-  } else {
-    // Create new transaction
-    const created = await prisma.transaction.create({
-      data: {
-        source,
-        sourceTransactionId,
+    return;
+  }
+
+  // If this is a posted transaction, check for pending duplicate
+  // (pending transactions have more accurate dates, so we skip creating the posted version)
+  if (!isPending) {
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const potentialDuplicate = await prisma.transaction.findFirst({
+      where: {
         accountId,
+        pending: true,
         amount: tx.amount,
-        currency: tx.currency,
-        transactionDate: new Date(tx.timestamp),
-        description: tx.description,
-        merchantName,
         normalizedMerchant,
-        pending: isPending,
-        rawJson: tx as object,
+        transactionDate: {
+          gte: new Date(transactionDate.getTime() - threeDaysMs),
+          lte: new Date(transactionDate.getTime() + threeDaysMs),
+        },
       },
     });
 
-    // Apply recurring rules to new transactions only
-    await applyRulesToTransaction(created.id);
+    if (potentialDuplicate) {
+      logger.info(
+        {
+          pendingId: potentialDuplicate.id,
+          pendingDate: potentialDuplicate.transactionDate,
+          postedDate: transactionDate,
+          merchant: normalizedMerchant,
+          amount: tx.amount,
+        },
+        "Skipping posted transaction - pending duplicate exists with more accurate date"
+      );
+      return;
+    }
   }
+
+  // Create new transaction
+  const created = await prisma.transaction.create({
+    data: {
+      source,
+      sourceTransactionId,
+      accountId,
+      amount: tx.amount,
+      currency: tx.currency,
+      transactionDate,
+      description: tx.description,
+      merchantName,
+      normalizedMerchant,
+      pending: isPending,
+      rawJson: tx as object,
+    },
+  });
+
+  // Apply recurring rules to new transactions only
+  await applyRulesToTransaction(created.id);
 }
 
 export async function syncAllConnections() {

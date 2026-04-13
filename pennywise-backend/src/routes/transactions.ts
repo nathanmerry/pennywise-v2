@@ -70,6 +70,8 @@ router.get("/", async (req, res) => {
     prisma.transaction.count({ where }),
   ]);
 
+  console.log({ transactions, total });
+
   res.json({
     data: transactions,
     pagination: {

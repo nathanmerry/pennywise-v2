@@ -11,7 +11,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "cleanup:old-categories": "tsx scripts/cleanup-old-categories.ts"
+    "cleanup:old-categories": "tsx scripts/cleanup-old-categories.ts",
+    "cleanup:posted-duplicates": "tsx scripts/remove-posted-duplicates.ts"
   },
   "keywords": [],
   "author": "",

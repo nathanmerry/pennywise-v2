@@ -257,7 +257,6 @@ export async function getSpendingHistoryAnalysis(
       where: {
         transactionDate: { gte: start, lte: end },
         isIgnored: false,
-        pending: false,
         amount: { lt: 0 }, // Only outflows
       },
       include: {
@@ -477,7 +476,6 @@ export async function getCategoryEvidenceBatch(
     where: {
       transactionDate: { gte: windowStart, lte: windowEnd },
       isIgnored: false,
-      pending: false,
       amount: { lt: 0 },
     },
     select: {
