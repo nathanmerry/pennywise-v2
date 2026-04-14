@@ -467,7 +467,7 @@ export function SpendingPage() {
         </div>
 
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <Select
               value={accountId || "all"}
               onValueChange={(value) => setAccountId(value === "all" ? undefined : value)}
@@ -511,31 +511,33 @@ export function SpendingPage() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center gap-1 rounded-xl border bg-background p-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 rounded-xl border bg-background p-1">
+                <Button
+                  variant={comparePrevious ? "ghost" : "default"}
+                  size="sm"
+                  onClick={() => setComparePrevious(false)}
+                >
+                  No comparison
+                </Button>
+                <Button
+                  variant={comparePrevious ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setComparePrevious(true)}
+                >
+                  Vs previous
+                </Button>
+              </div>
+
               <Button
-                variant={comparePrevious ? "ghost" : "default"}
+                variant={includeIgnored ? "secondary" : "ghost"}
                 size="sm"
-                onClick={() => setComparePrevious(false)}
+                className={cn("rounded-xl", !includeIgnored && "text-muted-foreground")}
+                onClick={() => setIncludeIgnored((current) => !current)}
               >
-                No comparison
-              </Button>
-              <Button
-                variant={comparePrevious ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setComparePrevious(true)}
-              >
-                Vs previous
+                Include ignored
               </Button>
             </div>
-
-            <Button
-              variant={includeIgnored ? "secondary" : "ghost"}
-              size="sm"
-              className={cn("rounded-xl", !includeIgnored && "text-muted-foreground")}
-              onClick={() => setIncludeIgnored((current) => !current)}
-            >
-              Include ignored
-            </Button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -559,7 +561,7 @@ export function SpendingPage() {
 
       {isLoading ? (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             {Array.from({ length: 5 }).map((_, index) => (
               <Skeleton key={index} className="h-28" />
             ))}
@@ -572,7 +574,7 @@ export function SpendingPage() {
         </div>
       ) : analysis ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <SummaryCard
               title="Total spend"
               primary={formatCurrency(analysis.summary.totalSpend)}
@@ -607,7 +609,7 @@ export function SpendingPage() {
           <div className="grid gap-4 xl:grid-cols-[1.7fr,0.9fr]">
             <Card>
               <CardHeader className="space-y-2">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-base">Spend over time</CardTitle>
                     <p className="text-sm text-muted-foreground">
@@ -629,9 +631,9 @@ export function SpendingPage() {
                     <TabsTrigger value="weekly">Weekly spend</TabsTrigger>
                   </TabsList>
 
-                  <div className="h-80 w-full">
+                  <div className="h-64 w-full sm:h-80">
                     {chartMode === "weekly" ? (
-                      <ResponsiveContainer width="100%" height={320}>
+                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={weeklyData}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis dataKey="label" />
@@ -664,7 +666,7 @@ export function SpendingPage() {
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
-                      <ResponsiveContainer width="100%" height={320}>
+                      <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartMode === "cumulative" ? cumulativeSeriesWithPace : analysis.series} key={chartMode}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis dataKey="label" minTickGap={24} />
@@ -795,7 +797,7 @@ export function SpendingPage() {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0 sm:px-6">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -806,7 +808,7 @@ export function SpendingPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="hidden sm:table-cell">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -817,7 +819,7 @@ export function SpendingPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="hidden md:table-cell">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -828,7 +830,7 @@ export function SpendingPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="hidden lg:table-cell">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -839,7 +841,7 @@ export function SpendingPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="hidden lg:table-cell">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -850,8 +852,8 @@ export function SpendingPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </Button>
                     </TableHead>
-                    <TableHead>Trend</TableHead>
-                    <TableHead>Budget</TableHead>
+                    <TableHead className="hidden xl:table-cell">Trend</TableHead>
+                    <TableHead className="hidden sm:table-cell">Budget</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -864,19 +866,23 @@ export function SpendingPage() {
                         onClick={() => setSelectedCategoryId(row.categoryId)}
                       >
                         <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div>
-                              <p className="font-medium">{row.categoryName}</p>
-                              <p className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{row.categoryName}</p>
+                              <p className="text-xs text-muted-foreground sm:text-sm">
                                 {row.transactionCount} transactions
+                                <span className="md:hidden">
+                                  {" · "}
+                                  {formatChange(row.changeAmount, row.changePercent)}
+                                </span>
                               </p>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                           </div>
                         </TableCell>
-                        <TableCell className="font-semibold">{formatCurrency(row.spend)}</TableCell>
-                        <TableCell>{Math.round(row.shareOfTotal)}%</TableCell>
-                        <TableCell>
+                        <TableCell className="font-semibold tabular-nums">{formatCurrency(row.spend)}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{Math.round(row.shareOfTotal)}%</TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <div
                             className={cn(
                               "inline-flex items-center gap-1 font-medium",
@@ -899,12 +905,12 @@ export function SpendingPage() {
                             <span>{formatChange(row.changeAmount, row.changePercent)}</span>
                           </div>
                         </TableCell>
-                        <TableCell>{row.transactionCount}</TableCell>
-                        <TableCell>{formatCurrency(row.averageTransaction)}</TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">{row.transactionCount}</TableCell>
+                        <TableCell className="hidden lg:table-cell">{formatCurrency(row.averageTransaction)}</TableCell>
+                        <TableCell className="hidden xl:table-cell">
                           <Sparkline values={row.sparkline} />
                         </TableCell>
-                        <TableCell>{getBudgetBadge(row) ?? <span className="text-muted-foreground">-</span>}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{getBudgetBadge(row) ?? <span className="text-muted-foreground">-</span>}</TableCell>
                       </TableRow>
                     ))
                   ) : (
