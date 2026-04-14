@@ -8,6 +8,7 @@ import { TransactionFilterBar } from "../components/transactions/transaction-fil
 import { TransactionTable } from "../components/transactions/transaction-table";
 import { BulkNoteDialog } from "../components/transactions/bulk-note-dialog";
 import { BulkCategoryDialog } from "../components/transactions/bulk-category-dialog";
+import { BulkDateDialog } from "../components/transactions/bulk-date-dialog";
 import { runAiCategorisation, type TransactionFilters, type AiCategorisationResult } from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -21,6 +22,7 @@ export function TransactionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkNoteOpen, setBulkNoteOpen] = useState(false);
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
+  const [bulkDateOpen, setBulkDateOpen] = useState(false);
   const [pendingBulkIds, setPendingBulkIds] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
@@ -176,12 +178,30 @@ export function TransactionsPage() {
           );
         }}
       />
+
+      <BulkDateDialog
+        count={pendingBulkIds.length}
+        open={bulkDateOpen}
+        onOpenChange={setBulkDateOpen}
+        onSave={(date) => {
+          bulkUpdateTx.mutate(
+            { ids: pendingBulkIds, data: { transactionDate: date } },
+            {
+              onSuccess: () => {
+                setBulkDateOpen(false);
+                setSelectedIds(new Set());
+                queryClient.invalidateQueries({ queryKey: ["transactions"] });
+              },
+            }
+          );
+        }}
+      />
     </div>
   );
 
-  function handleBulkAction(action: "ignore" | "unignore" | "note" | "category", ids: string[]) {
+  function handleBulkAction(action: "ignore" | "unignore" | "note" | "category" | "date", ids: string[]) {
     setPendingBulkIds(ids);
-    
+
     if (action === "ignore") {
       bulkUpdateTx.mutate(
         { ids, data: { isIgnored: true } },
@@ -206,6 +226,8 @@ export function TransactionsPage() {
       setBulkNoteOpen(true);
     } else if (action === "category") {
       setBulkCategoryOpen(true);
+    } else if (action === "date") {
+      setBulkDateOpen(true);
     }
   }
 }

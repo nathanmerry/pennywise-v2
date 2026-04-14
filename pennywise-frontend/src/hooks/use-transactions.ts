@@ -21,7 +21,7 @@ export function useUpdateTransaction() {
       data,
     }: {
       id: string;
-      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean };
+      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string };
     }) => updateTransaction(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
@@ -37,7 +37,7 @@ export function useBulkUpdateTransactions() {
       data,
     }: {
       ids: string[];
-      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean };
+      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string };
     }) => bulkUpdateTransactions(ids, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });

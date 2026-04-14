@@ -58,7 +58,7 @@ export function fetchTransactions(filters: TransactionFilters = {}) {
 
 export function updateTransaction(
   id: string,
-  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }
+  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string }
 ) {
   return request<Transaction>(`/transactions/${id}`, {
     method: "PATCH",
@@ -68,7 +68,7 @@ export function updateTransaction(
 
 export function bulkUpdateTransactions(
   ids: string[],
-  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }
+  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string }
 ) {
   return request<{ updated: number }>("/transactions/bulk", {
     method: "PATCH",

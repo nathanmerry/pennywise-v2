@@ -89,6 +89,7 @@ const bulkUpdateSchema = z.object({
   note: z.string().nullable().optional(),
   categoryIds: z.array(z.string()).nullable().optional(),
   isIgnored: z.boolean().optional(),
+  transactionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 router.patch("/bulk", async (req, res) => {
@@ -98,7 +99,7 @@ router.patch("/bulk", async (req, res) => {
     return;
   }
 
-  const { ids, note, categoryIds, isIgnored } = parsed.data;
+  const { ids, note, categoryIds, isIgnored, transactionDate } = parsed.data;
   const txData: Record<string, unknown> = {};
 
   if (note !== undefined) {
@@ -108,6 +109,10 @@ router.patch("/bulk", async (req, res) => {
   if (isIgnored !== undefined) {
     txData.isIgnored = isIgnored;
     txData.ignoreSource = "manual";
+  }
+
+  if (transactionDate !== undefined) {
+    txData.transactionDate = new Date(transactionDate + "T00:00:00.000Z");
   }
 
   // Handle categories for each transaction
@@ -142,6 +147,7 @@ const updateSchema = z.object({
   note: z.string().nullable().optional(),
   categoryIds: z.array(z.string()).nullable().optional(),
   isIgnored: z.boolean().optional(),
+  transactionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 router.patch("/:id", async (req, res) => {
@@ -161,6 +167,10 @@ router.patch("/:id", async (req, res) => {
   if (body.isIgnored !== undefined) {
     txData.isIgnored = body.isIgnored;
     txData.ignoreSource = "manual";
+  }
+
+  if (body.transactionDate !== undefined) {
+    txData.transactionDate = new Date(body.transactionDate + "T00:00:00.000Z");
   }
 
   // Update categories via join table

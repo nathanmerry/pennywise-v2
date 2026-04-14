@@ -9,6 +9,7 @@ import {
   ListFilter,
   Loader2,
   X,
+  CalendarIcon,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -32,16 +33,17 @@ import { cn } from "@/lib/utils";
 import type { Transaction, Category } from "../../lib/api";
 import { EditNoteDialog } from "./edit-note-dialog";
 import { EditCategoryDialog } from "./edit-category-dialog";
+import { EditDateDialog } from "./edit-date-dialog";
 import { CreateRuleDialog } from "./create-rule-dialog";
 
 interface TransactionTableProps {
   transactions: Transaction[];
   categories: Category[];
-  onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean }) => void;
+  onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string }) => void;
   isUpdating: boolean;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
-  onBulkAction: (action: "ignore" | "unignore" | "note" | "category", ids: string[]) => void;
+  onBulkAction: (action: "ignore" | "unignore" | "note" | "category" | "date", ids: string[]) => void;
   isBulkUpdating: boolean;
 }
 
@@ -57,6 +59,7 @@ export function TransactionTable({
 }: TransactionTableProps) {
   const [noteDialog, setNoteDialog] = useState<Transaction | null>(null);
   const [categoryDialog, setCategoryDialog] = useState<Transaction | null>(null);
+  const [dateDialog, setDateDialog] = useState<Transaction | null>(null);
   const [ruleDialog, setRuleDialog] = useState<Transaction | null>(null);
 
   const allSelected = transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
@@ -134,6 +137,15 @@ export function TransactionTable({
           >
             <Tag className="mr-2 h-4 w-4" />
             Set Category
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onBulkAction("date", selectedArray)}
+            disabled={isBulkUpdating}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            Set Date
           </Button>
           <Button
             variant="ghost"
@@ -292,6 +304,10 @@ export function TransactionTable({
                           <StickyNote className="mr-2 h-4 w-4" />
                           {tx.note ? "Edit note" : "Add note"}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDateDialog(tx)}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          Edit date
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onUpdate(tx.id, { isIgnored: !tx.isIgnored })}
                         >
@@ -343,6 +359,18 @@ export function TransactionTable({
           onSave={(categoryIds: string[]) => {
             onUpdate(categoryDialog.id, { categoryIds: categoryIds.length > 0 ? categoryIds : null });
             setCategoryDialog(null);
+          }}
+        />
+      )}
+
+      {dateDialog && (
+        <EditDateDialog
+          transaction={dateDialog}
+          open={!!dateDialog}
+          onOpenChange={(open: boolean) => !open && setDateDialog(null)}
+          onSave={(date: string) => {
+            onUpdate(dateDialog.id, { transactionDate: date });
+            setDateDialog(null);
           }}
         />
       )}
