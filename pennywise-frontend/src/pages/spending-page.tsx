@@ -10,10 +10,13 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
+  ReferenceLine,
 } from "recharts";
 import {
   ArrowUpDown,
@@ -225,7 +228,7 @@ function getBudgetBadge(row: CategoryAnalysisRow) {
 
 export function SpendingPage() {
   const [preset, setPreset] = useState<AnalysisPreset>("this_month");
-  const [chartMode, setChartMode] = useState<"daily" | "cumulative">("daily");
+  const [chartMode, setChartMode] = useState<"daily" | "cumulative" | "weekly">("daily");
   const [comparePrevious, setComparePrevious] = useState(false);
   const [includeIgnored, setIncludeIgnored] = useState(false);
   const [accountId, setAccountId] = useState<string | undefined>();
@@ -269,6 +272,81 @@ export function SpendingPage() {
     });
   }, [analysis?.categories, sortDirection, sortKey]);
 
+  // Cumulative chart data enriched with budget pace line
+  const cumulativeSeriesWithPace = useMemo(() => {
+    if (!analysis?.series) return [];
+    const budget = analysis.budgetContext.applicable && analysis.budgetContext.overall
+      ? analysis.budgetContext.overall.flexibleBudget
+      : null;
+    const totalDays = analysis.series.length;
+    return analysis.series.map((point, index) => ({
+      ...point,
+      budgetPace: budget !== null && totalDays > 1
+        ? Math.round((budget / (totalDays - 1)) * index)
+        : undefined,
+    }));
+  }, [analysis?.series, analysis?.budgetContext]);
+
+  // Weekly aggregation of daily spending
+  const weeklyData = useMemo(() => {
+    if (!analysis?.series) return [];
+    const weeks: Array<{
+      label: string;
+      weekStart: string;
+      currentSpend: number;
+      previousSpend: number | null;
+    }> = [];
+    let weekSpend = 0;
+    let weekPrevSpend = 0;
+    let weekStart = "";
+    let hasPrevious = false;
+
+    for (let i = 0; i < analysis.series.length; i++) {
+      const point = analysis.series[i];
+      if (i % 7 === 0) {
+        if (i > 0) {
+          weeks.push({
+            label: weekStart,
+            weekStart,
+            currentSpend: weekSpend,
+            previousSpend: hasPrevious ? weekPrevSpend : null,
+          });
+        }
+        weekSpend = 0;
+        weekPrevSpend = 0;
+        weekStart = point.currentDate;
+        hasPrevious = false;
+      }
+      weekSpend += point.currentSpend;
+      if (point.previousSpend !== null) {
+        weekPrevSpend += point.previousSpend;
+        hasPrevious = true;
+      }
+    }
+    // Push the final (possibly partial) week
+    if (weekSpend > 0 || weekStart) {
+      weeks.push({
+        label: weekStart,
+        weekStart,
+        currentSpend: weekSpend,
+        previousSpend: hasPrevious ? weekPrevSpend : null,
+      });
+    }
+    return weeks.map((w) => ({
+      ...w,
+      label: format(new Date(`${w.weekStart}T00:00:00.000Z`), "d MMM"),
+    }));
+  }, [analysis?.series]);
+
+  // Weekly budget allowance reference line
+  const weeklyBudgetAllowance = useMemo(() => {
+    if (!analysis?.budgetContext.applicable || !analysis.budgetContext.overall) return null;
+    const totalDays = analysis.series.length;
+    if (totalDays === 0) return null;
+    const weeksInRange = Math.max(1, Math.ceil(totalDays / 7));
+    return analysis.budgetContext.overall.flexibleBudget / weeksInRange;
+  }, [analysis?.budgetContext, analysis?.series.length]);
+
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
       setSortDirection((current) => (current === "desc" ? "asc" : "desc"));
@@ -310,27 +388,29 @@ export function SpendingPage() {
       <div className="space-y-3 rounded-2xl border bg-card/60 px-4 py-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 Time range
               </span>
-              <div className="flex flex-wrap items-center gap-1 rounded-xl bg-muted p-1">
-                {PRESET_OPTIONS.map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={preset === option.value ? "default" : "ghost"}
-                    size={option.value === preset ? "default" : "sm"}
-                    className={cn(
-                      "rounded-lg",
-                      preset === option.value
-                        ? "shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                    onClick={() => setPreset(option.value)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
+              <div className="-mx-4 overflow-x-auto sm:mx-0">
+                <div className="flex min-w-min items-center gap-1 rounded-xl bg-muted p-1 px-4 sm:px-1">
+                  {PRESET_OPTIONS.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={preset === option.value ? "default" : "ghost"}
+                      size="sm"
+                      className={cn(
+                        "rounded-lg shrink-0",
+                        preset === option.value
+                          ? "shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      onClick={() => setPreset(option.value)}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -392,7 +472,7 @@ export function SpendingPage() {
               value={accountId || "all"}
               onValueChange={(value) => setAccountId(value === "all" ? undefined : value)}
             >
-              <SelectTrigger className="min-w-44 bg-background">
+              <SelectTrigger className="w-full min-w-0 sm:w-auto sm:min-w-44 bg-background">
                 <SelectValue placeholder="All accounts" />
               </SelectTrigger>
               <SelectContent>
@@ -409,7 +489,7 @@ export function SpendingPage() {
               value={categoryId || "all"}
               onValueChange={(value) => setCategoryId(value === "all" ? undefined : value)}
             >
-              <SelectTrigger className="min-w-44 bg-background">
+              <SelectTrigger className="w-full min-w-0 sm:w-auto sm:min-w-44 bg-background">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
@@ -542,74 +622,121 @@ export function SpendingPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Tabs value={chartMode} onValueChange={(value) => setChartMode(value as "daily" | "cumulative")} className="space-y-4">
+                <Tabs value={chartMode} onValueChange={(value) => setChartMode(value as "daily" | "cumulative" | "weekly")} className="space-y-4">
                   <TabsList>
                     <TabsTrigger value="daily">Daily spend</TabsTrigger>
                     <TabsTrigger value="cumulative">Cumulative spend</TabsTrigger>
+                    <TabsTrigger value="weekly">Weekly spend</TabsTrigger>
                   </TabsList>
 
                   <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height={320}>
-                      <LineChart data={analysis.series} key={chartMode}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="label" minTickGap={24} />
-                        <YAxis tickFormatter={formatCompactCurrency} width={56} />
-                        <Tooltip
-                          formatter={(value) => formatTooltipCurrency(value)}
-                          labelFormatter={(_, payload) => {
-                            const point = payload?.[0]?.payload as { currentDate?: string } | undefined;
-                            return point?.currentDate
-                              ? format(new Date(`${point.currentDate}T00:00:00.000Z`), "d MMM yyyy")
-                              : "";
-                          }}
-                        />
-                        {chartMode === "daily" ? (
-                          <>
-                            <Line
-                              type="linear"
-                              dataKey="currentSpend"
-                              stroke="var(--chart-1)"
-                              strokeWidth={2}
-                              dot={false}
-                              name="Current period"
+                    {chartMode === "weekly" ? (
+                      <ResponsiveContainer width="100%" height={320}>
+                        <BarChart data={weeklyData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="label" />
+                          <YAxis tickFormatter={formatCompactCurrency} width={56} />
+                          <Tooltip formatter={(value) => formatTooltipCurrency(value)} />
+                          <Bar
+                            dataKey="currentSpend"
+                            fill="var(--chart-1)"
+                            radius={[4, 4, 0, 0]}
+                            name="Current period"
+                          />
+                          {comparePrevious && analysis.previousPeriod && (
+                            <Bar
+                              dataKey="previousSpend"
+                              fill="var(--muted-foreground)"
+                              radius={[4, 4, 0, 0]}
+                              opacity={0.4}
+                              name="Previous period"
                             />
-                            {comparePrevious && analysis.previousPeriod && (
+                          )}
+                          {weeklyBudgetAllowance !== null && (
+                            <ReferenceLine
+                              y={weeklyBudgetAllowance}
+                              stroke="var(--destructive)"
+                              strokeDasharray="6 4"
+                              strokeWidth={1.5}
+                              label={{ value: "Weekly budget", position: "right", fontSize: 11, fill: "var(--destructive)" }}
+                            />
+                          )}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={320}>
+                        <LineChart data={chartMode === "cumulative" ? cumulativeSeriesWithPace : analysis.series} key={chartMode}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="label" minTickGap={24} />
+                          <YAxis tickFormatter={formatCompactCurrency} width={56} />
+                          <Tooltip
+                            formatter={(value) => formatTooltipCurrency(value)}
+                            labelFormatter={(_, payload) => {
+                              const point = payload?.[0]?.payload as { currentDate?: string } | undefined;
+                              return point?.currentDate
+                                ? format(new Date(`${point.currentDate}T00:00:00.000Z`), "d MMM yyyy")
+                                : "";
+                            }}
+                          />
+                          {chartMode === "daily" ? (
+                            <>
                               <Line
                                 type="linear"
-                                dataKey="previousSpend"
-                                stroke="var(--muted-foreground)"
-                                strokeDasharray="4 4"
+                                dataKey="currentSpend"
+                                stroke="var(--chart-1)"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Previous period"
+                                name="Current period"
                               />
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <Line
-                              type="linear"
-                              dataKey="currentCumulative"
-                              stroke="var(--chart-1)"
-                              strokeWidth={2}
-                              dot={false}
-                              name="Current period"
-                            />
-                            {comparePrevious && analysis.previousPeriod && (
+                              {comparePrevious && analysis.previousPeriod && (
+                                <Line
+                                  type="linear"
+                                  dataKey="previousSpend"
+                                  stroke="var(--muted-foreground)"
+                                  strokeDasharray="4 4"
+                                  strokeWidth={2}
+                                  dot={false}
+                                  name="Previous period"
+                                />
+                              )}
+                            </>
+                          ) : (
+                            <>
                               <Line
                                 type="linear"
-                                dataKey="previousCumulative"
-                                stroke="var(--muted-foreground)"
-                                strokeDasharray="4 4"
+                                dataKey="currentCumulative"
+                                stroke="var(--chart-1)"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Previous period"
+                                name="Current period"
                               />
-                            )}
-                          </>
-                        )}
-                      </LineChart>
-                    </ResponsiveContainer>
+                              {comparePrevious && analysis.previousPeriod && (
+                                <Line
+                                  type="linear"
+                                  dataKey="previousCumulative"
+                                  stroke="var(--muted-foreground)"
+                                  strokeDasharray="4 4"
+                                  strokeWidth={2}
+                                  dot={false}
+                                  name="Previous period"
+                                />
+                              )}
+                              {analysis.budgetContext.applicable && analysis.budgetContext.overall && (
+                                <Line
+                                  type="linear"
+                                  dataKey="budgetPace"
+                                  stroke="var(--destructive)"
+                                  strokeDasharray="6 4"
+                                  strokeWidth={1.5}
+                                  dot={false}
+                                  name="Budget pace"
+                                />
+                              )}
+                            </>
+                          )}
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </Tabs>
               </CardContent>

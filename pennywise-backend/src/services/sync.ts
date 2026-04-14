@@ -269,7 +269,7 @@ export async function syncAllConnections() {
     where: { status: "active" },
   });
 
-  const results = [];
+  const results: Array<{ synced: number; connectionId: string; status: string }> = [];
   for (const conn of connections) {
     try {
       const result = await syncConnection(conn.id);

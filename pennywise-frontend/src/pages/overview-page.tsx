@@ -16,12 +16,14 @@ import {
   Wallet,
   PiggyBank,
   ChevronRight,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MonthlyStatusStrip } from "@/components/monthly-status-strip";
 import { PaceExplanation } from "@/components/pace-explanation";
 import { MainBudgetPressuresCard } from "@/components/main-budget-pressures-card";
 import { CategoryPressureDrawer } from "@/components/category-pressure-drawer";
+import type { MonthlyBudgetPace, SpendingBreakdown } from "@/lib/api";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-GB", {
@@ -39,6 +41,185 @@ function formatCurrencyPrecise(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+function computeProjectedMonthEnd(pace: MonthlyBudgetPace): {
+  projectedTotal: number;
+  overUnder: number;
+  isOver: boolean;
+} {
+  const { overall, elapsedDays, totalDaysInMonth } = pace;
+  if (elapsedDays === 0) {
+    return { projectedTotal: 0, overUnder: 0, isOver: false };
+  }
+  const dailyRate = overall.actualFlexibleSpendToDate / elapsedDays;
+  const projectedTotal = dailyRate * totalDaysInMonth;
+  const overUnder = projectedTotal - overall.flexibleBudget;
+  return { projectedTotal, overUnder, isOver: overUnder > 0 };
+}
+
+function DailyPulse({ pace, overview }: {
+  pace: MonthlyBudgetPace | undefined;
+  overview: { dailyAllowance: number; remainingFlexible: number; daysUntilPayday: number; flexibleBudget: number };
+}) {
+  const safeDailySpend = pace?.overall.safeDailySpend ?? overview.dailyAllowance;
+  const remaining = pace?.overall.remainingFlexibleBudget ?? overview.remainingFlexible;
+  const daysLeft = pace?.remainingDays ?? overview.daysUntilPayday;
+  const projection = pace ? computeProjectedMonthEnd(pace) : null;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Card className="relative overflow-hidden">
+        <CardContent className="pt-6 pb-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-muted-foreground">Safe to spend today</p>
+              <p className={cn(
+                "text-3xl sm:text-4xl font-bold tracking-tight mt-1 wrap-break-word",
+                safeDailySpend <= 0 && "text-destructive"
+              )}>
+                {formatCurrencyPrecise(Math.max(0, safeDailySpend))}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {formatCurrency(remaining)} remaining over {daysLeft} days
+              </p>
+            </div>
+            <div className={cn(
+              "shrink-0 rounded-full p-3",
+              safeDailySpend > 0 ? "bg-green-100 dark:bg-green-950/40" : "bg-destructive/10"
+            )}>
+              <Wallet className={cn(
+                "h-6 w-6",
+                safeDailySpend > 0 ? "text-green-600" : "text-destructive"
+              )} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="relative overflow-hidden">
+        <CardContent className="pt-6 pb-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-muted-foreground">Month-end forecast</p>
+              {projection ? (
+                <>
+                  <p className={cn(
+                    "text-3xl sm:text-4xl font-bold tracking-tight mt-1 wrap-break-word",
+                    projection.isOver ? "text-destructive" : "text-green-600"
+                  )}>
+                    {projection.isOver ? "+" : "-"}{formatCurrency(Math.abs(projection.overUnder))}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {projection.isOver
+                      ? `On pace to overshoot by ${formatCurrency(projection.overUnder)}`
+                      : `On pace to finish ${formatCurrency(Math.abs(projection.overUnder))} under budget`
+                    }
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className={cn(
+                    "text-3xl sm:text-4xl font-bold tracking-tight mt-1 wrap-break-word",
+                    remaining < 0 ? "text-destructive" : "text-green-600"
+                  )}>
+                    {formatCurrency(remaining)}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    remaining of {formatCurrency(overview.flexibleBudget)} flexible budget
+                  </p>
+                </>
+              )}
+            </div>
+            <div className={cn(
+              "shrink-0 rounded-full p-3",
+              projection && !projection.isOver
+                ? "bg-green-100 dark:bg-green-950/40"
+                : projection?.isOver
+                  ? "bg-destructive/10"
+                  : "bg-muted"
+            )}>
+              <Target className={cn(
+                "h-6 w-6",
+                projection && !projection.isOver
+                  ? "text-green-600"
+                  : projection?.isOver
+                    ? "text-destructive"
+                    : "text-muted-foreground"
+              )} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function BudgetVsActualBars({ pace, spending }: {
+  pace: MonthlyBudgetPace | undefined;
+  spending: SpendingBreakdown | undefined;
+}) {
+  if (!pace || !spending) return null;
+
+  const categoryBars = pace.categories
+    .filter((cat) => cat.monthlyBudget !== null && cat.monthlyBudget > 0)
+    .map((cat) => {
+      const spendData = spending.byParentCategory.find((s) => s.categoryId === cat.categoryId);
+      return {
+        categoryId: cat.categoryId,
+        categoryName: cat.categoryName,
+        budget: cat.monthlyBudget!,
+        actual: spendData?.spent ?? cat.actualSpendToDate,
+        isOver: cat.actualSpendToDate > cat.monthlyBudget!,
+      };
+    })
+    .sort((a, b) => b.actual - a.actual)
+    .slice(0, 6);
+
+  if (categoryBars.length === 0) return null;
+
+  const maxValue = Math.max(...categoryBars.map((c) => Math.max(c.budget, c.actual)));
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Budget vs actual</CardTitle>
+        <p className="text-sm text-muted-foreground">How each budgeted category is tracking</p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {categoryBars.map((cat) => {
+          const budgetWidth = maxValue > 0 ? (cat.budget / maxValue) * 100 : 0;
+          const actualWidth = maxValue > 0 ? (cat.actual / maxValue) * 100 : 0;
+          return (
+            <div key={cat.categoryId} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className="font-medium truncate min-w-0">{cat.categoryName}</span>
+                <span className={cn(
+                  "font-medium shrink-0 tabular-nums",
+                  cat.isOver ? "text-destructive" : "text-muted-foreground"
+                )}>
+                  {formatCurrency(cat.actual)} / {formatCurrency(cat.budget)}
+                </span>
+              </div>
+              <div className="relative h-3 w-full rounded-full bg-muted">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/20"
+                  style={{ width: `${budgetWidth}%` }}
+                />
+                <div
+                  className={cn(
+                    "absolute inset-y-0 left-0 rounded-full transition-all",
+                    cat.isOver ? "bg-destructive" : "bg-primary"
+                  )}
+                  style={{ width: `${Math.min(actualWidth, 100)}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
 }
 
 function getCurrentMonth(): string {
@@ -64,7 +245,7 @@ export function OverviewPage() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -96,7 +277,7 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">{formatMonthDisplay(month)}</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />
@@ -131,8 +312,11 @@ export function OverviewPage() {
         />
       )}
 
+      {/* Daily Pulse: Safe to spend + Month-end forecast */}
+      <DailyPulse pace={pace} overview={overview} />
+
       {/* Key Numbers */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className={cn(isOverBudget && "border-destructive")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Weekly Allowance</CardTitle>
@@ -224,6 +408,9 @@ export function OverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Budget vs Actual Bars */}
+      <BudgetVsActualBars pace={pace} spending={spending} />
 
       {/* Budget Breakdown & Main Budget Pressures */}
       <div className="grid gap-4 md:grid-cols-2">

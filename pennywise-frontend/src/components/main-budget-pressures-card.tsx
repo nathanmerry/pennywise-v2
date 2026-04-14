@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { AlertTriangle, CheckCircle2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MonthlyBudgetPace, CategorySpend } from "@/lib/api";
@@ -22,6 +23,8 @@ interface PressureItem {
   amount: number;
   label: string;
   severity: number;
+  budget: number | null;
+  spent: number;
 }
 
 interface MainBudgetPressuresCardProps {
@@ -43,6 +46,8 @@ export function MainBudgetPressuresCard({ pace, spending, onCategoryClick }: Mai
         amount: cat.overAmount,
         label: `${formatCurrency(cat.overAmount)} over`,
         severity: 3,
+        budget: cat.monthlyBudget,
+        spent: cat.actualSpendToDate,
       });
     }
   }
@@ -59,6 +64,8 @@ export function MainBudgetPressuresCard({ pace, spending, onCategoryClick }: Mai
           amount: cat.paceDelta,
           label: `${formatCurrency(cat.paceDelta)} ahead of pace`,
           severity: 2,
+          budget: cat.monthlyBudget,
+          spent: cat.actualSpendToDate,
         });
       }
     }
@@ -83,6 +90,8 @@ export function MainBudgetPressuresCard({ pace, spending, onCategoryClick }: Mai
         amount: cat.spent,
         label: `${formatCurrency(cat.spent)} spent`,
         severity: 1,
+        budget: null,
+        spent: cat.spent,
       });
     }
   }
@@ -139,50 +148,72 @@ export function MainBudgetPressuresCard({ pace, spending, onCategoryClick }: Mai
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {topPressures.map((item) => (
-            <button
-              key={item.categoryId}
-              type="button"
-              onClick={() => onCategoryClick?.(item.categoryId)}
-              className="flex items-center justify-between py-2 border-b last:border-0 w-full text-left hover:bg-accent/50 -mx-2 px-2 rounded transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="font-medium text-sm truncate">
-                  {item.categoryName}
-                </span>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-xs shrink-0",
-                    item.status === "over_budget" &&
-                      "border-destructive/50 text-destructive",
-                    item.status === "over_pace" &&
-                      "border-amber-500/50 text-amber-600",
-                    item.status === "no_budget" &&
-                      "border-muted-foreground/50 text-muted-foreground"
-                  )}
-                >
-                  {item.status === "over_budget" && "Over budget"}
-                  {item.status === "over_pace" && "Over pace"}
-                  {item.status === "no_budget" && "No budget"}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span
-                  className={cn(
-                    "text-sm font-medium",
-                    item.status === "over_budget" && "text-destructive",
-                    item.status === "over_pace" && "text-amber-600",
-                    item.status === "no_budget" && "text-muted-foreground"
-                  )}
-                >
-                  {item.label}
-                </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </button>
-          ))}
+        <div className="space-y-1">
+          {topPressures.map((item) => {
+            const percentUsed = item.budget && item.budget > 0
+              ? Math.round((item.spent / item.budget) * 100)
+              : null;
+            return (
+              <button
+                key={item.categoryId}
+                type="button"
+                onClick={() => onCategoryClick?.(item.categoryId)}
+                className="flex flex-col gap-1.5 py-3 border-b last:border-0 w-full text-left hover:bg-accent/50 -mx-2 px-2 rounded transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="font-medium text-sm truncate max-w-full">
+                      {item.categoryName}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs shrink-0",
+                        item.status === "over_budget" &&
+                          "border-destructive/50 text-destructive",
+                        item.status === "over_pace" &&
+                          "border-amber-500/50 text-amber-600",
+                        item.status === "no_budget" &&
+                          "border-muted-foreground/50 text-muted-foreground"
+                      )}
+                    >
+                      {item.status === "over_budget" && "Over budget"}
+                      {item.status === "over_pace" && "Over pace"}
+                      {item.status === "no_budget" && "No budget"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span
+                      className={cn(
+                        "text-sm font-medium tabular-nums",
+                        item.status === "over_budget" && "text-destructive",
+                        item.status === "over_pace" && "text-amber-600",
+                        item.status === "no_budget" && "text-muted-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+                {item.budget !== null && percentUsed !== null && (
+                  <div className="flex items-center gap-2">
+                    <Progress
+                      value={Math.min(percentUsed, 100)}
+                      className={cn(
+                        "h-1.5 flex-1",
+                        percentUsed >= 100 && "[&>div]:bg-destructive",
+                        percentUsed >= 80 && percentUsed < 100 && "[&>div]:bg-amber-500"
+                      )}
+                    />
+                    <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
+                      {formatCurrency(item.spent)} / {formatCurrency(item.budget)}
+                    </span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

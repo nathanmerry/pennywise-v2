@@ -14,12 +14,8 @@
 import "dotenv/config";
 import * as fs from "fs";
 import * as path from "path";
-import { fileURLToPath } from "url";
 import { prisma } from "../lib/prisma.js";
 import { expandCategoryIds, setTransactionCategories } from "../services/rules.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 interface MappingEntry {
   normalized_merchant: string;
