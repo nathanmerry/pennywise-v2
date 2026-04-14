@@ -1,8 +1,11 @@
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const connectionString = process.env.DATABASE_URL!;
-const needsSsl = /sslmode=(require|verify-ca|verify-full)/.test(connectionString);
+const rawConnectionString = process.env.DATABASE_URL!;
+const needsSsl = /sslmode=(require|verify-ca|verify-full)/.test(rawConnectionString);
+const connectionString = needsSsl
+  ? rawConnectionString.replace(/([?&])sslmode=[^&]*(&|$)/, (_, pre, post) => (post === "&" ? pre : ""))
+  : rawConnectionString;
 
 const adapter = new PrismaPg({
   connectionString,
