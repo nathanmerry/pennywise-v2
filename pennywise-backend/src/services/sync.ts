@@ -3,7 +3,12 @@ import { logger } from "../lib/logger.js";
 import * as truelayer from "./truelayer.js";
 import { applyRulesToTransaction } from "./rules.js";
 import { normalizeMerchant } from "./normalize.js";
-import {format} from 'date-fns'
+
+const PENDING_MATCH_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+
+export function amountTolerance(amount: number): number {
+  return Math.max(Math.abs(amount) * 0.15, 2);
+}
 
 export async function syncConnection(connectionId: string) {
   const connection = await prisma.bankConnection.findUniqueOrThrow({
@@ -137,30 +142,14 @@ async function syncAccount(
 
   let synced = 0;
 
-  // console.dir(pending.find((p) => p.description.includes("Wagtail")), { depth: null });
-  const filteredPosted = posted.filter(t => {
-    try {
-      // console.log(t)
-      const date = format(new Date(t.timestamp), 'yyyy-MM-dd');
-      console.log(date);
-      return date === '2026-04-07'
-    } catch (err) {
-      logger.error({ err }, "Failed to format date");
-    }
-  })
-
-  console.dir([{}], { depth: null });
-  console.dir(filteredPosted, { depth: null });
-
-  // Process posted transactions
-  for (const tx of posted) {
-    await upsertTransaction(accountId, tx, false);
+  // Process pending first so posted-side dedup can find promotion candidates.
+  for (const tx of pending) {
+    await upsertTransaction(accountId, tx, true);
     synced++;
   }
 
-  // Process pending transactions
-  for (const tx of pending) {
-    await upsertTransaction(accountId, tx, true);
+  for (const tx of posted) {
+    await upsertTransaction(accountId, tx, false);
     synced++;
   }
 
@@ -211,33 +200,64 @@ async function upsertTransaction(
     return;
   }
 
-  // If this is a posted transaction, check for pending duplicate
-  // (pending transactions have more accurate dates, so we skip creating the posted version)
-  if (!isPending) {
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-    const potentialDuplicate = await prisma.transaction.findFirst({
+  // If this is a posted transaction, look for a pending row to promote in place.
+  // We prefer the pending row's transactionDate (closer to when the charge happened)
+  // and fold the posted's finalised fields onto it.
+  if (!isPending && normalizedMerchant) {
+    const tolerance = amountTolerance(tx.amount);
+    const candidates = await prisma.transaction.findMany({
       where: {
         accountId,
         pending: true,
-        amount: tx.amount,
         normalizedMerchant,
+        amount: {
+          gte: tx.amount - tolerance,
+          lte: tx.amount + tolerance,
+        },
         transactionDate: {
-          gte: new Date(transactionDate.getTime() - threeDaysMs),
-          lte: new Date(transactionDate.getTime() + threeDaysMs),
+          gte: new Date(transactionDate.getTime() - PENDING_MATCH_WINDOW_MS),
+          lte: new Date(transactionDate.getTime() + PENDING_MATCH_WINDOW_MS),
         },
       },
     });
 
-    if (potentialDuplicate) {
+    if (candidates.length > 0) {
+      // Pick closest on amount, tiebreak on closest date
+      const best = candidates.reduce((a, b) => {
+        const da = Math.abs(Number(a.amount) - tx.amount);
+        const db = Math.abs(Number(b.amount) - tx.amount);
+        if (da !== db) return da < db ? a : b;
+        const ta = Math.abs(a.transactionDate.getTime() - transactionDate.getTime());
+        const tb = Math.abs(b.transactionDate.getTime() - transactionDate.getTime());
+        return ta <= tb ? a : b;
+      });
+
+      await prisma.transaction.update({
+        where: { id: best.id },
+        data: {
+          source,
+          sourceTransactionId,
+          amount: tx.amount,
+          currency: tx.currency,
+          description: tx.description,
+          merchantName,
+          normalizedMerchant,
+          pending: false,
+          rawJson: tx as object,
+          // transactionDate intentionally preserved
+        },
+      });
+
       logger.info(
         {
-          pendingId: potentialDuplicate.id,
-          pendingDate: potentialDuplicate.transactionDate,
+          promotedId: best.id,
+          preservedDate: best.transactionDate,
           postedDate: transactionDate,
           merchant: normalizedMerchant,
-          amount: tx.amount,
+          pendingAmount: Number(best.amount),
+          postedAmount: tx.amount,
         },
-        "Skipping posted transaction - pending duplicate exists with more accurate date"
+        "Promoted pending transaction to posted in place"
       );
       return;
     }

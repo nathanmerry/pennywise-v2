@@ -7,6 +7,7 @@ import {
   getCategoryTree,
   getUncategorisedTransactions,
 } from "../services/ai-categorisation.js";
+import { dedupPending } from "../services/dedup-pending.js";
 
 const router = Router();
 
@@ -170,6 +171,30 @@ router.get("/ai-categorisation/decisions/:transactionId", async (req, res) => {
     });
 
     res.json(decisions);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
+});
+
+// ============================================================================
+// PENDING/POSTED DUPLICATE CLEANUP
+// ============================================================================
+
+const dedupPendingSchema = z.object({
+  dryRun: z.boolean().optional().default(false),
+});
+
+router.post("/dedup-pending", async (req, res) => {
+  const parsed = dedupPendingSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  try {
+    const result = await dedupPending(parsed.data.dryRun);
+    res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(500).json({ error: message });
