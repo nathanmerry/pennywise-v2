@@ -1,93 +1,113 @@
 import { format, parseISO } from "date-fns";
-import { useCurrentBudgetOverview } from "@/shared/hooks/use-budget";
-import { useSpendingAnalysis } from "@/shared/hooks/use-budget";
-import type { TransactionFilters } from "@/shared/lib/api";
 import {
-  formatAmount,
-  formatDateRangeLabel,
-  getFilterMode,
-} from "../../lib/group-transactions";
+  useCurrentBudgetOverview,
+  useSpendingAnalysis,
+} from "@/shared/hooks/use-budget";
+import type { TransactionFilters } from "@/shared/lib/api";
+import { formatAmount } from "../../lib/group-transactions";
 
 interface Props {
   filters: TransactionFilters;
 }
 
+/**
+ * Summary line contract:
+ * - "spent" follows the active date filter (historical analysis).
+ * - "remaining until payday" is always the current payday cycle (live control metric).
+ *
+ * The two deliberately use different horizons — "spent" is analytical, "remaining"
+ * is live. Mixing them on one line is intentional per product decision.
+ */
 export function MobileMonthSummary({ filters }: Props) {
-  const mode = getFilterMode(filters.from, filters.to);
+  const hasDateFilter = !!filters.from || !!filters.to;
+  const { data: overview } = useCurrentBudgetOverview();
 
-  if (mode === "future") return null;
-  if (mode === "past") return <PastRangeSummary filters={filters} />;
-  return <CurrentCycleSummary />;
+  // Analytics endpoint requires both start and end. Fall back to sensible bounds
+  // when only one side of the range is set.
+  const today = format(new Date(), "yyyy-MM-dd");
+  const analysisStart = filters.from ?? "1970-01-01";
+  const analysisEnd = filters.to ?? today;
+
+  // Analytics can't express "only ignored" — when the user filters to that, we can't
+  // compute a meaningful filtered spent. Fall back to "no filtered spent shown".
+  const canUseAnalytics = hasDateFilter && filters.isIgnored !== "true";
+
+  const { data: analysis } = useSpendingAnalysis(
+    canUseAnalytics
+      ? {
+          start: analysisStart,
+          end: analysisEnd,
+          accountId: filters.accountId,
+          categoryId:
+            filters.categoryId && filters.categoryId !== "uncategorised"
+              ? filters.categoryId
+              : undefined,
+          // Always exclude ignored — matches BudgetOverview and the feed's visual treatment.
+          includeIgnored: false,
+        }
+      : { start: "", end: "" },
+  );
+
+  if (!overview) return null;
+
+  const remaining = overview.remainingFlexible ?? 0;
+  const hasBudget = (overview.flexibleBudget ?? 0) > 0;
+
+  const spent = hasDateFilter
+    ? canUseAnalytics
+      ? analysis?.summary.totalSpend
+      : undefined
+    : Math.max(0, overview.actualSpend ?? 0);
+
+  const spentLabel =
+    spent !== undefined
+      ? formatAmount(Math.max(0, spent), "GBP", { signDisplay: "auto" })
+      : null;
+
+  const trailing = buildTrailing({
+    hasBudget,
+    remaining,
+    paydayDate: overview.paydayDate,
+  });
+
+  if (!spentLabel && !trailing) return null;
+
+  return (
+    <div className="text-sm">
+      {spentLabel && <span className="text-foreground">{spentLabel} spent</span>}
+      {spentLabel && trailing && (
+        <span className="text-muted-foreground/70"> · </span>
+      )}
+      {trailing && (
+        <span className="text-muted-foreground/70">{trailing}</span>
+      )}
+    </div>
+  );
 }
 
-function CurrentCycleSummary() {
-  const { data, isError, isLoading } = useCurrentBudgetOverview();
-
-  if (isLoading || isError || !data) return null;
-
-  const spent = Math.max(0, data.actualSpend ?? 0);
-  const remaining = data.remainingFlexible ?? 0;
-  const hasBudget = (data.flexibleBudget ?? 0) > 0;
-
-  const spentLabel = formatAmount(spent, "GBP", { signDisplay: "auto" });
-
-  let trailing: string;
-  if (!hasBudget) {
-    trailing = "this month";
-  } else if (remaining < 0) {
+function buildTrailing({
+  hasBudget,
+  remaining,
+  paydayDate,
+}: {
+  hasBudget: boolean;
+  remaining: number;
+  paydayDate: string | null | undefined;
+}): string | null {
+  if (!hasBudget) return null;
+  if (remaining < 0) {
     const over = formatAmount(Math.abs(remaining), "GBP", {
       signDisplay: "auto",
     });
-    trailing = `${over} over budget`;
-  } else {
-    const remainingLabel = formatAmount(remaining, "GBP", {
-      signDisplay: "auto",
-    });
-    const paydayLabel = safeFormatDate(data.paydayDate, "d MMM");
-    trailing = paydayLabel
-      ? `${remainingLabel} remaining until ${paydayLabel}`
-      : `${remainingLabel} remaining`;
+    return `${over} over budget`;
   }
-
-  return (
-    <div className="text-sm">
-      <span className="text-foreground">{spentLabel} spent</span>
-      <span className="text-muted-foreground/70"> · {trailing}</span>
-    </div>
-  );
-}
-
-function PastRangeSummary({ filters }: { filters: TransactionFilters }) {
-  // Past mode implies `to` is set and in the past. If `from` is missing we default
-  // to a distant past so the analytics endpoint still has a valid range.
-  const start = filters.from ?? "1970-01-01";
-  const end = filters.to!;
-
-  const { data, isLoading, isError } = useSpendingAnalysis({
-    start,
-    end,
-    accountId: filters.accountId,
-    categoryId:
-      filters.categoryId && filters.categoryId !== "uncategorised"
-        ? filters.categoryId
-        : undefined,
-    // Reproduce the feed's ignored behaviour as closely as the analytics filter allows.
-    // The feed can show "only ignored"; analytics cannot — in that rare case we just include all.
-    includeIgnored: filters.isIgnored !== "false",
+  const remainingLabel = formatAmount(remaining, "GBP", {
+    signDisplay: "auto",
   });
-
-  if (isLoading || isError || !data) return null;
-
-  const spent = Math.max(0, data.summary.totalSpend ?? 0);
-  const spentLabel = formatAmount(spent, "GBP", { signDisplay: "auto" });
-  const rangeLabel = formatDateRangeLabel(filters.from, filters.to);
-
-  return (
-    <div className="text-sm">
-      <span className="text-foreground">{spentLabel} spent</span>
-      <span className="text-muted-foreground/70"> · {rangeLabel}</span>
-    </div>
-  );
+  const paydayLabel = safeFormatDate(paydayDate, "d MMM");
+  return paydayLabel
+    ? `${remainingLabel} remaining until ${paydayLabel}`
+    : `${remainingLabel} remaining`;
 }
 
 function safeFormatDate(

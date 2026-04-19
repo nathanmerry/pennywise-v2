@@ -1,31 +1,5 @@
-import {
-  format,
-  isThisYear,
-  isToday,
-  isYesterday,
-  parseISO,
-  startOfDay,
-} from "date-fns";
+import { format, isThisYear, isToday, isYesterday, parseISO } from "date-fns";
 import type { Transaction } from "@/shared/lib/api";
-
-export type FilterMode = "current" | "past" | "future";
-
-/**
- * Classify a date filter as current/past/future for UX purposes.
- * - "current" means the range contains today (including open-ended ranges) — live budget metrics make sense.
- * - "past" means the range is fully behind today — only "spent" makes sense, not "remaining".
- * - "future" means the range is fully ahead of today — nothing meaningful to show.
- */
-export function getFilterMode(from?: string, to?: string): FilterMode {
-  if (!from && !to) return "current";
-  const today = startOfDay(new Date());
-  const fromDate = from ? startOfDay(parseISO(from)) : null;
-  const toDate = to ? startOfDay(parseISO(to)) : null;
-
-  if (toDate && toDate.getTime() < today.getTime()) return "past";
-  if (fromDate && fromDate.getTime() > today.getTime()) return "future";
-  return "current";
-}
 
 export interface TransactionDayGroup {
   dateKey: string;

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { format, isAfter, parseISO, startOfDay, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions } from "./hooks/use-transactions";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { useAccounts } from "@/shared/hooks/use-accounts";
+import { useCurrentBudgetOverview } from "@/shared/hooks/use-budget";
 import { useIsMobile } from "@/shared/hooks/use-media-query";
 import { TransactionFilterBar } from "./components/transaction-filters";
 import { TransactionTable } from "./components/transaction-table";
@@ -31,9 +33,35 @@ export function TransactionsPage() {
   const { data, isLoading } = useTransactions(filters);
   const { data: categories = [] } = useCategories();
   const { data: accounts = [] } = useAccounts();
+  const { data: overview } = useCurrentBudgetOverview();
   const updateTx = useUpdateTransaction();
   const bulkUpdateTx = useBulkUpdateTransactions();
   const isMobile = useIsMobile();
+
+  // On first load, default the date filter to "last payday → today" so the page
+  // opens on the current pay cycle instead of all-time. Only applies once, and
+  // never overwrites filters the user has already set.
+  const hasAppliedDefault = useRef(false);
+  useEffect(() => {
+    if (hasAppliedDefault.current) return;
+    if (!overview?.paydayDate) return;
+    if (filters.from || filters.to) {
+      hasAppliedDefault.current = true;
+      return;
+    }
+    const today = startOfDay(new Date());
+    const payday = startOfDay(parseISO(overview.paydayDate));
+    // paydayDate is the upcoming payday when it's still in the future.
+    // If it's already passed (budget hasn't rolled over), treat it as the last payday directly.
+    const lastPayday = isAfter(payday, today) ? subMonths(payday, 1) : payday;
+    hasAppliedDefault.current = true;
+    setFilters((f) => ({
+      ...f,
+      from: format(lastPayday, "yyyy-MM-dd"),
+      to: format(today, "yyyy-MM-dd"),
+      page: 1,
+    }));
+  }, [overview?.paydayDate, filters.from, filters.to]);
 
   const pagination = data?.pagination;
 
