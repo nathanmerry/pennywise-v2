@@ -13,20 +13,6 @@ import { SpendingSummaryGrid } from "./components/summary-grid";
 import { TopMerchantsCard } from "./components/top-merchants-card";
 import { WhatToDoNowCard } from "./components/what-to-do-now-card";
 
-function SpendingPageHeader() {
-  return (
-    <div className='space-y-2'>
-      <div>
-        <h1 className='text-2xl font-bold'>Spending Analysis</h1>
-        <p className='text-muted-foreground'>
-          Drill into what changed, where the spend came from, and whether it
-          looks fixable.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function SpendingPageSkeleton() {
   return (
     <div className='space-y-6'>
