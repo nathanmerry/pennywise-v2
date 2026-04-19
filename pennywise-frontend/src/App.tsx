@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Layout } from "./shared/components/layout";
 import { OverviewPage } from "./features/overview/overview-page";
-import { SpendingPage } from "./features/spending/spending-page";
+import { SpendingPage } from "./features/spending-analysis/spending-page";
 import { BudgetPage } from "./features/budget/budget-page";
 import { TransactionsPage } from "./features/transactions/transactions-page";
 import { ConnectionsPage } from "./features/connections/connections-page";
