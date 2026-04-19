@@ -4,11 +4,13 @@ import { Button } from "@/shared/components/ui/button";
 import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions } from "./hooks/use-transactions";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { useAccounts } from "@/shared/hooks/use-accounts";
+import { useIsMobile } from "@/shared/hooks/use-media-query";
 import { TransactionFilterBar } from "./components/transaction-filters";
 import { TransactionTable } from "./components/transaction-table";
 import { BulkNoteDialog } from "./components/bulk-note-dialog";
 import { BulkCategoryDialog } from "./components/bulk-category-dialog";
 import { BulkDateDialog } from "./components/bulk-date-dialog";
+import { MobileTransactionsPage } from "./components/mobile/mobile-transactions-page";
 import { runAiCategorisation, type TransactionFilters, type AiCategorisationResult } from "@/shared/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -31,6 +33,7 @@ export function TransactionsPage() {
   const { data: accounts = [] } = useAccounts();
   const updateTx = useUpdateTransaction();
   const bulkUpdateTx = useBulkUpdateTransactions();
+  const isMobile = useIsMobile();
 
   const pagination = data?.pagination;
 
@@ -49,6 +52,21 @@ export function TransactionsPage() {
       setAiRunning(false);
     }
   };
+
+  if (isMobile) {
+    return (
+      <MobileTransactionsPage
+        filters={filters}
+        onFiltersChange={setFilters}
+        transactions={data?.data ?? []}
+        pagination={pagination}
+        isLoading={isLoading}
+        categories={categories}
+        accounts={accounts}
+        onUpdate={(id, data) => updateTx.mutate({ id, data })}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
