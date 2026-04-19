@@ -64,8 +64,6 @@ export function SpendingPage() {
 
   return (
     <div className='space-y-6'>
-      <SpendingPageHeader />
-
       <SpendingFiltersPanel
         preset={state.preset}
         onPresetChange={state.setPreset}

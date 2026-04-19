@@ -29,8 +29,11 @@ function formatCurrencyPrecise(amount: number): string {
   }).format(amount);
 }
 
-export function getMonthlyStatusFromPace(pace: MonthlyBudgetPace): MonthlyStatusResult {
-  const { overall, highlights, remainingDays } = pace;
+export function getMonthlyStatusFromPace(
+  pace: MonthlyBudgetPace,
+  daysUntilPayday: number,
+): MonthlyStatusResult {
+  const { overall, highlights } = pace;
   const state = overall.status;
 
   // Determine headline based on state - one short sentence
@@ -63,9 +66,14 @@ export function getMonthlyStatusFromPace(pace: MonthlyBudgetPace): MonthlyStatus
   // Secondary facts: max 2, prioritized
   const secondaryFacts: string[] = [];
 
-  // Priority 1: Safe daily spend
-  if (overall.safeDailySpend > 0 && remainingDays > 0) {
-    secondaryFacts.push(`Safe to spend ${formatCurrencyPrecise(overall.safeDailySpend)}/day from here`);
+  // Priority 1: Safe daily spend — computed against payday horizon, not calendar month,
+  // because remainingFlexibleBudget is a payday-cycle number.
+  const safeDailyUntilPayday =
+    daysUntilPayday > 0
+      ? Math.max(0, overall.remainingFlexibleBudget / daysUntilPayday)
+      : 0;
+  if (safeDailyUntilPayday > 0) {
+    secondaryFacts.push(`Safe to spend ${formatCurrencyPrecise(safeDailyUntilPayday)}/day until payday`);
   }
 
   // Priority 2: Main category issue
@@ -77,9 +85,9 @@ export function getMonthlyStatusFromPace(pace: MonthlyBudgetPace): MonthlyStatus
     secondaryFacts.push(`Main pressure: ${worst.categoryName}`);
   }
 
-  // Priority 3: Days left (only if we have room)
-  if (secondaryFacts.length < 2 && remainingDays > 0) {
-    secondaryFacts.push(`${remainingDays} days left in month`);
+  // Priority 3: Days until payday (only if we have room)
+  if (secondaryFacts.length < 2 && daysUntilPayday > 0) {
+    secondaryFacts.push(`${daysUntilPayday} days until payday`);
   }
 
   return {

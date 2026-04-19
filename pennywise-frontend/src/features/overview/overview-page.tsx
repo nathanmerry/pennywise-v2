@@ -62,9 +62,11 @@ function DailyPulse({ pace, overview }: {
   pace: MonthlyBudgetPace | undefined;
   overview: { dailyAllowance: number; remainingFlexible: number; daysUntilPayday: number; flexibleBudget: number };
 }) {
-  const safeDailySpend = pace?.overall.safeDailySpend ?? overview.dailyAllowance;
+  // Remaining flexible + daily allowance are payday-cycle numbers (see budget.ts).
+  // Never pair them with calendar-month day counts.
   const remaining = pace?.overall.remainingFlexibleBudget ?? overview.remainingFlexible;
-  const daysLeft = pace?.remainingDays ?? overview.daysUntilPayday;
+  const safeDailySpend = overview.dailyAllowance;
+  const daysUntilPayday = overview.daysUntilPayday;
   const projection = pace ? computeProjectedMonthEnd(pace) : null;
 
   return (
@@ -81,7 +83,7 @@ function DailyPulse({ pace, overview }: {
                 {formatCurrencyPrecise(Math.max(0, safeDailySpend))}
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                {formatCurrency(remaining)} remaining over {daysLeft} days
+                {formatCurrency(remaining)} remaining over {daysUntilPayday} {daysUntilPayday === 1 ? "day" : "days"} until payday
               </p>
             </div>
             <div className={cn(
@@ -287,7 +289,7 @@ export function OverviewPage() {
 
       {/* Monthly Status Strip - Layer 2: Use pace data if available */}
       {pace ? (
-        <MonthlyStatusStrip pace={pace} />
+        <MonthlyStatusStrip pace={pace} daysUntilPayday={overview.daysUntilPayday} />
       ) : overspend ? (
         <MonthlyStatusStrip
           remainingFlexibleBudget={overview.remainingFlexible}
@@ -327,12 +329,12 @@ export function OverviewPage() {
               {formatCurrency(Math.max(0, pace?.overall.weeklyAllowance ?? overview.weeklyAllowance))}
             </div>
             <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-              {formatCurrencyPrecise(Math.max(0, pace?.overall.safeDailySpend ?? overview.dailyAllowance))}/day safe to spend
+              {formatCurrencyPrecise(Math.max(0, overview.dailyAllowance))}/day safe until payday
               <PaceExplanation type="daily" />
             </p>
-            {pace && pace.remainingDays > 0 && (
+            {overview.daysUntilPayday > 0 && (
               <p className="text-xs text-muted-foreground">
-                {pace.remainingDays} days left in month
+                {overview.daysUntilPayday} {overview.daysUntilPayday === 1 ? "day" : "days"} until payday
               </p>
             )}
           </CardContent>

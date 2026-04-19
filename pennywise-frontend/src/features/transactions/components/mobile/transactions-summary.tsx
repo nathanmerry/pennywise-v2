@@ -9,7 +9,7 @@ export function TransactionsSummary({ count, dateLabel }: Props) {
 
   return (
     <div className="text-sm text-muted-foreground">
-      {countText} · {dateLabel}
+      {dateLabel} · {countText}
     </div>
   );
 }

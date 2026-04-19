@@ -13,6 +13,7 @@ import { PaceExplanation } from "@/features/overview/components/pace-explanation
 // Props for pace-based status (Layer 2)
 interface PaceStatusStripProps {
   pace: MonthlyBudgetPace;
+  daysUntilPayday: number;
 }
 
 // Props for legacy status (Layer 1 fallback)
@@ -66,7 +67,7 @@ export function MonthlyStatusStrip(props: MonthlyStatusStripProps) {
 
   if (isPaceProps(props)) {
     // Layer 2: Use real pace data
-    status = getMonthlyStatusFromPace(props.pace);
+    status = getMonthlyStatusFromPace(props.pace, props.daysUntilPayday);
   } else {
     // Layer 1 fallback: Use legacy logic
     const input: LegacyStatusInput = {

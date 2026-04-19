@@ -1,5 +1,31 @@
-import { format, isThisYear, isToday, isYesterday, parseISO } from "date-fns";
+import {
+  format,
+  isThisYear,
+  isToday,
+  isYesterday,
+  parseISO,
+  startOfDay,
+} from "date-fns";
 import type { Transaction } from "@/shared/lib/api";
+
+export type FilterMode = "current" | "past" | "future";
+
+/**
+ * Classify a date filter as current/past/future for UX purposes.
+ * - "current" means the range contains today (including open-ended ranges) — live budget metrics make sense.
+ * - "past" means the range is fully behind today — only "spent" makes sense, not "remaining".
+ * - "future" means the range is fully ahead of today — nothing meaningful to show.
+ */
+export function getFilterMode(from?: string, to?: string): FilterMode {
+  if (!from && !to) return "current";
+  const today = startOfDay(new Date());
+  const fromDate = from ? startOfDay(parseISO(from)) : null;
+  const toDate = to ? startOfDay(parseISO(to)) : null;
+
+  if (toDate && toDate.getTime() < today.getTime()) return "past";
+  if (fromDate && fromDate.getTime() > today.getTime()) return "future";
+  return "current";
+}
 
 export interface TransactionDayGroup {
   dateKey: string;
@@ -41,8 +67,8 @@ export function formatDayLabel(dateKey: string): string {
   const d = parseISO(dateKey);
   if (isToday(d)) return "Today";
   if (isYesterday(d)) return "Yesterday";
-  if (isThisYear(d)) return format(d, "d MMMM");
-  return format(d, "d MMMM yyyy");
+  if (isThisYear(d)) return format(d, "EEE d MMM");
+  return format(d, "EEE d MMM yyyy");
 }
 
 export function formatAmount(
@@ -64,21 +90,20 @@ export function formatDateRangeLabel(from?: string, to?: string): string {
   const fromDate = from ? parseISO(from) : undefined;
   const toDate = to ? parseISO(to) : undefined;
 
-  const fmt = (d: Date) =>
-    isThisYear(d) ? format(d, "d MMM") : format(d, "d MMM yyyy");
+  const fmtWithYear = (d: Date) =>
+    isThisYear(d) ? format(d, "MMM do") : format(d, "MMM do, yyyy");
 
   if (fromDate && toDate) {
-    if (
-      fromDate.getFullYear() === toDate.getFullYear() &&
-      fromDate.getMonth() === toDate.getMonth()
-    ) {
-      return isThisYear(fromDate)
-        ? format(fromDate, "MMMM")
-        : format(fromDate, "MMMM yyyy");
+    const sameYear = fromDate.getFullYear() === toDate.getFullYear();
+    const sameMonth = sameYear && fromDate.getMonth() === toDate.getMonth();
+    if (sameMonth) {
+      return `${format(fromDate, "MMMM do")} – ${format(toDate, "do")}${
+        isThisYear(fromDate) ? "" : format(fromDate, ", yyyy")
+      }`;
     }
-    return `${fmt(fromDate)} – ${fmt(toDate)}`;
+    return `${fmtWithYear(fromDate)} – ${fmtWithYear(toDate)}`;
   }
-  if (fromDate) return `Since ${fmt(fromDate)}`;
-  if (toDate) return `Until ${fmt(toDate)}`;
+  if (fromDate) return `Since ${fmtWithYear(fromDate)}`;
+  if (toDate) return `Until ${fmtWithYear(toDate)}`;
   return "All time";
 }

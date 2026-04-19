@@ -320,15 +320,17 @@ function chipDateLabel(from?: string, to?: string): string {
   const f = from ? parseISO(from) : undefined;
   const t = to ? parseISO(to) : undefined;
   if (f && t) {
-    if (
-      f.getFullYear() === t.getFullYear() &&
-      f.getMonth() === t.getMonth()
-    ) {
-      return format(f, "MMMM");
+    const sameYear = f.getFullYear() === t.getFullYear();
+    const sameMonth = sameYear && f.getMonth() === t.getMonth();
+    if (sameMonth) {
+      return `${format(f, "MMMM do")} – ${format(t, "do")}`;
     }
-    return `${format(f, "d MMM")} – ${format(t, "d MMM")}`;
+    if (sameYear) {
+      return `${format(f, "MMM do")} – ${format(t, "MMM do")}`;
+    }
+    return `${format(f, "MMM do, yyyy")} – ${format(t, "MMM do, yyyy")}`;
   }
-  if (f) return `Since ${format(f, "d MMM")}`;
-  if (t) return `Until ${format(t, "d MMM")}`;
+  if (f) return `Since ${format(f, "MMM do")}`;
+  if (t) return `Until ${format(t, "MMM do")}`;
   return "Date";
 }
