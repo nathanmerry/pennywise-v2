@@ -69,13 +69,20 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 
   const { start, end } = getMonthDateRange(month);
 
-  // Get all non-ignored transactions for the month
+  // Get all non-ignored transactions for the month, including their categories
+  // so we can split spend between fixed and flexible.
   const transactions = await prisma.transaction.findMany({
     where: {
       transactionDate: { gte: start, lte: end },
       isIgnored: false,
     },
-    select: { amount: true },
+    select: {
+      amount: true,
+      categories: {
+        where: { source: { not: "inherited" } },
+        select: { categoryId: true },
+      },
+    },
   });
 
   // Get all transactions including ignored for money in/out totals
@@ -110,13 +117,48 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   // Flexible budget = income - savings - fixed - planned
   const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
 
-  // Actual spend (negative amounts are outflows in most banking APIs)
-  // We sum absolute values of negative transactions
-  const actualSpend = transactions
-    .filter((t) => toNumber(t.amount) < 0)
-    .reduce((sum, t) => sum + Math.abs(toNumber(t.amount)), 0);
+  // Build fixed-category set from linked BudgetFixedCommitments. Spend on these
+  // categories is counted toward fixed spend and excluded from flexible tally
+  // so remainingFlexible / daily+weekly allowances reflect controllable spend.
+  const fixedCategoryIds = new Set<string>();
+  const hasLinkedCommitment = budgetMonth.fixedCommitments.some((c) => c.categoryId);
+  if (hasLinkedCommitment) {
+    const allCategories = await prisma.category.findMany({
+      select: { id: true, parentId: true },
+    });
+    const childrenMap = new Map<string, string[]>();
+    for (const cat of allCategories) {
+      if (cat.parentId) {
+        const kids = childrenMap.get(cat.parentId) ?? [];
+        kids.push(cat.id);
+        childrenMap.set(cat.parentId, kids);
+      }
+    }
+    const addWithDescendants = (id: string) => {
+      if (fixedCategoryIds.has(id)) return;
+      fixedCategoryIds.add(id);
+      for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
+    };
+    for (const commitment of budgetMonth.fixedCommitments) {
+      if (commitment.categoryId) addWithDescendants(commitment.categoryId);
+    }
+  }
 
-  const remainingFlexible = flexibleBudget - actualSpend;
+  // Split spend into flexible vs fixed using the source-of-truth commitment links.
+  let actualSpend = 0;
+  let actualFlexibleSpend = 0;
+  for (const tx of transactions) {
+    const amount = toNumber(tx.amount);
+    if (amount >= 0) continue;
+    const abs = Math.abs(amount);
+    actualSpend += abs;
+    const isFixed =
+      fixedCategoryIds.size > 0 &&
+      tx.categories.some((c) => fixedCategoryIds.has(c.categoryId));
+    if (!isFixed) actualFlexibleSpend += abs;
+  }
+
+  const remainingFlexible = flexibleBudget - actualFlexibleSpend;
 
   // Days/weeks until payday
   const now = new Date();
@@ -408,6 +450,8 @@ export interface MonthlyBudgetPace {
     safeDailySpend: number;
     weeklyAllowance: number;
     status: OverallPaceStatus;
+    fixedPlanned: number;
+    actualFixedSpendToDate: number;
   };
 
   categories: CategoryPace[];
@@ -741,11 +785,51 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   );
   const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
 
-  // Calculate actual flexible spend to date
-  const actualFlexibleSpendToDate = transactions.reduce(
-    (sum, t) => sum + Math.abs(toNumber(t.amount)),
-    0
-  );
+  // Build the set of categories treated as "fixed": every category linked by a
+  // BudgetFixedCommitment, plus all descendants. Spend on these categories is
+  // excluded from the flexible tally so pacing reflects controllable spend only.
+  const fixedCategoryIds = new Set<string>();
+  const hasLinkedCommitment = budgetMonth.fixedCommitments.some((c) => c.categoryId);
+
+  if (hasLinkedCommitment) {
+    const allCategories = await prisma.category.findMany({
+      select: { id: true, parentId: true },
+    });
+    const childrenMap = new Map<string, string[]>();
+    for (const cat of allCategories) {
+      if (cat.parentId) {
+        const kids = childrenMap.get(cat.parentId) ?? [];
+        kids.push(cat.id);
+        childrenMap.set(cat.parentId, kids);
+      }
+    }
+
+    const addWithDescendants = (id: string) => {
+      if (fixedCategoryIds.has(id)) return;
+      fixedCategoryIds.add(id);
+      for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
+    };
+
+    for (const commitment of budgetMonth.fixedCommitments) {
+      if (commitment.categoryId) addWithDescendants(commitment.categoryId);
+    }
+  }
+
+  const isFixedTransaction = (tx: (typeof transactions)[number]): boolean => {
+    if (fixedCategoryIds.size === 0) return false;
+    return tx.categories.some((tc) => fixedCategoryIds.has(tc.categoryId));
+  };
+
+  let actualFlexibleSpendToDate = 0;
+  let actualFixedSpendToDate = 0;
+  for (const tx of transactions) {
+    const amount = Math.abs(toNumber(tx.amount));
+    if (isFixedTransaction(tx)) {
+      actualFixedSpendToDate += amount;
+    } else {
+      actualFlexibleSpendToDate += amount;
+    }
+  }
 
   // Overall pace calculations
   const expectedFlexibleSpendByNow = flexibleBudget * paceContext.elapsedRatio;
@@ -768,10 +852,12 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
     overallStatus = "on_track";
   }
 
-  // Build category budgets map from plans
+  // Build category budgets map from plans. Skip any plan whose category is a
+  // fixed-commitment category: pace tracking is a "controllable spend" view
+  // and fixed categories belong to the fixed-commitment ledger, not pacing.
   const categoryBudgets = new Map<string, { budget: number; categoryName: string }>();
   for (const plan of budgetMonth.categoryPlans) {
-    if (plan.categoryId && plan.category) {
+    if (plan.categoryId && plan.category && !fixedCategoryIds.has(plan.categoryId)) {
       categoryBudgets.set(plan.categoryId, {
         budget: toNumber(plan.targetValue),
         categoryName: plan.category.name,
@@ -782,13 +868,17 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   // Aggregate spend by category (using parent category for hierarchy)
   // Only count transactions with a single direct budgeted category to avoid ambiguity
   const categorySpendMap = new Map<string, number>();
-  
+
   for (const tx of transactions) {
+    // Skip fixed-commitment transactions: they shouldn't inflate the flexible
+    // spend on any budgeted category.
+    if (isFixedTransaction(tx)) continue;
+
     const amount = Math.abs(toNumber(tx.amount));
-    
+
     // Get direct category assignments
     const directCategories = tx.categories.filter(tc => tc.source !== "inherited");
-    
+
     if (directCategories.length === 0) continue;
     
     // Find which categories have budgets (check both direct and parent)
@@ -883,6 +973,8 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
       safeDailySpend,
       weeklyAllowance,
       status: overallStatus,
+      fixedPlanned: fixedCommitments,
+      actualFixedSpendToDate,
     },
     categories,
     highlights: {

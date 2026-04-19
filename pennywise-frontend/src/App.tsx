@@ -1,15 +1,15 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
-import { Layout } from "./components/layout";
-import { OverviewPage } from "./pages/overview-page";
-import { SpendingPage } from "./pages/spending-page";
-import { BudgetPage } from "./pages/budget-page";
-import { TransactionsPage } from "./pages/transactions-page";
-import { ConnectionsPage } from "./pages/connections-page";
-import { CategoriesPage } from "./pages/categories-page";
-import { RulesPage } from "./pages/rules-page";
-import { useSyncAll } from "./hooks/use-connections";
+import { Layout } from "./shared/components/layout";
+import { OverviewPage } from "./features/overview/overview-page";
+import { SpendingPage } from "./features/spending/spending-page";
+import { BudgetPage } from "./features/budget/budget-page";
+import { TransactionsPage } from "./features/transactions/transactions-page";
+import { ConnectionsPage } from "./features/connections/connections-page";
+import { CategoriesPage } from "./features/categories/categories-page";
+import { RulesPage } from "./features/rules/rules-page";
+import { useSyncAll } from "./shared/hooks/use-connections";
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -32,11 +32,20 @@ export interface AnalysisCategoryBudget {
   status: CategoryPaceStatus | null;
 }
 
+export interface AnalysisPaceContext {
+  totalDaysInMonth: number;
+  elapsedDays: number;
+  remainingDays: number;
+  elapsedRatio: number;
+  isCurrentMonth: boolean;
+}
+
 export interface AnalysisBudgetContext {
   applicable: boolean;
   month: string | null;
   hasBudget: boolean;
   overall: MonthlyBudgetPace["overall"] | null;
+  paceContext: AnalysisPaceContext | null;
 }
 
 export interface AnalysisPeriod {
@@ -53,6 +62,8 @@ export interface AnalysisSummary {
   avgPerDay: number;
   transactionCount: number;
   recurringSpend: number;
+  flexibleSpend: number;
+  fixedSpend: number;
   highestCategory: {
     categoryId: string;
     categoryName: string;
@@ -81,6 +92,7 @@ export interface AnalysisMerchantRow {
 export interface CategoryAnalysisRow {
   categoryId: string;
   categoryName: string;
+  kind: "fixed" | "flexible";
   spend: number;
   previousSpend: number | null;
   changeAmount: number | null;
@@ -90,6 +102,7 @@ export interface CategoryAnalysisRow {
   averageTransaction: number;
   sparkline: number[];
   budget: AnalysisCategoryBudget | null;
+  plannedAmount: number | null;
 }
 
 export interface SpendingAnalysisResponse {
@@ -118,7 +131,7 @@ export interface CategoryDrilldownResponse {
   };
   series: AnalysisTimeSeriesPoint[];
   topMerchants: AnalysisMerchantRow[];
-  largestTransactions: Array<{
+  transactions: Array<{
     transactionId: string;
     transactionDate: string;
     merchantName: string | null;
@@ -650,11 +663,23 @@ function buildBudgetContext(
   const applicable = filters.preset !== "custom" && isSingleMonth;
   const month = applicable ? formatMonthKey(start) : null;
 
+  const paceContext: AnalysisPaceContext | null =
+    applicable && pace
+      ? {
+          totalDaysInMonth: pace.totalDaysInMonth,
+          elapsedDays: pace.elapsedDays,
+          remainingDays: pace.remainingDays,
+          elapsedRatio: pace.elapsedRatio,
+          isCurrentMonth: pace.isCurrentMonth,
+        }
+      : null;
+
   return {
     applicable,
     month,
     hasBudget: applicable && !!pace,
     overall: applicable ? pace?.overall ?? null : null,
+    paceContext,
   };
 }
 
@@ -679,6 +704,33 @@ function buildBudgetByCategory(
   }
 
   return budgetByCategory;
+}
+
+interface FixedCategoryEntry {
+  plannedAmount: number;
+}
+
+async function getFixedCategoryMap(
+  month: string,
+  ancestryMap: Map<string, CategoryWithAncestry>
+): Promise<Map<string, FixedCategoryEntry>> {
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month },
+    include: { fixedCommitments: true },
+  });
+
+  const rootFixed = new Map<string, FixedCategoryEntry>();
+  if (!budgetMonth) return rootFixed;
+
+  for (const commitment of budgetMonth.fixedCommitments) {
+    if (!commitment.categoryId) continue;
+    const rootCategoryId = getRootCategoryId(commitment.categoryId, ancestryMap);
+    const existing = rootFixed.get(rootCategoryId) ?? { plannedAmount: 0 };
+    existing.plannedAmount += toNumber(commitment.amount);
+    rootFixed.set(rootCategoryId, existing);
+  }
+
+  return rootFixed;
 }
 
 async function getPaceForFilters(filters: SpendingAnalysisFilters): Promise<MonthlyBudgetPace | null> {
@@ -731,6 +783,9 @@ export async function getSpendingAnalysis(
   const budgetContext = buildBudgetContext(filters, pace);
   const budgetByCategory = buildBudgetByCategory(budgetContext, pace);
   const recurringMerchants = buildRecurringMerchantSet(recurringHistory);
+  const fixedCategoryMap = budgetContext.month
+    ? await getFixedCategoryMap(budgetContext.month, ancestryMap)
+    : new Map<string, FixedCategoryEntry>();
   const previousByCategory = new Map<string, { spend: number; transactionCount: number }>();
 
   for (const transaction of previousTransactions) {
@@ -783,10 +838,13 @@ export async function getSpendingAnalysis(
       const previous = previousByCategory.get(categoryId);
       const previousSpend = previous ? roundCurrency(previous.spend) : filters.compare ? 0 : null;
       const change = getChangeMetrics(roundCurrency(entry.spend), previousSpend);
+      const fixed = fixedCategoryMap.get(categoryId);
+      const kind: "fixed" | "flexible" = fixed ? "fixed" : "flexible";
 
       return {
         categoryId,
         categoryName: entry.categoryName,
+        kind,
         spend: roundCurrency(entry.spend),
         previousSpend,
         changeAmount: change.changeAmount,
@@ -795,10 +853,18 @@ export async function getSpendingAnalysis(
         transactionCount: entry.transactionCount,
         averageTransaction: roundCurrency(entry.spend / entry.transactionCount),
         sparkline: buildSparkline(entry.transactions, currentRange.start, currentRange.end),
-        budget: budgetByCategory.get(categoryId) ?? null,
+        budget: kind === "fixed" ? null : budgetByCategory.get(categoryId) ?? null,
+        plannedAmount: fixed ? roundCurrency(fixed.plannedAmount) : null,
       };
     })
     .sort((a, b) => b.spend - a.spend);
+
+  const fixedSpend = roundCurrency(
+    categories
+      .filter((category) => category.kind === "fixed")
+      .reduce((sum, category) => sum + category.spend, 0)
+  );
+  const flexibleSpend = roundCurrency(totalSpend - fixedSpend);
 
   const highestCategory = categories[0]
     ? {
@@ -822,6 +888,8 @@ export async function getSpendingAnalysis(
       avgPerDay: roundCurrency(totalSpend / getInclusiveDayCount(currentRange.start, currentRange.end)),
       transactionCount: currentTransactions.length,
       recurringSpend,
+      flexibleSpend,
+      fixedSpend,
       highestCategory,
     },
     series: buildTimeSeries(currentTransactions, currentRange, previousTransactions, previousRange),
@@ -962,9 +1030,8 @@ export async function getCategoryDrilldown(
       previousRange
     ),
     topMerchants: buildMerchantRows(currentCategoryTransactions, 6),
-    largestTransactions: [...currentCategoryTransactions]
+    transactions: [...currentCategoryTransactions]
       .sort((a, b) => b.amount - a.amount)
-      .slice(0, 8)
       .map((transaction) => ({
         transactionId: transaction.id,
         transactionDate: transaction.transactionDateKey,
