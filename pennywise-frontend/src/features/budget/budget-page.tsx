@@ -33,6 +33,7 @@ import {
   useUpdateCategoryPlan,
   useDeleteCategoryPlan,
   useSpendingHistory,
+  useUpdateBudgetMonth,
 } from "@/shared/hooks/use-budget";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { BudgetRecommendationsPanel } from "@/features/budget/components/budget-recommendations-panel";
@@ -545,6 +546,106 @@ function CategoryPlanRow({ plan, flexibleBudget, avgSpend, monthsObserved, onDel
   );
 }
 
+interface EditBudgetMonthDialogProps {
+  month: string;
+  expectedIncome: string;
+  paydayDate: string;
+  savingsTargetType: "fixed" | "percent";
+  savingsTargetValue: string;
+  onClose: () => void;
+}
+
+function EditBudgetMonthDialog({
+  month,
+  expectedIncome: initialIncome,
+  paydayDate: initialPayday,
+  savingsTargetType: initialSavingsType,
+  savingsTargetValue: initialSavingsValue,
+  onClose,
+}: EditBudgetMonthDialogProps) {
+  const [expectedIncome, setExpectedIncome] = useState(initialIncome);
+  const [savingsTargetValue, setSavingsTargetValue] = useState(initialSavingsValue);
+  const [savingsTargetType, setSavingsTargetType] = useState<"fixed" | "percent">(initialSavingsType);
+  const [paydayDate, setPaydayDate] = useState(() => initialPayday.slice(0, 10));
+  const updateMonth = useUpdateBudgetMonth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expectedIncome || !savingsTargetValue) return;
+
+    await updateMonth.mutateAsync({
+      month,
+      data: {
+        expectedIncome: parseFloat(expectedIncome),
+        paydayDate: new Date(paydayDate).toISOString(),
+        savingsTargetType,
+        savingsTargetValue: parseFloat(savingsTargetValue),
+      },
+    });
+    onClose();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="edit-income">Expected Income (£)</Label>
+          <Input
+            id="edit-income"
+            type="number"
+            step="0.01"
+            value={expectedIncome}
+            onChange={(e) => setExpectedIncome(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-payday">Payday Date</Label>
+          <Input
+            id="edit-payday"
+            type="date"
+            value={paydayDate}
+            onChange={(e) => setPaydayDate(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Savings Target Type</Label>
+          <Select value={savingsTargetType} onValueChange={(v) => setSavingsTargetType(v as "fixed" | "percent")}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fixed">Fixed Amount</SelectItem>
+              <SelectItem value="percent">Percentage of Income</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-savings">
+            Savings Target ({savingsTargetType === "fixed" ? "£" : "%"})
+          </Label>
+          <Input
+            id="edit-savings"
+            type="number"
+            step={savingsTargetType === "fixed" ? "0.01" : "1"}
+            value={savingsTargetValue}
+            onChange={(e) => setSavingsTargetValue(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={updateMonth.isPending}>
+          Save
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 interface SetupBudgetFormProps {
   month: string;
 }
@@ -652,6 +753,7 @@ export function BudgetPage() {
   const [commitmentDialogOpen, setCommitmentDialogOpen] = useState(false);
   const [plannedDialogOpen, setPlannedDialogOpen] = useState(false);
   const [categoryPlanDialogOpen, setCategoryPlanDialogOpen] = useState(false);
+  const [editMonthDialogOpen, setEditMonthDialogOpen] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
 
   const avgSpendByCategoryId = useMemo(() => {
@@ -718,6 +820,27 @@ export function BudgetPage() {
           <h1 className="text-2xl font-bold">Budget Keeper</h1>
           <p className="text-muted-foreground">{formatMonthDisplay(month)}</p>
         </div>
+        <Dialog open={editMonthDialogOpen} onOpenChange={setEditMonthDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Month
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit {formatMonthDisplay(month)}</DialogTitle>
+            </DialogHeader>
+            <EditBudgetMonthDialog
+              month={month}
+              expectedIncome={budget.expectedIncome}
+              paydayDate={budget.paydayDate}
+              savingsTargetType={budget.savingsTargetType}
+              savingsTargetValue={budget.savingsTargetValue}
+              onClose={() => setEditMonthDialogOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Summary Cards */}
@@ -991,7 +1114,12 @@ export function BudgetPage() {
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {budget.categoryPlans.map((plan: BudgetCategoryPlan) => (
+                    {[...budget.categoryPlans]
+                      .sort((a, b) => {
+                        const nameCompare = (a.category?.name ?? "").localeCompare(b.category?.name ?? "");
+                        return nameCompare !== 0 ? nameCompare : a.id.localeCompare(b.id);
+                      })
+                      .map((plan: BudgetCategoryPlan) => (
                       <CategoryPlanRow
                         key={plan.id}
                         plan={plan}

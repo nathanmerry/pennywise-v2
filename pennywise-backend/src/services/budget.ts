@@ -1,9 +1,17 @@
 import { prisma } from "../lib/prisma.js";
+import { getCyclePaceContext, getPayCycleFromBudgetMonth } from "./cycle.js";
 
 export interface BudgetOverview {
   month: string;
   expectedIncome: number;
   paydayDate: Date;
+  /** Start of the pay cycle (previous payday) — shown in UI. */
+  cycleStart: Date;
+  /** End of the pay cycle (this payday) — shown in UI. */
+  cycleEnd: Date;
+  daysInCycle: number;
+  daysElapsed: number;
+  daysRemaining: number;
   savingsTarget: number;
   fixedCommitments: number;
   plannedOneOffs: number;
@@ -67,13 +75,20 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 
   if (!budgetMonth) return null;
 
-  const { start, end } = getMonthDateRange(month);
+  // Phase 1: Overview operates on the pay cycle ending on this budgetMonth's payday,
+  // NOT the calendar month. Transaction queries use (prevPayday, thisPayday] to avoid
+  // overlapping adjacent cycles.
+  const now = new Date();
+  const cycle = getPayCycleFromBudgetMonth(
+    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    now,
+  );
 
-  // Get all non-ignored transactions for the month, including their categories
+  // Get all non-ignored transactions for the cycle, including their categories
   // so we can split spend between fixed and flexible.
   const transactions = await prisma.transaction.findMany({
     where: {
-      transactionDate: { gte: start, lte: end },
+      transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
       isIgnored: false,
     },
     select: {
@@ -85,10 +100,10 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     },
   });
 
-  // Get all transactions including ignored for money in/out totals
+  // Get all transactions (including ignored) for money in/out totals
   const allTransactions = await prisma.transaction.findMany({
     where: {
-      transactionDate: { gte: start, lte: end },
+      transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
     },
     select: { amount: true, isIgnored: true },
   });
@@ -160,14 +175,11 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 
   const remainingFlexible = flexibleBudget - actualFlexibleSpend;
 
-  // Days/weeks until payday
-  const now = new Date();
-  const payday = new Date(budgetMonth.paydayDate);
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const daysUntilPayday = Math.max(0, Math.ceil((payday.getTime() - now.getTime()) / msPerDay));
+  // Days/weeks until payday — use the cycle's remaining days (payday-inclusive cycle).
+  const daysUntilPayday = cycle.daysRemaining;
   const weeksUntilPayday = daysUntilPayday / 7;
 
-  // Weekly/daily allowance based on remaining time
+  // Weekly/daily allowance based on remaining time in cycle.
   const weeklyAllowance = weeksUntilPayday > 0 ? remainingFlexible / weeksUntilPayday : remainingFlexible;
   const dailyAllowance = daysUntilPayday > 0 ? remainingFlexible / daysUntilPayday : remainingFlexible;
 
@@ -186,7 +198,12 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   return {
     month,
     expectedIncome,
-    paydayDate: payday,
+    paydayDate: cycle.paydayDate,
+    cycleStart: cycle.previousPaydayDate,
+    cycleEnd: cycle.paydayDate,
+    daysInCycle: cycle.daysInCycle,
+    daysElapsed: cycle.daysElapsed,
+    daysRemaining: cycle.daysRemaining,
     savingsTarget,
     fixedCommitments,
     plannedOneOffs,
@@ -204,12 +221,31 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 }
 
 export async function getSpendingBreakdown(month: string): Promise<SpendingBreakdown> {
-  const { start, end } = getMonthDateRange(month);
+  // Phase 1: cycle-scoped breakdown. Falls back to calendar month bounds if the
+  // BudgetMonth hasn't been seeded (e.g. caller passed a month key without data).
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month },
+    include: { categoryPlans: true },
+  });
+  const range = budgetMonth
+    ? (() => {
+        const cycle = getPayCycleFromBudgetMonth(
+          { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+          new Date(),
+        );
+        return { start: cycle.startInclusive, end: cycle.endExclusive, isCycle: true };
+      })()
+    : (() => {
+        const { start, end } = getMonthDateRange(month);
+        return { start, end, isCycle: false };
+      })();
 
   // Get all non-ignored transactions with categories
   const transactions = await prisma.transaction.findMany({
     where: {
-      transactionDate: { gte: start, lte: end },
+      transactionDate: range.isCycle
+        ? { gte: range.start, lt: range.end }
+        : { gte: range.start, lte: range.end },
       isIgnored: false,
       amount: { lt: 0 }, // Only outflows
     },
@@ -300,12 +336,7 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
     }
   }
 
-  // Get budget plans for the month
-  const budgetMonth = await prisma.budgetMonth.findUnique({
-    where: { month },
-    include: { categoryPlans: true },
-  });
-
+  // Build budget maps from the budgetMonth already loaded above.
   const categoryBudgets = new Map<string, number>();
   const groupBudgets = new Map<string, number>();
 
@@ -563,9 +594,6 @@ export async function getCategoryPressureDetail(
   month: string,
   categoryId: string
 ): Promise<CategoryPressureDetail | null> {
-  const { start, end } = getMonthDateRange(month);
-  const paceContext = getMonthPaceContext(month);
-
   // Get the category
   const category = await prisma.category.findUnique({
     where: { id: categoryId },
@@ -584,6 +612,15 @@ export async function getCategoryPressureDetail(
     },
   });
 
+  if (!budgetMonth) return null;
+
+  // Phase 1: cycle-scoped pressure view.
+  const cycle = getPayCycleFromBudgetMonth(
+    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    new Date(),
+  );
+  const paceContext = getCyclePaceContext(cycle);
+
   const monthlyBudget = budgetMonth?.categoryPlans[0]
     ? toNumber(budgetMonth.categoryPlans[0].targetValue)
     : null;
@@ -593,7 +630,7 @@ export async function getCategoryPressureDetail(
 
   const transactions = await prisma.transaction.findMany({
     where: {
-      transactionDate: { gte: start, lte: end },
+      transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
       isIgnored: false,
       amount: { lt: 0 },
       categories: {
@@ -742,14 +779,19 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
 
   if (!budgetMonth) return null;
 
-  const paceContext = getMonthPaceContext(month);
-  const { start, end } = getMonthDateRange(month);
+  // Phase 1: cycle-scoped pace. Transaction range and pace context both come
+  // from the pay cycle ending on this BudgetMonth's paydayDate.
+  const cycle = getPayCycleFromBudgetMonth(
+    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    new Date(),
+  );
+  const paceContext = getCyclePaceContext(cycle);
 
-  // Get all non-ignored, non-pending spending transactions for the month
+  // Get all non-ignored, non-pending spending transactions for the cycle
   // Only use direct category assignments (source != 'inherited') to avoid double counting
   const transactions = await prisma.transaction.findMany({
     where: {
-      transactionDate: { gte: start, lte: end },
+      transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
       isIgnored: false,
       amount: { lt: 0 }, // Only outflows (spending)
     },

@@ -313,6 +313,13 @@ export interface BudgetOverview {
   month: string;
   expectedIncome: number;
   paydayDate: string;
+  /** Start of the pay cycle (previous payday, ISO date). */
+  cycleStart: string;
+  /** End of the pay cycle (this payday, ISO date). */
+  cycleEnd: string;
+  daysInCycle: number;
+  daysElapsed: number;
+  daysRemaining: number;
   savingsTarget: number;
   fixedCommitments: number;
   plannedOneOffs: number;

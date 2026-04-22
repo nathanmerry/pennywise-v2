@@ -11,7 +11,6 @@ import { SpendingChartsCard } from "./components/spending-charts-card";
 import { SpendingFiltersPanel } from "./components/spending-filters-panel";
 import { SpendingSummaryGrid } from "./components/summary-grid";
 import { TopMerchantsCard } from "./components/top-merchants-card";
-import { WhatToDoNowCard } from "./components/what-to-do-now-card";
 
 function SpendingPageSkeleton() {
   return (
@@ -76,13 +75,6 @@ export function SpendingPage() {
         <SpendingPageSkeleton />
       ) : analysis ? (
         <>
-          {overall && hasBudgetContext && (
-            <WhatToDoNowCard
-              overall={overall}
-              projection={viewModel.flexibleProjection}
-            />
-          )}
-
           <SpendingSummaryGrid
             summary={analysis.summary}
             dayCount={analysis.currentPeriod.dayCount}

@@ -509,14 +509,35 @@ router.get("/overspend/:month", async (req, res) => {
   res.json(overBudget);
 });
 
-// GET /api/budget/current - Get current month's overview
+// GET /api/budget/current - Get the overview for the active pay cycle.
+// Active cycle = the BudgetMonth whose paydayDate is the next upcoming payday.
+// If no upcoming BudgetMonth exists, fall back to the latest past row (its cycle
+// is still the most recent defined one; the frontend will see it as elapsed).
 router.get("/current", async (_req, res) => {
   const now = new Date();
-  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const overview = await getBudgetOverview(month);
+
+  const upcoming = await prisma.budgetMonth.findFirst({
+    where: { paydayDate: { gte: now } },
+    orderBy: { paydayDate: "asc" },
+    select: { month: true },
+  });
+
+  const activeMonth =
+    upcoming ??
+    (await prisma.budgetMonth.findFirst({
+      orderBy: { paydayDate: "desc" },
+      select: { month: true },
+    }));
+
+  if (!activeMonth) {
+    res.status(404).json({ error: "No budget configured" });
+    return;
+  }
+
+  const overview = await getBudgetOverview(activeMonth.month);
 
   if (!overview) {
-    res.status(404).json({ error: "No budget set for current month" });
+    res.status(404).json({ error: "No budget set for current cycle" });
     return;
   }
 
