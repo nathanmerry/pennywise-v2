@@ -181,11 +181,12 @@ async function upsertTransaction(
   });
 
   if (existing) {
-    // Update provider data but respect manual overrides
+    // Update provider data but respect manual overrides.
+    // transactionDate is intentionally omitted: users can edit it and we must
+    // not clobber their choice on subsequent syncs.
     const updateData: Record<string, unknown> = {
       amount: tx.amount,
       currency: tx.currency,
-      transactionDate,
       description: tx.description,
       merchantName,
       normalizedMerchant,

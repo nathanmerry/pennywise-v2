@@ -357,13 +357,21 @@ export interface SpendingBreakdown {
 }
 
 export type AnalysisPreset =
-  | "this_month"
-  | "last_month"
-  | "last_3_months"
-  | "last_4_months"
-  | "last_6_months"
+  | "this_cycle"
+  | "last_cycle"
+  | "last_3_cycles"
+  | "last_6_cycles"
   | "ytd"
   | "custom";
+
+export interface PayCycleSummary {
+  budgetMonth: string;
+  startInclusive: string;
+  endExclusive: string;
+  paydayDate: string;
+  previousPaydayDate: string;
+  daysInCycle: number;
+}
 
 export interface SpendingAnalysisFilters {
   start: string;
@@ -653,6 +661,10 @@ export function deleteCategoryPlan(id: string) {
 // Dashboard Endpoints
 export function fetchBudgetOverview(month: string) {
   return request<BudgetOverview>(`/budget/overview/${month}`);
+}
+
+export function fetchRecentCycles(count = 12) {
+  return request<{ cycles: PayCycleSummary[] }>(`/budget/cycles?count=${count}`);
 }
 
 // Monthly Pace (Layer 2)

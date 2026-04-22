@@ -13,51 +13,89 @@ import {
 } from "../lib/spending-formatters";
 import { Sparkline } from "./sparkline";
 
+function getTarget(row: CategoryAnalysisRow): {
+  target: number | null;
+  label: string;
+} {
+  if (row.kind === "fixed") {
+    return { target: row.plannedAmount, label: "planned" };
+  }
+  return { target: row.budget?.monthlyBudget ?? null, label: "budget" };
+}
+
+function BudgetDelta({ row }: { row: CategoryAnalysisRow }) {
+  const { target } = getTarget(row);
+  if (target === null) return null;
+
+  const delta = row.spend - target;
+  const deltaAbs = Math.abs(delta);
+
+  if (deltaAbs < 1) {
+    return <span className='text-muted-foreground'>on target</span>;
+  }
+  return delta > 0 ? (
+    <span className='text-destructive font-medium tabular-nums'>
+      {formatCurrency(deltaAbs)} over
+    </span>
+  ) : (
+    <span className='text-green-600 font-medium tabular-nums'>
+      {formatCurrency(deltaAbs)} under
+    </span>
+  );
+}
+
 function BudgetCell({ row }: { row: CategoryAnalysisRow }) {
-  const isFixed = row.kind === "fixed";
-  const target = isFixed
-    ? row.plannedAmount
-    : (row.budget?.monthlyBudget ?? null);
+  const { target, label } = getTarget(row);
 
   if (target === null) {
     return <span className='text-muted-foreground'>-</span>;
   }
 
-  const delta = row.spend - target;
-  const deltaAbs = Math.abs(delta);
-  const targetLabel = isFixed ? "planned" : "budget";
-
-  const deltaNode =
-    deltaAbs < 1 ? (
-      <span className='text-muted-foreground'>on target</span>
-    ) : delta > 0 ? (
-      <span className='text-destructive'>
-        {formatCurrency(deltaAbs)} over
-      </span>
-    ) : (
-      <span className='text-green-600'>
-        {formatCurrency(deltaAbs)} under
-      </span>
-    );
-
   return (
     <div className='text-sm tabular-nums leading-tight'>
       <div className='text-xs text-muted-foreground'>
-        {formatCurrency(row.spend)} / {formatCurrency(target)} {targetLabel}
+        {formatCurrency(row.spend)} / {formatCurrency(target)} {label}
       </div>
-      <div className='font-medium'>{deltaNode}</div>
+      <div>
+        <BudgetDelta row={row} />
+      </div>
     </div>
   );
 }
 
-export function CategoryRow({
+function TrendGlyph({ row }: { row: CategoryAnalysisRow }) {
+  if (row.kind === "fixed" || row.changeAmount === null) {
+    return null;
+  }
+  if (row.changeAmount > 0) {
+    return (
+      <span className='inline-flex items-center gap-0.5 text-destructive'>
+        <ArrowUpRight className='h-3.5 w-3.5' /> trending up
+      </span>
+    );
+  }
+  if (row.changeAmount < 0) {
+    return (
+      <span className='inline-flex items-center gap-0.5 text-green-600'>
+        <ArrowDownRight className='h-3.5 w-3.5' /> trending down
+      </span>
+    );
+  }
+  return null;
+}
+
+export function CategoryTableRow({
   row,
   selected,
   onSelect,
+  showVsPrevious,
+  showBudget,
 }: {
   row: CategoryAnalysisRow;
   selected: boolean;
   onSelect: (id: string) => void;
+  showVsPrevious: boolean;
+  showBudget: boolean;
 }) {
   const isFixed = row.kind === "fixed";
 
@@ -73,12 +111,6 @@ export function CategoryRow({
             <p className='font-medium truncate'>{row.categoryName}</p>
             <p className='text-xs text-muted-foreground sm:text-sm'>
               {row.transactionCount} transactions
-              {!isFixed && (
-                <span className='md:hidden'>
-                  {" · "}
-                  {formatChange(row.changeAmount, row.changePercent)}
-                </span>
-              )}
             </p>
           </div>
           <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground' />
@@ -87,48 +119,104 @@ export function CategoryRow({
       <TableCell className='font-semibold tabular-nums'>
         {formatCurrency(row.spend)}
       </TableCell>
-      <TableCell className='hidden sm:table-cell'>
-        {Math.round(row.shareOfTotal)}%
-      </TableCell>
-      <TableCell className='hidden md:table-cell'>
-        {isFixed ? (
-          <span className='text-muted-foreground'>-</span>
-        ) : (
-          <div
-            className={cn(
-              "inline-flex items-center gap-1 font-medium",
-              row.changeAmount === null
-                ? "text-muted-foreground"
-                : row.changeAmount > 0
-                  ? "text-destructive"
-                  : row.changeAmount < 0
-                    ? "text-green-600"
-                    : "text-muted-foreground",
-            )}
-          >
-            {row.changeAmount !== null && row.changeAmount > 0 ? (
-              <ArrowUpRight className='h-4 w-4' />
-            ) : row.changeAmount !== null && row.changeAmount < 0 ? (
-              <ArrowDownRight className='h-4 w-4' />
-            ) : (
-              <ArrowUpDown className='h-4 w-4' />
-            )}
-            <span>{formatChange(row.changeAmount, row.changePercent)}</span>
-          </div>
-        )}
-      </TableCell>
-      <TableCell className='hidden lg:table-cell'>
-        {row.transactionCount}
-      </TableCell>
-      <TableCell className='hidden lg:table-cell'>
-        {formatCurrency(row.averageTransaction)}
-      </TableCell>
+      <TableCell>{Math.round(row.shareOfTotal)}%</TableCell>
+      {showVsPrevious && (
+        <TableCell>
+          {isFixed ? (
+            <span className='text-muted-foreground'>-</span>
+          ) : (
+            <div
+              className={cn(
+                "inline-flex items-center gap-1 font-medium",
+                row.changeAmount === null
+                  ? "text-muted-foreground"
+                  : row.changeAmount > 0
+                    ? "text-destructive"
+                    : row.changeAmount < 0
+                      ? "text-green-600"
+                      : "text-muted-foreground",
+              )}
+            >
+              {row.changeAmount !== null && row.changeAmount > 0 ? (
+                <ArrowUpRight className='h-4 w-4' />
+              ) : row.changeAmount !== null && row.changeAmount < 0 ? (
+                <ArrowDownRight className='h-4 w-4' />
+              ) : (
+                <ArrowUpDown className='h-4 w-4' />
+              )}
+              <span>{formatChange(row.changeAmount, row.changePercent)}</span>
+            </div>
+          )}
+        </TableCell>
+      )}
+      <TableCell>{row.transactionCount}</TableCell>
+      <TableCell>{formatCurrency(row.averageTransaction)}</TableCell>
       <TableCell className='hidden xl:table-cell'>
         <Sparkline values={row.sparkline} />
       </TableCell>
-      <TableCell className='hidden sm:table-cell'>
-        <BudgetCell row={row} />
-      </TableCell>
+      {showBudget && (
+        <TableCell>
+          <BudgetCell row={row} />
+        </TableCell>
+      )}
     </TableRow>
+  );
+}
+
+export function CategoryMobileRow({
+  row,
+  selected,
+  onSelect,
+}: {
+  row: CategoryAnalysisRow;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const { target } = getTarget(row);
+  const trend = <TrendGlyph row={row} />;
+
+  return (
+    <button
+      type='button'
+      onClick={() => onSelect(row.categoryId)}
+      className={cn(
+        "group block w-full py-2.5 text-left transition-colors",
+        "border-l-2 border-transparent -ml-3 pl-3 pr-1",
+        "active:bg-accent/40 hover:bg-accent/20",
+        selected && "border-primary bg-accent/30",
+      )}
+    >
+      <div className='flex items-baseline justify-between gap-3'>
+        <div className='flex min-w-0 items-center gap-1'>
+          <p className='font-medium truncate'>{row.categoryName}</p>
+          <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5' />
+        </div>
+        <p className='text-base font-semibold tabular-nums'>
+          {formatCurrency(row.spend)}
+        </p>
+      </div>
+
+      <div className='mt-0.5 flex items-baseline justify-between gap-3 text-sm text-muted-foreground'>
+        <span>
+          {row.transactionCount}{" "}
+          {row.transactionCount === 1 ? "transaction" : "transactions"}
+        </span>
+        {target !== null ? <BudgetDelta row={row} /> : null}
+      </div>
+
+      <p className='mt-0.5 text-xs text-muted-foreground/80'>
+        <span className='font-medium text-foreground/70'>
+          {Math.round(row.shareOfTotal)}% of spend
+        </span>
+        {" · "}
+        {formatCurrency(row.averageTransaction)} avg
+        {trend !== null && (
+          <>
+            {" · "}
+            {trend}
+          </>
+        )}
+      </p>
+    </button>
   );
 }

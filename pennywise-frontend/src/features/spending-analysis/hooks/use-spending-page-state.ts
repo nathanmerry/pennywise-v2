@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import type {
-  Account,
   AnalysisPreset,
-  Category,
+  PayCycleSummary,
   SpendingAnalysisFilters,
 } from "@/shared/lib/api";
 import {
@@ -16,11 +15,8 @@ import type { ChartMode } from "../components/spending-charts-card";
 
 type SortDirection = "asc" | "desc";
 
-export function useSpendingPageState(
-  accounts: Account[],
-  categories: Category[],
-) {
-  const [preset, setPreset] = useState<AnalysisPreset>("this_month");
+export function useSpendingPageState(cycles: PayCycleSummary[]) {
+  const [preset, setPreset] = useState<AnalysisPreset>("this_cycle");
   const [chartMode, setChartMode] = useState<ChartMode>("daily");
   const [comparePrevious, setComparePrevious] = useState(false);
   const [includeIgnored, setIncludeIgnored] = useState(false);
@@ -37,8 +33,8 @@ export function useSpendingPageState(
   );
 
   const resolvedRange = useMemo(
-    () => resolvePresetRange(preset, customRange),
-    [preset, customRange],
+    () => resolvePresetRange(preset, cycles, customRange),
+    [preset, cycles, customRange],
   );
 
   const filters = useMemo<SpendingAnalysisFilters>(
@@ -63,25 +59,15 @@ export function useSpendingPageState(
 
   const periodLabel = formatDateRangeLabel(filters.start, filters.end);
 
-  const selectedAccountLabel = accountId
-    ? (accounts.find((account) => account.id === accountId)?.accountName ??
-      "Selected account")
-    : "all accounts";
-
-  const selectedCategoryLabel = categoryId
-    ? (categories.find((category) => category.id === categoryId)?.name ??
-      "selected category")
-    : "all categories";
-
   const hasCustomFilters =
-    preset !== "this_month" ||
+    preset !== "this_cycle" ||
     !!accountId ||
     !!categoryId ||
     comparePrevious ||
     includeIgnored;
 
   const resetFilters = () => {
-    setPreset("this_month");
+    setPreset("this_cycle");
     setComparePrevious(false);
     setIncludeIgnored(false);
     setAccountId(undefined);
@@ -120,8 +106,6 @@ export function useSpendingPageState(
     setSelectedCategoryId,
     filters,
     periodLabel,
-    selectedAccountLabel,
-    selectedCategoryLabel,
     hasCustomFilters,
     resetFilters,
   };

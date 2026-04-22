@@ -2,29 +2,21 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useAccounts } from "@/shared/hooks/use-accounts";
 import { useCategories } from "@/shared/hooks/use-categories";
-import { useSpendingAnalysis } from "@/shared/hooks/use-budget";
+import { useRecentCycles, useSpendingAnalysis } from "@/shared/hooks/use-budget";
 import { useSpendingPageState } from "./hooks/use-spending-page-state";
 import { useSpendingAnalysisViewModel } from "./hooks/use-spending-analysis-view-model";
 import { SpendingAnalysisDrawer } from "./components/spending-analysis-drawer";
 import { CategoryBreakdownCard } from "./components/category-breakdown-card";
 import { SpendingChartsCard } from "./components/spending-charts-card";
 import { SpendingFiltersPanel } from "./components/spending-filters-panel";
-import { SpendingSummaryGrid } from "./components/summary-grid";
 import { TopMerchantsCard } from "./components/top-merchants-card";
 
 function SpendingPageSkeleton() {
   return (
-    <div className='space-y-6'>
-      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5'>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Skeleton key={index} className='h-28' />
-        ))}
-      </div>
-      <div className='grid gap-4 xl:grid-cols-[1.7fr,0.9fr]'>
-        <Skeleton className='h-96' />
-        <Skeleton className='h-96' />
-      </div>
-      <Skeleton className='h-[480px]' />
+    <div className='grid gap-4 xl:grid-cols-[1.7fr,0.9fr]'>
+      <Skeleton className='h-96' />
+      <Skeleton className='h-96' />
+      <Skeleton className='h-[480px] xl:col-span-2' />
     </div>
   );
 }
@@ -32,20 +24,38 @@ function SpendingPageSkeleton() {
 export function SpendingPage() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
-  const state = useSpendingPageState(accounts, categories);
-  const { data: analysis, isLoading } = useSpendingAnalysis(state.filters);
+  const { data: cyclesData, isLoading: isCyclesLoading } = useRecentCycles(12);
+  const cycles = cyclesData?.cycles ?? [];
+  const hasCycles = cycles.length > 0;
+  const state = useSpendingPageState(cycles);
+  const { data: analysis, isLoading: isAnalysisLoading } = useSpendingAnalysis(
+    hasCycles ? state.filters : { start: "", end: "" },
+  );
   const viewModel = useSpendingAnalysisViewModel(
     analysis,
     state.sortKey,
     state.sortDirection,
   );
 
-  const overall = analysis?.budgetContext.overall ?? null;
-  const hasBudgetContext =
-    !!analysis?.budgetContext.applicable && !!overall;
-  const budgetStatusLabel =
-    hasBudgetContext && overall ? overall.status.replace("_", " ") : null;
   const showPrevious = state.comparePrevious && !!analysis?.previousPeriod;
+  const showBudgetColumn = !!analysis?.budgetContext.applicable;
+  const isLoading = isCyclesLoading || (hasCycles && isAnalysisLoading);
+
+  if (!isCyclesLoading && !hasCycles) {
+    return (
+      <Card>
+        <CardContent className='py-12 text-center text-muted-foreground'>
+          <p className='mb-2 text-base font-medium text-foreground'>
+            Set up your pay cycle to see spending analysis
+          </p>
+          <p className='text-sm'>
+            Spending Analysis is organised around pay cycles. Create a budget
+            month with a payday to unlock this view.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className='space-y-6'>
@@ -65,8 +75,6 @@ export function SpendingPage() {
         accounts={accounts}
         categories={categories}
         periodLabel={state.periodLabel}
-        selectedAccountLabel={state.selectedAccountLabel}
-        selectedCategoryLabel={state.selectedCategoryLabel}
         hasCustomFilters={state.hasCustomFilters}
         onReset={state.resetFilters}
       />
@@ -74,38 +82,31 @@ export function SpendingPage() {
       {isLoading ? (
         <SpendingPageSkeleton />
       ) : analysis ? (
-        <>
-          <SpendingSummaryGrid
-            summary={analysis.summary}
-            dayCount={analysis.currentPeriod.dayCount}
+        <div className='grid gap-4 xl:grid-cols-[1.7fr,0.9fr]'>
+          <CategoryBreakdownCard
+            flexibleCategories={viewModel.flexibleCategories}
+            fixedCategories={viewModel.fixedCategories}
+            onToggleSort={state.toggleSort}
+            selectedCategoryId={state.selectedCategoryId}
+            onSelectCategory={state.setSelectedCategoryId}
+            showVsPrevious={showPrevious}
+            showBudget={showBudgetColumn}
           />
 
-          <div className='grid gap-4 xl:grid-cols-[1.7fr,0.9fr]'>
-            <SpendingChartsCard
-              chartMode={state.chartMode}
-              onChartModeChange={state.setChartMode}
-              series={analysis.series}
-              cumulativeSeries={viewModel.cumulativeSeries}
-              weeklyData={viewModel.weeklyData}
-              showPrevious={showPrevious}
-              showBudgetPace={hasBudgetContext}
-              dailyBudgetPace={viewModel.dailyBudgetPace}
-              weeklyBudgetAllowance={viewModel.weeklyBudgetAllowance}
-              budgetStatusLabel={budgetStatusLabel}
-            />
+          <SpendingChartsCard
+            chartMode={state.chartMode}
+            onChartModeChange={state.setChartMode}
+            series={analysis.series}
+            cumulativeSeries={viewModel.cumulativeSeries}
+            weeklyData={viewModel.weeklyData}
+            showPrevious={showPrevious}
+            totalSpend={analysis.summary.totalSpend}
+            avgPerDay={analysis.summary.avgPerDay}
+            periodLabel={state.periodLabel}
+          />
 
-            <CategoryBreakdownCard
-              flexibleCategories={viewModel.flexibleCategories}
-              fixedCategories={viewModel.fixedCategories}
-              onToggleSort={state.toggleSort}
-              selectedCategoryId={state.selectedCategoryId}
-              onSelectCategory={state.setSelectedCategoryId}
-              budgetStatusLabel={budgetStatusLabel}
-            />
-
-            <TopMerchantsCard merchants={analysis.topMerchants} />
-          </div>
-        </>
+          <TopMerchantsCard merchants={analysis.topMerchants} />
+        </div>
       ) : (
         <Card>
           <CardContent className='py-12 text-center text-muted-foreground'>

@@ -10,20 +10,12 @@ import type { WeeklyPoint } from "../components/weekly-spend-chart";
 
 type SortDirection = "asc" | "desc";
 
-type CumulativePoint = AnalysisTimeSeriesPoint & { budgetPace?: number };
-
 export interface SpendingAnalysisViewModel {
   sortedCategories: CategoryAnalysisRow[];
   flexibleCategories: CategoryAnalysisRow[];
   fixedCategories: CategoryAnalysisRow[];
-  cumulativeSeries: CumulativePoint[];
+  cumulativeSeries: AnalysisTimeSeriesPoint[];
   weeklyData: WeeklyPoint[];
-  weeklyBudgetAllowance: number | null;
-  dailyBudgetPace: number | null;
-  flexibleProjection: {
-    projectedTotal: number;
-    projectedOverage: number;
-  } | null;
 }
 
 export function useSpendingAnalysisViewModel(
@@ -42,21 +34,10 @@ export function useSpendingAnalysisViewModel(
     });
   }, [analysis, sortDirection, sortKey]);
 
-  const cumulativeSeries = useMemo<CumulativePoint[]>(() => {
-    if (!analysis?.series) return [];
-    const budget =
-      analysis.budgetContext.applicable && analysis.budgetContext.overall
-        ? analysis.budgetContext.overall.flexibleBudget
-        : null;
-    const totalDays = analysis.series.length;
-    return analysis.series.map((point, index) => ({
-      ...point,
-      budgetPace:
-        budget !== null && totalDays > 1
-          ? Math.round((budget / (totalDays - 1)) * index)
-          : undefined,
-    }));
-  }, [analysis]);
+  const cumulativeSeries = useMemo<AnalysisTimeSeriesPoint[]>(
+    () => analysis?.series ?? [],
+    [analysis],
+  );
 
   const weeklyData = useMemo<WeeklyPoint[]>(() => {
     if (!analysis?.series) return [];
@@ -102,50 +83,6 @@ export function useSpendingAnalysisViewModel(
     }));
   }, [analysis]);
 
-  const weeklyBudgetAllowance = useMemo(() => {
-    if (!analysis?.budgetContext.applicable || !analysis.budgetContext.overall)
-      return null;
-    const totalDays = analysis.series.length;
-    if (totalDays === 0) return null;
-    const weeksInRange = Math.max(1, Math.ceil(totalDays / 7));
-    return analysis.budgetContext.overall.flexibleBudget / weeksInRange;
-  }, [analysis]);
-
-  const dailyBudgetPace = useMemo(() => {
-    if (
-      !analysis?.budgetContext.applicable ||
-      !analysis.budgetContext.overall ||
-      !analysis.budgetContext.paceContext
-    ) {
-      return null;
-    }
-    const { flexibleBudget } = analysis.budgetContext.overall;
-    const { totalDaysInMonth } = analysis.budgetContext.paceContext;
-    if (totalDaysInMonth <= 0) return null;
-    return flexibleBudget / totalDaysInMonth;
-  }, [analysis]);
-
-  const flexibleProjection = useMemo(() => {
-    if (
-      !analysis?.budgetContext.applicable ||
-      !analysis.budgetContext.overall ||
-      !analysis.budgetContext.paceContext
-    ) {
-      return null;
-    }
-    const { flexibleBudget, actualFlexibleSpendToDate } =
-      analysis.budgetContext.overall;
-    const { elapsedDays, totalDaysInMonth, isCurrentMonth } =
-      analysis.budgetContext.paceContext;
-    if (!isCurrentMonth || elapsedDays <= 0 || totalDaysInMonth <= 0) {
-      return null;
-    }
-    const dailyRate = actualFlexibleSpendToDate / elapsedDays;
-    const projectedTotal = dailyRate * totalDaysInMonth;
-    const projectedOverage = projectedTotal - flexibleBudget;
-    return { projectedTotal, projectedOverage };
-  }, [analysis]);
-
   const flexibleCategories = useMemo(
     () => sortedCategories.filter((row) => row.kind !== "fixed"),
     [sortedCategories],
@@ -161,8 +98,5 @@ export function useSpendingAnalysisViewModel(
     fixedCategories,
     cumulativeSeries,
     weeklyData,
-    weeklyBudgetAllowance,
-    dailyBudgetPace,
-    flexibleProjection,
   };
 }

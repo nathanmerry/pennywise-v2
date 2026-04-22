@@ -6,11 +6,10 @@ import {
 } from "./budget.js";
 
 export type AnalysisPreset =
-  | "this_month"
-  | "last_month"
-  | "last_3_months"
-  | "last_4_months"
-  | "last_6_months"
+  | "this_cycle"
+  | "last_cycle"
+  | "last_3_cycles"
+  | "last_6_cycles"
   | "ytd"
   | "custom";
 
@@ -242,10 +241,6 @@ function getMonthStart(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 }
 
-function getMonthEnd(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999));
-}
-
 function shiftMonths(date: Date, months: number): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate()));
 }
@@ -253,25 +248,9 @@ function shiftMonths(date: Date, months: number): Date {
 function getPreviousPeriod(
   start: Date,
   end: Date,
-  preset: AnalysisPreset | undefined
+  _preset: AnalysisPreset | undefined
 ): { start: Date; end: Date } {
   const dayCount = getInclusiveDayCount(start, end);
-
-  if (preset === "this_month") {
-    const previousMonth = shiftMonths(start, -1);
-    const previousStart = getMonthStart(previousMonth);
-    const previousEnd = addDays(previousStart, dayCount - 1);
-    return { start: previousStart, end: previousEnd };
-  }
-
-  if (preset === "last_month") {
-    const previousMonth = shiftMonths(start, -1);
-    return {
-      start: getMonthStart(previousMonth),
-      end: getMonthEnd(previousMonth),
-    };
-  }
-
   const previousEnd = addDays(start, -1);
   const previousStart = addDays(previousEnd, -(dayCount - 1));
   return { start: previousStart, end: previousEnd };
@@ -654,14 +633,12 @@ function buildBudgetContext(
   filters: SpendingAnalysisFilters,
   pace: MonthlyBudgetPace | null
 ): AnalysisBudgetContext {
-  const start = parseStartDate(filters.start);
   const end = parseEndDate(filters.end);
-  const isSingleMonth =
-    start.getUTCFullYear() === end.getUTCFullYear() &&
-    start.getUTCMonth() === end.getUTCMonth();
+  const isSingleCycle =
+    filters.preset === "this_cycle" || filters.preset === "last_cycle";
 
-  const applicable = filters.preset !== "custom" && isSingleMonth;
-  const month = applicable ? formatMonthKey(start) : null;
+  const applicable = isSingleCycle;
+  const month = applicable ? formatMonthKey(end) : null;
 
   const paceContext: AnalysisPaceContext | null =
     applicable && pace
@@ -734,17 +711,12 @@ async function getFixedCategoryMap(
 }
 
 async function getPaceForFilters(filters: SpendingAnalysisFilters): Promise<MonthlyBudgetPace | null> {
-  const start = parseStartDate(filters.start);
-  const end = parseEndDate(filters.end);
-  const isSingleMonth =
-    start.getUTCFullYear() === end.getUTCFullYear() &&
-    start.getUTCMonth() === end.getUTCMonth();
-
-  if (!isSingleMonth || filters.preset === "custom") {
+  if (filters.preset !== "this_cycle" && filters.preset !== "last_cycle") {
     return null;
   }
 
-  return getMonthlyBudgetPace(formatMonthKey(start));
+  const end = parseEndDate(filters.end);
+  return getMonthlyBudgetPace(formatMonthKey(end));
 }
 
 function getPeriodMeta(start: Date, end: Date): AnalysisPeriod {

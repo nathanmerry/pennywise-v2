@@ -3,7 +3,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -14,8 +13,6 @@ import {
   formatCompactCurrency,
   formatTooltipCurrency,
 } from "../lib/spending-formatters";
-
-type CumulativePoint = AnalysisTimeSeriesPoint & { budgetPace?: number };
 
 function tooltipLabelFormatter(_: unknown, payload: unknown) {
   const items = payload as
@@ -30,11 +27,9 @@ function tooltipLabelFormatter(_: unknown, payload: unknown) {
 export function DailySpendChart({
   data,
   showPrevious,
-  dailyBudgetPace,
 }: {
   data: AnalysisTimeSeriesPoint[];
   showPrevious: boolean;
-  dailyBudgetPace: number | null;
 }) {
   return (
     <ResponsiveContainer width='100%' height='100%'>
@@ -65,20 +60,6 @@ export function DailySpendChart({
             name='Previous period'
           />
         )}
-        {dailyBudgetPace !== null && (
-          <ReferenceLine
-            y={dailyBudgetPace}
-            stroke='var(--destructive)'
-            strokeDasharray='6 4'
-            strokeWidth={1.5}
-            label={{
-              value: "Expected daily pace",
-              position: "right",
-              fontSize: 11,
-              fill: "var(--destructive)",
-            }}
-          />
-        )}
       </LineChart>
     </ResponsiveContainer>
   );
@@ -87,11 +68,9 @@ export function DailySpendChart({
 export function CumulativeSpendChart({
   data,
   showPrevious,
-  showBudgetPace,
 }: {
-  data: CumulativePoint[];
+  data: AnalysisTimeSeriesPoint[];
   showPrevious: boolean;
-  showBudgetPace: boolean;
 }) {
   return (
     <ResponsiveContainer width='100%' height='100%'>
@@ -120,17 +99,6 @@ export function CumulativeSpendChart({
             strokeWidth={2}
             dot={false}
             name='Previous period'
-          />
-        )}
-        {showBudgetPace && (
-          <Line
-            type='linear'
-            dataKey='budgetPace'
-            stroke='var(--destructive)'
-            strokeDasharray='6 4'
-            strokeWidth={1.5}
-            dot={false}
-            name='Budget pace'
           />
         )}
       </LineChart>

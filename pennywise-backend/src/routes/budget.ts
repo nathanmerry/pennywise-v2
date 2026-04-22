@@ -5,6 +5,7 @@ import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget, getMo
 import { getSpendingHistoryAnalysis, getCategoryEvidenceBatch } from "../services/spending-history.js";
 import { generateBudgetRecommendations, applyBudgetRecommendations } from "../services/budget-recommendations.js";
 import { getCategoryDrilldown, getSpendingAnalysis } from "../services/spending-analysis.js";
+import { buildRecentPayCycles } from "../services/cycle.js";
 
 const router = Router();
 
@@ -13,7 +14,7 @@ const analysisQuerySchema = z.object({
   end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   compare: z.union([z.literal("true"), z.literal("false")]).optional(),
   preset: z
-    .enum(["this_month", "last_month", "last_3_months", "last_4_months", "last_6_months", "ytd", "custom"])
+    .enum(["this_cycle", "last_cycle", "last_3_cycles", "last_6_cycles", "ytd", "custom"])
     .optional(),
   accountId: z.string().optional(),
   categoryId: z.string().optional(),
@@ -542,6 +543,50 @@ router.get("/current", async (_req, res) => {
   }
 
   res.json(overview);
+});
+
+// GET /api/budget/cycles?count=N - Return the most recent N pay cycles.
+// Used by Spending Analysis to resolve cycle-based preset ranges on the client.
+// Returns [] when no BudgetMonth rows exist so the client can render a setup prompt.
+router.get("/cycles", async (req, res) => {
+  const countParam = Number.parseInt(String(req.query.count ?? "12"), 10);
+  const count = Number.isFinite(countParam)
+    ? Math.min(Math.max(countParam, 1), 24)
+    : 12;
+
+  const now = new Date();
+  const upcoming = await prisma.budgetMonth.findFirst({
+    where: { paydayDate: { gte: now } },
+    orderBy: { paydayDate: "asc" },
+    select: { month: true, paydayDate: true },
+  });
+
+  const anchor =
+    upcoming ??
+    (await prisma.budgetMonth.findFirst({
+      orderBy: { paydayDate: "desc" },
+      select: { month: true, paydayDate: true },
+    }));
+
+  if (!anchor) {
+    res.json({ cycles: [] });
+    return;
+  }
+
+  const cycles = buildRecentPayCycles(
+    { month: anchor.month, paydayDate: new Date(anchor.paydayDate) },
+    count,
+    now,
+  ).map((cycle) => ({
+    budgetMonth: cycle.budgetMonth,
+    startInclusive: cycle.startInclusive.toISOString(),
+    endExclusive: cycle.endExclusive.toISOString(),
+    paydayDate: cycle.paydayDate.toISOString(),
+    previousPaydayDate: cycle.previousPaydayDate.toISOString(),
+    daysInCycle: cycle.daysInCycle,
+  }));
+
+  res.json({ cycles });
 });
 
 // GET /api/budget/pace/:month - Monthly pace calculations (Layer 2)

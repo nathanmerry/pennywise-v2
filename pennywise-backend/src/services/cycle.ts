@@ -115,6 +115,33 @@ export function getMonthKey(d: Date): string {
 }
 
 /**
+ * Walk back N cycles starting from an anchor BudgetMonth, newest first.
+ * Pure — callers supply the anchor (typically the upcoming BudgetMonth row,
+ * else the latest past one). Returns an empty array when count <= 0.
+ */
+export function buildRecentPayCycles(
+  anchor: { month: string; paydayDate: Date },
+  count: number,
+  now: Date,
+): PayCycle[] {
+  if (count <= 0) return [];
+
+  const cycles: PayCycle[] = [];
+  let paydayDate: Date = startOfLocalDay(new Date(anchor.paydayDate));
+  let budgetMonth: string = anchor.month;
+
+  for (let i = 0; i < count; i += 1) {
+    cycles.push(
+      getPayCycleFromBudgetMonth({ month: budgetMonth, paydayDate }, now),
+    );
+    paydayDate = getPreviousPaydayDate(paydayDate);
+    budgetMonth = monthKey(paydayDate);
+  }
+
+  return cycles;
+}
+
+/**
  * Pace context scoped to a pay cycle. Shape matches the legacy calendar-month
  * pace context (totalDaysInMonth/elapsedDays/remainingDays field names kept)
  * so existing MonthlyBudgetPace/CategoryPace consumers continue to typecheck —

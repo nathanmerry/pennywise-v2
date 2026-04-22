@@ -2,7 +2,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -23,11 +22,9 @@ export interface WeeklyPoint {
 export function WeeklySpendChart({
   data,
   showPrevious,
-  weeklyBudgetAllowance,
 }: {
   data: WeeklyPoint[];
   showPrevious: boolean;
-  weeklyBudgetAllowance: number | null;
 }) {
   return (
     <ResponsiveContainer width='100%' height='100%'>
@@ -49,20 +46,6 @@ export function WeeklySpendChart({
             radius={[4, 4, 0, 0]}
             opacity={0.4}
             name='Previous period'
-          />
-        )}
-        {weeklyBudgetAllowance !== null && (
-          <ReferenceLine
-            y={weeklyBudgetAllowance}
-            stroke='var(--destructive)'
-            strokeDasharray='6 4'
-            strokeWidth={1.5}
-            label={{
-              value: "Weekly budget",
-              position: "right",
-              fontSize: 11,
-              fill: "var(--destructive)",
-            }}
           />
         )}
       </BarChart>

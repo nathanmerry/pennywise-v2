@@ -20,6 +20,7 @@ import {
   deleteCategoryPlan,
   fetchBudgetOverview,
   fetchCurrentBudgetOverview,
+  fetchRecentCycles,
   fetchSpendingBreakdown,
   fetchSpendingAnalysis,
   fetchCategoryDrilldown,
@@ -228,6 +229,14 @@ export function useCurrentBudgetOverview() {
   return useQuery({
     queryKey: ["currentBudgetOverview"],
     queryFn: fetchCurrentBudgetOverview,
+    retry: false,
+  });
+}
+
+export function useRecentCycles(count = 12) {
+  return useQuery({
+    queryKey: ["recentCycles", count],
+    queryFn: () => fetchRecentCycles(count),
     retry: false,
   });
 }
