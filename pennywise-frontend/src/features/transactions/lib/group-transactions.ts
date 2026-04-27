@@ -23,7 +23,10 @@ export function groupTransactionsByDay(
   const groups: TransactionDayGroup[] = [];
   for (const [dateKey, txs] of map.entries()) {
     txs.sort((a, b) => b.transactionDate.localeCompare(a.transactionDate));
-    const total = txs.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const total = txs.reduce(
+      (sum, t) => sum + parseFloat(t.updatedTransactionAmount ?? t.amount),
+      0,
+    );
     groups.push({
       dateKey,
       label: formatDayLabel(dateKey),

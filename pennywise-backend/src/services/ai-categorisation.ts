@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { effectiveAmount } from "../lib/effective-amount.js";
 import { env } from "../lib/env.js";
 import { logger } from "../lib/logger.js";
 import { expandCategoryIds, setTransactionCategories } from "./rules.js";
@@ -119,6 +120,7 @@ export async function getUncategorisedTransactions(options: {
       merchantName: true,
       normalizedMerchant: true,
       amount: true,
+      updatedTransactionAmount: true,
       currency: true,
       transactionDate: true,
     },
@@ -137,7 +139,7 @@ function buildTransactionPayloads(
     description: tx.description,
     merchantName: tx.merchantName,
     normalizedMerchant: tx.normalizedMerchant,
-    amount: Number(tx.amount),
+    amount: effectiveAmount(tx),
     currency: tx.currency,
     transactionDate: tx.transactionDate.toISOString().split("T")[0],
   }));

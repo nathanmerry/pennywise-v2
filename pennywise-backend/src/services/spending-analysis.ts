@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { effectiveAmount } from "../lib/effective-amount.js";
 import {
   getMonthlyBudgetPace,
   type CategoryPaceStatus,
@@ -374,6 +375,7 @@ async function getAttributedTransactions(
       id: true,
       transactionDate: true,
       amount: true,
+      updatedTransactionAmount: true,
       description: true,
       merchantName: true,
       normalizedMerchant: true,
@@ -412,7 +414,7 @@ async function getAttributedTransactions(
       id: transaction.id,
       transactionDate: transaction.transactionDate,
       transactionDateKey: formatDateKey(transaction.transactionDate),
-      amount: Math.abs(toNumber(transaction.amount)),
+      amount: Math.abs(effectiveAmount(transaction)),
       description: transaction.description,
       merchantName: transaction.merchantName,
       normalizedMerchant: transaction.normalizedMerchant,

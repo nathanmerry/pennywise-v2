@@ -10,6 +10,7 @@ import {
   Loader2,
   X,
   CalendarIcon,
+  Pencil,
 } from "lucide-react";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
@@ -34,12 +35,13 @@ import type { Transaction, Category } from "@/shared/lib/api";
 import { EditNoteDialog } from "./edit-note-dialog";
 import { EditCategoryDialog } from "./edit-category-dialog";
 import { EditDateDialog } from "./edit-date-dialog";
+import { EditAmountDialog } from "./edit-amount-dialog";
 import { CreateRuleDialog } from "./create-rule-dialog";
 
 interface TransactionTableProps {
   transactions: Transaction[];
   categories: Category[];
-  onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string }) => void;
+  onUpdate: (id: string, data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string; updatedTransactionAmount?: number | null }) => void;
   isUpdating: boolean;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
@@ -60,6 +62,7 @@ export function TransactionTable({
   const [noteDialog, setNoteDialog] = useState<Transaction | null>(null);
   const [categoryDialog, setCategoryDialog] = useState<Transaction | null>(null);
   const [dateDialog, setDateDialog] = useState<Transaction | null>(null);
+  const [amountDialog, setAmountDialog] = useState<Transaction | null>(null);
   const [ruleDialog, setRuleDialog] = useState<Transaction | null>(null);
 
   const allSelected = transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
@@ -216,9 +219,25 @@ export function TransactionTable({
                     </div>
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium text-sm">
-                    <span className={cn(parseFloat(tx.amount) >= 0 ? "text-green-600" : "")}>
-                      {formatAmount(tx.amount, tx.currency)}
-                    </span>
+                    {(() => {
+                      const effective = tx.updatedTransactionAmount ?? tx.amount;
+                      const isOverridden = tx.updatedTransactionAmount !== null;
+                      return (
+                        <span
+                          className={cn(parseFloat(effective) >= 0 ? "text-green-600" : "")}
+                          title={
+                            isOverridden
+                              ? `Edited (bank-reported: ${formatAmount(tx.amount, tx.currency)})`
+                              : undefined
+                          }
+                        >
+                          {formatAmount(effective, tx.currency)}
+                          {isOverridden && (
+                            <Pencil className="ml-1 inline h-3 w-3 text-muted-foreground" />
+                          )}
+                        </span>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
@@ -308,6 +327,10 @@ export function TransactionTable({
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           Edit date
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setAmountDialog(tx)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit amount
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onUpdate(tx.id, { isIgnored: !tx.isIgnored })}
                         >
@@ -371,6 +394,18 @@ export function TransactionTable({
           onSave={(date: string) => {
             onUpdate(dateDialog.id, { transactionDate: date });
             setDateDialog(null);
+          }}
+        />
+      )}
+
+      {amountDialog && (
+        <EditAmountDialog
+          transaction={amountDialog}
+          open={!!amountDialog}
+          onOpenChange={(open: boolean) => !open && setAmountDialog(null)}
+          onSave={(amount: number | null) => {
+            onUpdate(amountDialog.id, { updatedTransactionAmount: amount });
+            setAmountDialog(null);
           }}
         />
       )}

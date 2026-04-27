@@ -29,6 +29,7 @@ import type { MobileTxAction } from "./mobile-transaction-row";
 import { EditNoteDialog } from "../edit-note-dialog";
 import { EditCategoryDialog } from "../edit-category-dialog";
 import { EditDateDialog } from "../edit-date-dialog";
+import { EditAmountDialog } from "../edit-amount-dialog";
 import { CreateRuleDialog } from "../create-rule-dialog";
 import { BulkNoteDialog } from "../bulk-note-dialog";
 import { BulkCategoryDialog } from "../bulk-category-dialog";
@@ -39,6 +40,7 @@ export interface MobileTxUpdatePayload {
   categoryIds?: string[] | null;
   isIgnored?: boolean;
   transactionDate?: string;
+  updatedTransactionAmount?: number | null;
 }
 
 interface Props {
@@ -70,6 +72,7 @@ export function MobileTransactionsPage({
   const [noteTx, setNoteTx] = useState<Transaction | null>(null);
   const [categoryTx, setCategoryTx] = useState<Transaction | null>(null);
   const [dateTx, setDateTx] = useState<Transaction | null>(null);
+  const [amountTx, setAmountTx] = useState<Transaction | null>(null);
   const [ruleTx, setRuleTx] = useState<Transaction | null>(null);
   // Detail sheet holds an id so edits/invalidations flow through to a live tx.
   const [detailTxId, setDetailTxId] = useState<string | null>(null);
@@ -134,6 +137,9 @@ export function MobileTransactionsPage({
         break;
       case "date":
         setDateTx(tx);
+        break;
+      case "amount":
+        setAmountTx(tx);
         break;
       case "ignore":
         onUpdate(tx.id, { isIgnored: !tx.isIgnored });
@@ -329,6 +335,18 @@ export function MobileTransactionsPage({
           onSave={(date: string) => {
             onUpdate(dateTx.id, { transactionDate: date });
             setDateTx(null);
+          }}
+        />
+      )}
+
+      {amountTx && (
+        <EditAmountDialog
+          transaction={amountTx}
+          open={!!amountTx}
+          onOpenChange={(open: boolean) => !open && setAmountTx(null)}
+          onSave={(amount: number | null) => {
+            onUpdate(amountTx.id, { updatedTransactionAmount: amount });
+            setAmountTx(null);
           }}
         />
       )}

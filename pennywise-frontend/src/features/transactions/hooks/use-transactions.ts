@@ -21,7 +21,7 @@ export function useUpdateTransaction() {
       data,
     }: {
       id: string;
-      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string };
+      data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string; updatedTransactionAmount?: number | null };
     }) => updateTransaction(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });

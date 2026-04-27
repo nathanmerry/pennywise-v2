@@ -58,7 +58,7 @@ export function fetchTransactions(filters: TransactionFilters = {}) {
 
 export function updateTransaction(
   id: string,
-  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string }
+  data: { note?: string | null; categoryIds?: string[] | null; isIgnored?: boolean; transactionDate?: string; updatedTransactionAmount?: number | null }
 ) {
   return request<Transaction>(`/transactions/${id}`, {
     method: "PATCH",
@@ -189,6 +189,7 @@ export interface Transaction {
   sourceTransactionId: string;
   accountId: string;
   amount: string;
+  updatedTransactionAmount: string | null;
   currency: string;
   transactionDate: string;
   description: string;
@@ -276,6 +277,62 @@ export interface BudgetMonth {
   fixedCommitments: BudgetFixedCommitment[];
   plannedSpends: BudgetPlannedSpend[];
   categoryPlans: BudgetCategoryPlan[];
+  events: BudgetEvent[];
+}
+
+export type BudgetEventFundingSource = "flexible" | "savings" | "external";
+
+export interface BudgetEvent {
+  id: string;
+  budgetMonthId: string;
+  name: string;
+  /** Inclusive ISO date. */
+  startDate: string;
+  /** Inclusive ISO date. */
+  endDate: string;
+  cap: string;
+  fundingSource: BudgetEventFundingSource;
+  includeAllSpend: boolean;
+  notes: string | null;
+  pots: BudgetEventPot[];
+}
+
+export interface BudgetEventPot {
+  id: string;
+  eventId: string;
+  name: string;
+  amount: string;
+  categoryId: string | null;
+  category: Category | null;
+  sortOrder: number;
+}
+
+/** Returned by `GET /budget/months/:month/events` — same shape as BudgetEvent plus computed spend. */
+export interface BudgetEventWithSpend {
+  id: string;
+  budgetMonthId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  cap: number;
+  fundingSource: BudgetEventFundingSource;
+  includeAllSpend: boolean;
+  notes: string | null;
+  pots: BudgetEventPotWithSpend[];
+  /** Sum of negative tx amounts in the event's date range (excluding ignored). */
+  actualSpend: number;
+}
+
+export interface BudgetEventPotWithSpend {
+  id: string;
+  eventId: string;
+  name: string;
+  amount: number;
+  categoryId: string | null;
+  category: { id: string; name: string; color: string | null; parentId: string | null } | null;
+  sortOrder: number;
+  /** null when the pot has no categoryId. */
+  actualSpend: number | null;
 }
 
 export interface BudgetFixedCommitment {
@@ -325,7 +382,11 @@ export interface BudgetOverview {
   savingsTarget: number;
   fixedCommitments: number;
   plannedOneOffs: number;
+  /** Sum of caps for flexible-funded events — carved out of flexibleBudget. */
+  events: number;
   flexibleBudget: number;
+  /** flexibleBudget minus resolved category plan totals. Negative = overcommitted. */
+  unallocated: number;
   actualSpend: number;
   remainingFlexible: number;
   daysUntilPayday: number;
@@ -662,6 +723,75 @@ export function updateCategoryPlan(id: string, data: Partial<{
 
 export function deleteCategoryPlan(id: string) {
   return request<{ ok: boolean }>(`/budget/plans/${id}`, { method: "DELETE" });
+}
+
+// Events
+export interface CreateBudgetEventInput {
+  name: string;
+  startDate: string;
+  endDate: string;
+  cap: number;
+  fundingSource?: BudgetEventFundingSource;
+  includeAllSpend?: boolean;
+  notes?: string | null;
+  pots?: { name: string; amount: number; categoryId?: string | null; sortOrder?: number }[];
+}
+
+export function fetchEventsForMonth(month: string) {
+  return request<BudgetEventWithSpend[]>(`/budget/months/${month}/events`);
+}
+
+export function createBudgetEvent(month: string, data: CreateBudgetEventInput) {
+  return request<BudgetEvent>(`/budget/months/${month}/events`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateBudgetEvent(
+  id: string,
+  data: Partial<{
+    name: string;
+    startDate: string;
+    endDate: string;
+    cap: number;
+    fundingSource: BudgetEventFundingSource;
+    includeAllSpend: boolean;
+    notes: string | null;
+  }>,
+) {
+  return request<BudgetEvent>(`/budget/events/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteBudgetEvent(id: string) {
+  return request<{ ok: boolean }>(`/budget/events/${id}`, { method: "DELETE" });
+}
+
+export function createEventPot(
+  eventId: string,
+  data: { name: string; amount: number; categoryId?: string | null; sortOrder?: number },
+) {
+  return request<BudgetEventPot>(`/budget/events/${eventId}/pots`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateEventPot(
+  id: string,
+  data: Partial<{ name: string; amount: number; categoryId: string | null; sortOrder: number }>,
+) {
+  return request<BudgetEventPot>(`/budget/event-pots/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteEventPot(id: string) {
+  return request<{ ok: boolean }>(`/budget/event-pots/${id}`, { method: "DELETE" });
 }
 
 // Dashboard Endpoints

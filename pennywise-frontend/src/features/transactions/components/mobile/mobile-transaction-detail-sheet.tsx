@@ -47,8 +47,9 @@ function DetailBody({
   onAction: (action: MobileTxAction, tx: Transaction) => void;
 }) {
   const name = tx.merchantName || tx.description || "Unknown transaction";
-  const amount = parseFloat(tx.amount);
+  const amount = parseFloat(tx.updatedTransactionAmount ?? tx.amount);
   const isPositive = amount > 0;
+  const isAmountOverridden = tx.updatedTransactionAmount !== null;
 
   const directCategories = tx.categories.filter(
     (c) => c.source !== "inherited",
@@ -121,6 +122,15 @@ function DetailBody({
           label="Date"
           value={formattedDate}
           onClick={() => onAction("date", tx)}
+        />
+        <Field
+          label="Amount"
+          value={
+            isAmountOverridden
+              ? `${formatAmount(amount, tx.currency)} · edited (bank: ${formatAmount(parseFloat(tx.amount), tx.currency)})`
+              : formatAmount(amount, tx.currency)
+          }
+          onClick={() => onAction("amount", tx)}
         />
         <Field
           label="Account"

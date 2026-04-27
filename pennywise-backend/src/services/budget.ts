@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { effectiveAmount } from "../lib/effective-amount.js";
 import { getCyclePaceContext, getPayCycleFromBudgetMonth } from "./cycle.js";
 
 export interface BudgetOverview {
@@ -14,7 +15,11 @@ export interface BudgetOverview {
   savingsTarget: number;
   fixedCommitments: number;
   plannedOneOffs: number;
+  /** Sum of caps for flexible-funded events — carved out of flexibleBudget at planning time. */
+  events: number;
   flexibleBudget: number;
+  /** flexibleBudget minus resolved category plan totals. Negative = overcommitted. */
+  unallocated: number;
   actualSpend: number;
   remainingFlexible: number;
   /** Days remaining in the current cycle (kept name for UI compatibility). */
@@ -70,6 +75,8 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     include: {
       fixedCommitments: true,
       plannedSpends: true,
+      categoryPlans: true,
+      events: true,
     },
   });
 
@@ -132,8 +139,21 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     0
   );
 
-  // Flexible budget = income - savings - fixed - planned
-  const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
+  // Events with funding="flexible" are carved out of flexible at planning time
+  // so categories can't double-budget the same money. Other funding sources
+  // (savings/external) come from money outside the cycle and don't reduce flexible.
+  const events = budgetMonth.events
+    .filter((e) => e.fundingSource === "flexible")
+    .reduce((sum, e) => sum + toNumber(e.cap), 0);
+
+  const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs - events;
+
+  // Resolved category plan totals: percent plans float against the post-event flexibleBudget.
+  const categoryAllocated = budgetMonth.categoryPlans.reduce((sum, plan) => {
+    const value = toNumber(plan.targetValue);
+    return sum + (plan.targetType === "percent" ? flexibleBudget * (value / 100) : value);
+  }, 0);
+  const unallocated = flexibleBudget - categoryAllocated;
 
   // Build fixed-category set from linked BudgetFixedCommitments. Spend on these
   // categories is counted toward fixed spend and excluded from flexible tally
@@ -166,7 +186,7 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   let actualSpend = 0;
   let actualFlexibleSpend = 0;
   for (const tx of transactions) {
-    const amount = toNumber(tx.amount);
+    const amount = effectiveAmount(tx);
     if (amount >= 0) continue;
     const abs = Math.abs(amount);
     actualSpend += abs;
@@ -188,15 +208,15 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 
   // Money in/out (all transactions)
   const moneyIn = allTransactions
-    .filter((t) => toNumber(t.amount) > 0)
-    .reduce((sum, t) => sum + toNumber(t.amount), 0);
+    .filter((t) => effectiveAmount(t) > 0)
+    .reduce((sum, t) => sum + effectiveAmount(t), 0);
 
   const moneyOut = allTransactions
-    .filter((t) => toNumber(t.amount) < 0)
-    .reduce((sum, t) => sum + Math.abs(toNumber(t.amount)), 0);
+    .filter((t) => effectiveAmount(t) < 0)
+    .reduce((sum, t) => sum + Math.abs(effectiveAmount(t)), 0);
 
   // Net after ignored = only non-ignored transactions
-  const netAfterIgnored = transactions.reduce((sum, t) => sum + toNumber(t.amount), 0);
+  const netAfterIgnored = transactions.reduce((sum, t) => sum + effectiveAmount(t), 0);
 
   return {
     month,
@@ -209,7 +229,9 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     savingsTarget,
     fixedCommitments,
     plannedOneOffs,
+    events,
     flexibleBudget,
+    unallocated,
     actualSpend,
     remainingFlexible,
     daysUntilPayday,
@@ -220,6 +242,123 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     moneyOut,
     netAfterIgnored,
   };
+}
+
+export interface EventPotWithSpend {
+  id: string;
+  eventId: string;
+  name: string;
+  amount: number;
+  categoryId: string | null;
+  category: { id: string; name: string; color: string | null; parentId: string | null } | null;
+  sortOrder: number;
+  /** null when no categoryId — pots without a category can't be tracked individually. */
+  actualSpend: number | null;
+}
+
+export interface EventWithSpend {
+  id: string;
+  budgetMonthId: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  cap: number;
+  fundingSource: string;
+  includeAllSpend: boolean;
+  notes: string | null;
+  pots: EventPotWithSpend[];
+  /** Sum of negative tx amounts in the event's date range (excluding ignored). */
+  actualSpend: number;
+}
+
+/**
+ * Return all events for a budget month with computed actual spend per event and per pot.
+ * Spend is currently date-range only (no transaction-event tagging) — see plan.
+ */
+export async function getEventsForMonth(month: string): Promise<EventWithSpend[]> {
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month },
+    select: { id: true },
+  });
+  if (!budgetMonth) return [];
+
+  const events = await prisma.budgetEvent.findMany({
+    where: { budgetMonthId: budgetMonth.id },
+    orderBy: { startDate: "asc" },
+    include: {
+      pots: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        include: { category: true },
+      },
+    },
+  });
+
+  return Promise.all(events.map(async (event) => {
+    const rangeEnd = new Date(event.endDate);
+    rangeEnd.setDate(rangeEnd.getDate() + 1);
+
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        transactionDate: { gte: event.startDate, lt: rangeEnd },
+        isIgnored: false,
+        amount: { lt: 0 },
+      },
+      select: {
+        amount: true,
+        updatedTransactionAmount: true,
+        categories: {
+          where: { source: { not: "inherited" } },
+          select: { categoryId: true },
+        },
+      },
+    });
+
+    const actualSpend = transactions.reduce(
+      (sum, tx) => sum + Math.abs(effectiveAmount(tx)),
+      0,
+    );
+
+    const pots: EventPotWithSpend[] = event.pots.map((pot) => {
+      let potSpend: number | null = null;
+      if (pot.categoryId) {
+        potSpend = transactions.reduce((sum, tx) => {
+          const matches = tx.categories.some((c) => c.categoryId === pot.categoryId);
+          return sum + (matches ? Math.abs(effectiveAmount(tx)) : 0);
+        }, 0);
+      }
+      return {
+        id: pot.id,
+        eventId: pot.eventId,
+        name: pot.name,
+        amount: toNumber(pot.amount),
+        categoryId: pot.categoryId,
+        category: pot.category
+          ? {
+              id: pot.category.id,
+              name: pot.category.name,
+              color: pot.category.color,
+              parentId: pot.category.parentId,
+            }
+          : null,
+        sortOrder: pot.sortOrder,
+        actualSpend: potSpend,
+      };
+    });
+
+    return {
+      id: event.id,
+      budgetMonthId: event.budgetMonthId,
+      name: event.name,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      cap: toNumber(event.cap),
+      fundingSource: event.fundingSource,
+      includeAllSpend: event.includeAllSpend,
+      notes: event.notes,
+      pots,
+      actualSpend,
+    };
+  }));
 }
 
 export async function getSpendingBreakdown(month: string): Promise<SpendingBreakdown> {
@@ -299,7 +438,7 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
   const dailySpend = new Map<string, number>();
 
   for (const tx of transactions) {
-    const amount = Math.abs(toNumber(tx.amount));
+    const amount = Math.abs(effectiveAmount(tx));
     const dateKey = tx.transactionDate.toISOString().split("T")[0];
 
     // Daily spend
@@ -661,7 +800,7 @@ export async function getCategoryPressureDetail(
 
   // Calculate actual spend
   const actualSpend = transactions.reduce(
-    (sum, t) => sum + Math.abs(toNumber(t.amount)),
+    (sum, t) => sum + Math.abs(effectiveAmount(t)),
     0
   );
 
@@ -691,7 +830,7 @@ export async function getCategoryPressureDetail(
   // Aggregate by subcategory
   const subcategorySpend = new Map<string, { name: string; spend: number }>();
   for (const tx of transactions) {
-    const amount = Math.abs(toNumber(tx.amount));
+    const amount = Math.abs(effectiveAmount(tx));
     for (const tc of tx.categories) {
       if (tc.category.parentId === categoryId) {
         const existing = subcategorySpend.get(tc.categoryId) || {
@@ -716,7 +855,7 @@ export async function getCategoryPressureDetail(
     { spend: number; transactionCount: number }
   >();
   for (const tx of transactions) {
-    const amount = Math.abs(toNumber(tx.amount));
+    const amount = Math.abs(effectiveAmount(tx));
     const merchant = tx.normalizedMerchant || tx.merchantName || tx.description;
     if (merchant) {
       const existing = merchantSpend.get(merchant) || {
@@ -734,13 +873,15 @@ export async function getCategoryPressureDetail(
     .map(([merchantName, data]) => ({ merchantName, ...data }))
     .sort((a, b) => b.spend - a.spend);
 
-  // Get largest transactions
+  // Get largest transactions. Note: orderBy on the SQL query uses bank `amount`,
+  // so a heavy override on a small bank-amount tx may not surface in the top 5
+  // until it's re-sorted by the user.
   const largestTransactions = transactions.slice(0, 5).map((tx) => ({
     transactionId: tx.id,
     transactionDate: tx.transactionDate.toISOString().split("T")[0],
     merchantName: tx.normalizedMerchant || tx.merchantName,
     description: tx.description,
-    amount: Math.abs(toNumber(tx.amount)),
+    amount: Math.abs(effectiveAmount(tx)),
   }));
 
   // Build summary
@@ -879,7 +1020,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   let actualFlexibleSpendToDate = 0;
   let actualFixedSpendToDate = 0;
   for (const tx of transactions) {
-    const amount = Math.abs(toNumber(tx.amount));
+    const amount = Math.abs(effectiveAmount(tx));
     if (isFixedTransaction(tx)) {
       actualFixedSpendToDate += amount;
     } else {
@@ -930,7 +1071,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
     // spend on any budgeted category.
     if (isFixedTransaction(tx)) continue;
 
-    const amount = Math.abs(toNumber(tx.amount));
+    const amount = Math.abs(effectiveAmount(tx));
 
     // Get direct category assignments
     const directCategories = tx.categories.filter(tc => tc.source !== "inherited");

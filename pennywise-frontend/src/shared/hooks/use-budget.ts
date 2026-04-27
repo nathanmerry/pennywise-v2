@@ -18,6 +18,13 @@ import {
   createCategoryPlan,
   updateCategoryPlan,
   deleteCategoryPlan,
+  fetchEventsForMonth,
+  createBudgetEvent,
+  updateBudgetEvent,
+  deleteBudgetEvent,
+  createEventPot,
+  updateEventPot,
+  deleteEventPot,
   fetchBudgetOverview,
   fetchCurrentBudgetOverview,
   fetchRecentCycles,
@@ -215,6 +222,74 @@ export function useDeleteCategoryPlan() {
       qc.invalidateQueries({ queryKey: ["budgetMonth"] });
       qc.invalidateQueries({ queryKey: ["spendingBreakdown"] });
     },
+  });
+}
+
+// Events
+function invalidateBudgetCaches(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ["budgetMonth"] });
+  qc.invalidateQueries({ queryKey: ["budgetOverview"] });
+  qc.invalidateQueries({ queryKey: ["currentBudgetOverview"] });
+  qc.invalidateQueries({ queryKey: ["eventsForMonth"] });
+}
+
+export function useEventsForMonth(month: string) {
+  return useQuery({
+    queryKey: ["eventsForMonth", month],
+    queryFn: () => fetchEventsForMonth(month),
+    enabled: !!month,
+  });
+}
+
+export function useCreateBudgetEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ month, data }: { month: string; data: Parameters<typeof createBudgetEvent>[1] }) =>
+      createBudgetEvent(month, data),
+    onSuccess: () => invalidateBudgetCaches(qc),
+  });
+}
+
+export function useUpdateBudgetEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateBudgetEvent>[1] }) =>
+      updateBudgetEvent(id, data),
+    onSuccess: () => invalidateBudgetCaches(qc),
+  });
+}
+
+export function useDeleteBudgetEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deleteBudgetEvent,
+    onSuccess: () => invalidateBudgetCaches(qc),
+  });
+}
+
+export function useCreateEventPot() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ eventId, data }: { eventId: string; data: Parameters<typeof createEventPot>[1] }) =>
+      createEventPot(eventId, data),
+    onSuccess: () => invalidateBudgetCaches(qc),
+  });
+}
+
+export function useUpdateEventPot() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateEventPot>[1] }) =>
+      updateEventPot(id, data),
+    onSuccess: () => invalidateBudgetCaches(qc),
+  });
+}
+
+export function useDeleteEventPot() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deleteEventPot,
+    onSuccess: () => invalidateBudgetCaches(qc),
   });
 }
 

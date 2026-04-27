@@ -23,6 +23,7 @@ import { MonthlyStatusStrip } from "@/features/overview/components/monthly-statu
 import { PaceExplanation } from "@/features/overview/components/pace-explanation";
 import { MainBudgetPressuresCard } from "@/features/overview/components/main-budget-pressures-card";
 import { CategoryPressureDrawer } from "@/features/overview/components/category-pressure-drawer";
+import { EventsSummaryCard } from "@/features/overview/components/events-summary-card";
 import type { MonthlyBudgetPace, SpendingBreakdown } from "@/shared/lib/api";
 
 function formatCurrency(amount: number): string {
@@ -450,6 +451,12 @@ export function OverviewPage() {
               <span className="text-sm text-muted-foreground">Planned One-offs</span>
               <span className="font-medium text-amber-600">-{formatCurrency(overview.plannedOneOffs)}</span>
             </div>
+            {overview.events > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Event Reserves</span>
+                <span className="font-medium text-amber-600">-{formatCurrency(overview.events)}</span>
+              </div>
+            )}
             <div className="border-t pt-4 flex justify-between items-center">
               <span className="font-medium">Flexible Budget</span>
               <span className="font-bold text-lg">{formatCurrency(overview.flexibleBudget)}</span>
@@ -500,11 +507,14 @@ export function OverviewPage() {
           </CardContent>
         </Card>
 
-        <MainBudgetPressuresCard 
-          pace={pace} 
-          spending={spending} 
-          onCategoryClick={setSelectedCategoryId}
-        />
+        <div className="space-y-4">
+          <MainBudgetPressuresCard
+            pace={pace}
+            spending={spending}
+            onCategoryClick={setSelectedCategoryId}
+          />
+          <EventsSummaryCard month={month} />
+        </div>
       </div>
 
       {/* Category Pressure Drawer */}

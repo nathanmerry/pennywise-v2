@@ -7,6 +7,7 @@ export type MobileTxAction =
   | "category"
   | "note"
   | "date"
+  | "amount"
   | "ignore"
   | "rule";
 
@@ -26,7 +27,7 @@ export function MobileTransactionRow({
   onToggleSelect,
 }: Props) {
   const name = tx.merchantName || tx.description || "Unknown transaction";
-  const amount = parseFloat(tx.amount);
+  const amount = parseFloat(tx.updatedTransactionAmount ?? tx.amount);
   const isPositive = amount > 0;
 
   const metaParts: string[] = [];

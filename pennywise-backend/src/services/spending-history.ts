@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { effectiveAmount } from "../lib/effective-amount.js";
 import crypto from "crypto";
 
 // ============================================================================
@@ -273,7 +274,7 @@ export async function getSpendingHistoryAnalysis(
       allTransactions.push({
         month,
         transactionId: tx.id,
-        amount: Math.abs(toNumber(tx.amount)),
+        amount: Math.abs(effectiveAmount(tx)),
         directCategoryIds: tx.categories.map((c) => c.categoryId),
       });
     }
@@ -482,6 +483,7 @@ export async function getCategoryEvidenceBatch(
       id: true,
       transactionDate: true,
       amount: true,
+      updatedTransactionAmount: true,
       merchantName: true,
       description: true,
       categories: {
@@ -524,7 +526,7 @@ export async function getCategoryEvidenceBatch(
       const txDate = new Date(tx.transactionDate);
       const txMonth = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, "0")}`;
       if (monthTotals.has(txMonth)) {
-        monthTotals.set(txMonth, (monthTotals.get(txMonth) || 0) + Math.abs(toNumber(tx.amount)));
+        monthTotals.set(txMonth, (monthTotals.get(txMonth) || 0) + Math.abs(effectiveAmount(tx)));
       }
     }
 
@@ -538,7 +540,7 @@ export async function getCategoryEvidenceBatch(
     for (const tx of txs) {
       const name = tx.merchantName || tx.description.slice(0, 40);
       const existing = merchantTotals.get(name) || { totalSpend: 0, count: 0 };
-      existing.totalSpend += Math.abs(toNumber(tx.amount));
+      existing.totalSpend += Math.abs(effectiveAmount(tx));
       existing.count++;
       merchantTotals.set(name, existing);
     }
@@ -558,7 +560,7 @@ export async function getCategoryEvidenceBatch(
         date: new Date(tx.transactionDate).toISOString().slice(0, 10),
         merchantName: tx.merchantName,
         description: tx.description,
-        amount: Math.round(Math.abs(toNumber(tx.amount)) * 100) / 100,
+        amount: Math.round(Math.abs(effectiveAmount(tx)) * 100) / 100,
       }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5);

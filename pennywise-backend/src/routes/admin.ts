@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod/v4";
 import { prisma } from "../lib/prisma.js";
+import { effectiveAmount } from "../lib/effective-amount.js";
 import {
   runAiCategorisationBackfill,
   categoriseSingleTransaction,
@@ -90,7 +91,7 @@ router.get("/ai-categorisation/preview", async (req, res) => {
         description: tx.description,
         merchantName: tx.merchantName,
         normalizedMerchant: tx.normalizedMerchant,
-        amount: Number(tx.amount),
+        amount: effectiveAmount(tx),
         currency: tx.currency,
         transactionDate: tx.transactionDate.toISOString().split("T")[0],
       })),

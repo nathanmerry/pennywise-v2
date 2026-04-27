@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod/v4";
 import { prisma } from "../lib/prisma.js";
-import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget, getMonthlyBudgetPace, getCategoryPressureDetail } from "../services/budget.js";
+import { getBudgetOverview, getEventsForMonth, getSpendingBreakdown, getCategoriesOverBudget, getMonthlyBudgetPace, getCategoryPressureDetail } from "../services/budget.js";
 import { getSpendingHistoryAnalysis, getCategoryEvidenceBatch } from "../services/spending-history.js";
 import { generateBudgetRecommendations, applyBudgetRecommendations } from "../services/budget-recommendations.js";
 import { getCategoryDrilldown, getSpendingAnalysis } from "../services/spending-analysis.js";
@@ -121,7 +121,16 @@ const budgetMonthInclude = {
   fixedCommitments: { include: { category: true } },
   plannedSpends: { include: { budgetGroup: true, category: true } },
   categoryPlans: { include: { budgetGroup: true, category: true } },
-} as const;
+  events: {
+    include: {
+      pots: {
+        include: { category: true },
+        orderBy: [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }],
+      },
+    },
+    orderBy: { startDate: "asc" as const },
+  },
+};
 
 // GET /api/budget/months
 router.get("/months", async (_req, res) => {
@@ -457,6 +466,185 @@ router.patch("/plans/:id", async (req, res) => {
 // DELETE /api/budget/plans/:id
 router.delete("/plans/:id", async (req, res) => {
   await prisma.budgetCategoryPlan.delete({ where: { id: req.params.id } });
+  res.json({ ok: true });
+});
+
+// ============================================================================
+// EVENTS
+// ============================================================================
+
+const potInputSchema = z.object({
+  name: z.string().min(1),
+  amount: z.number().min(0),
+  categoryId: z.string().nullable().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+const createEventSchema = z
+  .object({
+    name: z.string().min(1),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
+    cap: z.number().min(0),
+    fundingSource: z.enum(["flexible", "savings", "external"]).optional(),
+    includeAllSpend: z.boolean().optional(),
+    notes: z.string().nullable().optional(),
+    pots: z.array(potInputSchema).optional(),
+  })
+  .refine(
+    (d) => new Date(d.endDate).getTime() >= new Date(d.startDate).getTime(),
+    { message: "endDate must be on or after startDate" },
+  );
+
+const updateEventSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    cap: z.number().min(0).optional(),
+    fundingSource: z.enum(["flexible", "savings", "external"]).optional(),
+    includeAllSpend: z.boolean().optional(),
+    notes: z.string().nullable().optional(),
+  })
+  .refine(
+    (d) =>
+      d.startDate === undefined ||
+      d.endDate === undefined ||
+      new Date(d.endDate).getTime() >= new Date(d.startDate).getTime(),
+    { message: "endDate must be on or after startDate" },
+  );
+
+const updatePotSchema = z.object({
+  name: z.string().min(1).optional(),
+  amount: z.number().min(0).optional(),
+  categoryId: z.string().nullable().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+// GET /api/budget/months/:month/events
+router.get("/months/:month/events", async (req, res) => {
+  const events = await getEventsForMonth(req.params.month);
+  res.json(events);
+});
+
+// POST /api/budget/months/:month/events
+router.post("/months/:month/events", async (req, res) => {
+  const parsed = createEventSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const budgetMonth = await prisma.budgetMonth.findUnique({
+    where: { month: req.params.month },
+    select: { id: true },
+  });
+  if (!budgetMonth) {
+    res.status(404).json({ error: "Budget month not found" });
+    return;
+  }
+
+  const { pots, ...eventData } = parsed.data;
+  const event = await prisma.budgetEvent.create({
+    data: {
+      budgetMonthId: budgetMonth.id,
+      name: eventData.name,
+      startDate: new Date(eventData.startDate),
+      endDate: new Date(eventData.endDate),
+      cap: eventData.cap,
+      fundingSource: eventData.fundingSource ?? "flexible",
+      includeAllSpend: eventData.includeAllSpend ?? true,
+      notes: eventData.notes,
+      pots: pots
+        ? {
+            create: pots.map((p, i) => ({
+              name: p.name,
+              amount: p.amount,
+              categoryId: p.categoryId ?? null,
+              sortOrder: p.sortOrder ?? i,
+            })),
+          }
+        : undefined,
+    },
+    include: {
+      pots: { include: { category: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
+    },
+  });
+
+  res.status(201).json(event);
+});
+
+// PATCH /api/budget/events/:id
+router.patch("/events/:id", async (req, res) => {
+  const parsed = updateEventSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const data: Record<string, unknown> = { ...parsed.data };
+  if (parsed.data.startDate) data.startDate = new Date(parsed.data.startDate);
+  if (parsed.data.endDate) data.endDate = new Date(parsed.data.endDate);
+
+  const event = await prisma.budgetEvent.update({
+    where: { id: req.params.id },
+    data,
+    include: {
+      pots: { include: { category: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
+    },
+  });
+
+  res.json(event);
+});
+
+// DELETE /api/budget/events/:id
+router.delete("/events/:id", async (req, res) => {
+  await prisma.budgetEvent.delete({ where: { id: req.params.id } });
+  res.json({ ok: true });
+});
+
+// POST /api/budget/events/:id/pots
+router.post("/events/:id/pots", async (req, res) => {
+  const parsed = potInputSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const pot = await prisma.budgetEventPot.create({
+    data: {
+      eventId: req.params.id,
+      name: parsed.data.name,
+      amount: parsed.data.amount,
+      categoryId: parsed.data.categoryId ?? null,
+      sortOrder: parsed.data.sortOrder ?? 0,
+    },
+    include: { category: true },
+  });
+
+  res.status(201).json(pot);
+});
+
+// PATCH /api/budget/event-pots/:id
+router.patch("/event-pots/:id", async (req, res) => {
+  const parsed = updatePotSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+
+  const pot = await prisma.budgetEventPot.update({
+    where: { id: req.params.id },
+    data: parsed.data,
+    include: { category: true },
+  });
+
+  res.json(pot);
+});
+
+// DELETE /api/budget/event-pots/:id
+router.delete("/event-pots/:id", async (req, res) => {
+  await prisma.budgetEventPot.delete({ where: { id: req.params.id } });
   res.json({ ok: true });
 });
 

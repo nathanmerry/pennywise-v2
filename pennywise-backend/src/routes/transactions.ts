@@ -148,6 +148,7 @@ const updateSchema = z.object({
   categoryIds: z.array(z.string()).nullable().optional(),
   isIgnored: z.boolean().optional(),
   transactionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  updatedTransactionAmount: z.number().nullable().optional(),
 });
 
 router.patch("/:id", async (req, res) => {
@@ -171,6 +172,10 @@ router.patch("/:id", async (req, res) => {
 
   if (body.transactionDate !== undefined) {
     txData.transactionDate = new Date(body.transactionDate + "T00:00:00.000Z");
+  }
+
+  if (body.updatedTransactionAmount !== undefined) {
+    txData.updatedTransactionAmount = body.updatedTransactionAmount;
   }
 
   // Update categories via join table

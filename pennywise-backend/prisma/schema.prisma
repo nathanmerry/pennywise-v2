@@ -49,6 +49,7 @@ model Transaction {
   sourceTransactionId     String    @map("source_transaction_id")
   accountId               String    @map("account_id")
   amount                  Decimal   @db.Decimal(12, 2)
+  updatedTransactionAmount Decimal? @db.Decimal(12, 2) @map("updated_transaction_amount")
   currency                String    @default("GBP")
   transactionDate         DateTime  @map("transaction_date")
   description             String
@@ -109,6 +110,7 @@ model Category {
   fixedCommitments      BudgetFixedCommitment[]
   plannedSpends         BudgetPlannedSpend[]
   categoryPlans         BudgetCategoryPlan[]
+  eventPots             BudgetEventPot[]
 
   @@map("categories")
 }
@@ -190,6 +192,7 @@ model BudgetMonth {
   fixedCommitments BudgetFixedCommitment[]
   plannedSpends    BudgetPlannedSpend[]
   categoryPlans    BudgetCategoryPlan[]
+  events           BudgetEvent[]
 
   @@map("budget_months")
 }
@@ -246,6 +249,43 @@ model BudgetCategoryPlan {
   @@unique([budgetMonthId, budgetGroupId])
   @@unique([budgetMonthId, categoryId])
   @@map("budget_category_plans")
+}
+
+model BudgetEvent {
+  id              String   @id @default(cuid())
+  budgetMonthId   String   @map("budget_month_id")
+  name            String
+  startDate       DateTime @map("start_date")          // inclusive
+  endDate         DateTime @map("end_date")            // inclusive
+  cap             Decimal  @db.Decimal(12, 2)
+  fundingSource   String   @default("flexible") @map("funding_source") // flexible | savings | external
+  includeAllSpend Boolean  @default(true) @map("include_all_spend")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  budgetMonth BudgetMonth      @relation(fields: [budgetMonthId], references: [id], onDelete: Cascade)
+  pots        BudgetEventPot[]
+
+  @@index([budgetMonthId])
+  @@map("budget_events")
+}
+
+model BudgetEventPot {
+  id         String   @id @default(cuid())
+  eventId    String   @map("event_id")
+  name       String
+  amount     Decimal  @db.Decimal(12, 2)
+  categoryId String?  @map("category_id")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  event    BudgetEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@map("budget_event_pots")
 }
 
 // ============================================================================
