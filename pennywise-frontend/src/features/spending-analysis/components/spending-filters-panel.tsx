@@ -25,7 +25,6 @@ import { cn } from "@/shared/lib/utils";
 import type { Account, AnalysisPreset, Category } from "@/shared/lib/api";
 import {
   PRESET_OPTIONS,
-  getPresetLabel,
   type CustomRange,
 } from "../lib/spending-filters";
 
@@ -44,7 +43,6 @@ interface SpendingFiltersPanelProps {
   onIncludeIgnoredChange: (value: boolean) => void;
   accounts: Account[];
   categories: Category[];
-  periodLabel: string;
   hasCustomFilters: boolean;
   onReset: () => void;
 }
@@ -66,7 +64,6 @@ export function SpendingFiltersPanel({
   onIncludeIgnoredChange,
   accounts,
   categories,
-  periodLabel,
   hasCustomFilters,
   onReset,
 }: SpendingFiltersPanelProps) {
@@ -363,11 +360,6 @@ export function SpendingFiltersPanel({
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Passive context line */}
-      <p className='text-sm text-muted-foreground'>
-        {periodLabel} · {getPresetLabel(preset)}
-      </p>
     </div>
   );
 }

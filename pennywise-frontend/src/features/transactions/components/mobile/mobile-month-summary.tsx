@@ -67,7 +67,7 @@ export function MobileMonthSummary({ filters }: Props) {
   const trailing = buildTrailing({
     hasBudget,
     remaining,
-    paydayDate: overview.paydayDate,
+    cycleEnd: overview.cycleEnd,
   });
 
   if (!spentLabel && !trailing) return null;
@@ -88,11 +88,11 @@ export function MobileMonthSummary({ filters }: Props) {
 function buildTrailing({
   hasBudget,
   remaining,
-  paydayDate,
+  cycleEnd,
 }: {
   hasBudget: boolean;
   remaining: number;
-  paydayDate: string | null | undefined;
+  cycleEnd: string | null | undefined;
 }): string | null {
   if (!hasBudget) return null;
   if (remaining < 0) {
@@ -104,9 +104,9 @@ function buildTrailing({
   const remainingLabel = formatAmount(remaining, "GBP", {
     signDisplay: "auto",
   });
-  const paydayLabel = safeFormatDate(paydayDate, "d MMM");
-  return paydayLabel
-    ? `${remainingLabel} remaining until ${paydayLabel}`
+  const cycleEndLabel = safeFormatDate(cycleEnd, "d MMM");
+  return cycleEndLabel
+    ? `${remainingLabel} remaining until ${cycleEndLabel}`
     : `${remainingLabel} remaining`;
 }
 

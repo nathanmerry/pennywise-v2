@@ -1,4 +1,4 @@
-import { startOfMonth, startOfYear } from "date-fns";
+import { addDays, differenceInCalendarDays, startOfMonth, startOfYear } from "date-fns";
 import type { AnalysisPreset, PayCycleSummary } from "@/shared/lib/api";
 
 export const PRESET_OPTIONS: Array<{ value: AnalysisPreset; label: string }> = [
@@ -33,6 +33,47 @@ function parseCycleDate(iso: string): Date {
 
 export type CustomRange = { start: Date | null; end: Date | null };
 
+export interface CycleWeek {
+  index: number;
+  label: string;
+  start: Date;
+  end: Date;
+  dayCount: number;
+}
+
+/**
+ * Split a cycle range into cycle-relative 7-day weeks. Both start and end are
+ * inclusive; the final week may be shorter than 7 days if the cycle length
+ * isn't a multiple of 7. Returns at most ~6 weeks for a typical monthly cycle.
+ */
+export function buildCycleWeeks(cycleStart: Date, cycleEnd: Date): CycleWeek[] {
+  const totalDays = differenceInCalendarDays(cycleEnd, cycleStart) + 1;
+  if (totalDays <= 0) return [];
+
+  const weeks: CycleWeek[] = [];
+  let cursor = cycleStart;
+  let index = 0;
+
+  while (differenceInCalendarDays(cycleEnd, cursor) >= 0) {
+    const tentativeEnd = addDays(cursor, 6);
+    const weekEnd =
+      differenceInCalendarDays(tentativeEnd, cycleEnd) > 0
+        ? cycleEnd
+        : tentativeEnd;
+    weeks.push({
+      index,
+      label: `W${index + 1}`,
+      start: cursor,
+      end: weekEnd,
+      dayCount: differenceInCalendarDays(weekEnd, cursor) + 1,
+    });
+    cursor = addDays(weekEnd, 1);
+    index += 1;
+  }
+
+  return weeks;
+}
+
 /**
  * Resolve a preset into a concrete [start, end] (both inclusive) using the
  * supplied cycles (newest first). Cycle presets need current + prior N-1, so
@@ -55,7 +96,7 @@ export function resolvePresetRange(
       if (!cycle) return { start: today, end: today };
       return {
         start: parseCycleDate(cycle.startInclusive),
-        end: parseCycleDate(cycle.paydayDate),
+        end: parseCycleDate(cycle.cycleEndDate),
       };
     }
     case "last_cycle": {
@@ -63,7 +104,7 @@ export function resolvePresetRange(
       if (!cycle) return { start: today, end: today };
       return {
         start: parseCycleDate(cycle.startInclusive),
-        end: parseCycleDate(cycle.paydayDate),
+        end: parseCycleDate(cycle.cycleEndDate),
       };
     }
     case "last_3_cycles": {
@@ -73,7 +114,7 @@ export function resolvePresetRange(
       if (!oldest || !newest) return { start: today, end: today };
       return {
         start: parseCycleDate(oldest.startInclusive),
-        end: parseCycleDate(newest.paydayDate),
+        end: parseCycleDate(newest.cycleEndDate),
       };
     }
     case "last_6_cycles": {
@@ -83,7 +124,7 @@ export function resolvePresetRange(
       if (!oldest || !newest) return { start: today, end: today };
       return {
         start: parseCycleDate(oldest.startInclusive),
-        end: parseCycleDate(newest.paydayDate),
+        end: parseCycleDate(newest.cycleEndDate),
       };
     }
     case "ytd":

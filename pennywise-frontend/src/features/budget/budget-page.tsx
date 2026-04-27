@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Progress } from "@/shared/components/ui/progress";
@@ -23,6 +24,7 @@ import {
 } from "@/shared/components/ui/select";
 import {
   useBudgetMonth,
+  useBudgetMonths,
   useCreateBudgetMonth,
   useCreateFixedCommitment,
   useUpdateFixedCommitment,
@@ -32,14 +34,34 @@ import {
   useCreateCategoryPlan,
   useUpdateCategoryPlan,
   useDeleteCategoryPlan,
+  useRecentCycles,
   useSpendingHistory,
   useUpdateBudgetMonth,
 } from "@/shared/hooks/use-budget";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { BudgetRecommendationsPanel } from "@/features/budget/components/budget-recommendations-panel";
-import { Pencil, Plus, Trash2, Calendar, PiggyBank, Home, ShoppingBag, Sparkles, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Pencil,
+  PiggyBank,
+  Plus,
+  ShoppingBag,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { BudgetFixedCommitment, BudgetPlannedSpend, BudgetCategoryPlan } from "@/shared/lib/api";
+import type {
+  BudgetFixedCommitment,
+  BudgetMonth,
+  BudgetPlannedSpend,
+  BudgetCategoryPlan,
+  PayCycleSummary,
+} from "@/shared/lib/api";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-GB", {
@@ -55,10 +77,66 @@ function getCurrentMonth(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function formatMonthDisplay(month: string): string {
-  const [year, monthNum] = month.split("-");
-  const date = new Date(parseInt(year), parseInt(monthNum) - 1);
-  return date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+function addMonthsToKey(month: string, delta: number): string {
+  const [year, monthNum] = month.split("-").map(Number);
+  const date = new Date(year, monthNum - 1 + delta, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** The pay cycle whose date range contains today, or the most recent past one. */
+function findActiveCycle(cycles: PayCycleSummary[]): PayCycleSummary | null {
+  if (cycles.length === 0) return null;
+  const today = todayIso();
+  const containing = cycles.find((c) => c.startInclusive <= today && today < c.endExclusive);
+  if (containing) return containing;
+  const past = cycles
+    .filter((c) => c.startInclusive <= today)
+    .sort((a, b) => b.startInclusive.localeCompare(a.startInclusive));
+  return past[0] ?? cycles[cycles.length - 1] ?? null;
+}
+
+/**
+ * Display name for a cycle, named after the calendar month covering most of its days.
+ * A cycle running 25 Apr → 25 May becomes "May 2026 cycle".
+ */
+function getCycleDisplayName(cycle: PayCycleSummary | null, fallbackMonth: string): string {
+  if (!cycle) {
+    const [year, monthNum] = fallbackMonth.split("-").map(Number);
+    const date = new Date(year, monthNum - 1);
+    return `${date.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} cycle`;
+  }
+  const start = new Date(cycle.startInclusive);
+  const end = new Date(cycle.endExclusive);
+  const mid = new Date((start.getTime() + end.getTime()) / 2);
+  return `${mid.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} cycle`;
+}
+
+function getCycleDateRange(cycle: PayCycleSummary): string {
+  const start = new Date(cycle.startInclusive);
+  const lastDay = new Date(cycle.endExclusive);
+  lastDay.setDate(lastDay.getDate() - 1);
+  const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return `${fmt(start)} – ${fmt(lastDay)}`;
+}
+
+function isoDateOnly(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function addMonthsIso(iso: string, months: number): string {
+  const d = new Date(iso);
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
 }
 
 interface AddCommitmentDialogProps {
@@ -549,7 +627,8 @@ function CategoryPlanRow({ plan, flexibleBudget, avgSpend, monthsObserved, onDel
 interface EditBudgetMonthDialogProps {
   month: string;
   expectedIncome: string;
-  paydayDate: string;
+  cycleStartDate: string;
+  cycleEndDate: string;
   savingsTargetType: "fixed" | "percent";
   savingsTargetValue: string;
   onClose: () => void;
@@ -558,7 +637,8 @@ interface EditBudgetMonthDialogProps {
 function EditBudgetMonthDialog({
   month,
   expectedIncome: initialIncome,
-  paydayDate: initialPayday,
+  cycleStartDate: initialStart,
+  cycleEndDate: initialEnd,
   savingsTargetType: initialSavingsType,
   savingsTargetValue: initialSavingsValue,
   onClose,
@@ -566,18 +646,23 @@ function EditBudgetMonthDialog({
   const [expectedIncome, setExpectedIncome] = useState(initialIncome);
   const [savingsTargetValue, setSavingsTargetValue] = useState(initialSavingsValue);
   const [savingsTargetType, setSavingsTargetType] = useState<"fixed" | "percent">(initialSavingsType);
-  const [paydayDate, setPaydayDate] = useState(() => initialPayday.slice(0, 10));
+  const [cycleStartDate, setCycleStartDate] = useState(() => isoDateOnly(initialStart));
+  const [cycleEndDate, setCycleEndDate] = useState(() => isoDateOnly(initialEnd));
   const updateMonth = useUpdateBudgetMonth();
+
+  const rangeIsInvalid = cycleStartDate && cycleEndDate && cycleEndDate < cycleStartDate;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!expectedIncome || !savingsTargetValue) return;
+    if (!expectedIncome || !savingsTargetValue || !cycleStartDate || !cycleEndDate) return;
+    if (rangeIsInvalid) return;
 
     await updateMonth.mutateAsync({
       month,
       data: {
         expectedIncome: parseFloat(expectedIncome),
-        paydayDate: new Date(paydayDate).toISOString(),
+        cycleStartDate: new Date(cycleStartDate).toISOString(),
+        cycleEndDate: new Date(cycleEndDate).toISOString(),
         savingsTargetType,
         savingsTargetValue: parseFloat(savingsTargetValue),
       },
@@ -587,6 +672,29 @@ function EditBudgetMonthDialog({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="edit-cycle-start">Cycle Start</Label>
+          <Input
+            id="edit-cycle-start"
+            type="date"
+            value={cycleStartDate}
+            onChange={(e) => setCycleStartDate(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-cycle-end">Cycle End</Label>
+          <Input
+            id="edit-cycle-end"
+            type="date"
+            value={cycleEndDate}
+            onChange={(e) => setCycleEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+      {rangeIsInvalid && (
+        <p className="text-sm text-destructive">Cycle end must be on or after cycle start.</p>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="edit-income">Expected Income (£)</Label>
@@ -599,17 +707,6 @@ function EditBudgetMonthDialog({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="edit-payday">Payday Date</Label>
-          <Input
-            id="edit-payday"
-            type="date"
-            value={paydayDate}
-            onChange={(e) => setPaydayDate(e.target.value)}
-          />
-        </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
           <Label>Savings Target Type</Label>
           <Select value={savingsTargetType} onValueChange={(v) => setSavingsTargetType(v as "fixed" | "percent")}>
             <SelectTrigger>
@@ -621,24 +718,24 @@ function EditBudgetMonthDialog({
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="edit-savings">
-            Savings Target ({savingsTargetType === "fixed" ? "£" : "%"})
-          </Label>
-          <Input
-            id="edit-savings"
-            type="number"
-            step={savingsTargetType === "fixed" ? "0.01" : "1"}
-            value={savingsTargetValue}
-            onChange={(e) => setSavingsTargetValue(e.target.value)}
-          />
-        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-savings">
+          Savings Target ({savingsTargetType === "fixed" ? "£" : "%"})
+        </Label>
+        <Input
+          id="edit-savings"
+          type="number"
+          step={savingsTargetType === "fixed" ? "0.01" : "1"}
+          value={savingsTargetValue}
+          onChange={(e) => setSavingsTargetValue(e.target.value)}
+        />
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={updateMonth.isPending}>
+        <Button type="submit" disabled={updateMonth.isPending || !!rangeIsInvalid}>
           Save
         </Button>
       </div>
@@ -648,63 +745,143 @@ function EditBudgetMonthDialog({
 
 interface SetupBudgetFormProps {
   month: string;
+  /** Optional cycle metadata so we can title the form by cycle name, not month key. */
+  cycle?: PayCycleSummary | null;
+  /** Previous cycle to seed defaults and offer carry-forward of commitments/plans. */
+  previousBudget?: BudgetMonth | null;
 }
 
-function SetupBudgetForm({ month }: SetupBudgetFormProps) {
-  const [expectedIncome, setExpectedIncome] = useState("");
-  const [savingsTarget, setSavingsTarget] = useState("");
-  const [savingsType, setSavingsType] = useState<"fixed" | "percent">("fixed");
-  const [paydayDate, setPaydayDate] = useState(() => {
+function SetupBudgetForm({ month, cycle, previousBudget }: SetupBudgetFormProps) {
+  const [expectedIncome, setExpectedIncome] = useState(previousBudget?.expectedIncome ?? "");
+  const [savingsTarget, setSavingsTarget] = useState(previousBudget?.savingsTargetValue ?? "");
+  const [savingsType, setSavingsType] = useState<"fixed" | "percent">(
+    previousBudget?.savingsTargetType ?? "fixed"
+  );
+  const [cycleStartDate, setCycleStartDate] = useState(() => {
+    // Default new cycle's start = day after the previous cycle's end.
+    if (previousBudget) return addDaysIso(previousBudget.cycleEndDate, 1);
     const [year, monthNum] = month.split("-").map(Number);
     return `${year}-${String(monthNum).padStart(2, "0")}-25`;
   });
+  const [cycleEndDate, setCycleEndDate] = useState(() => {
+    // Default end = ~1 month after start, minus 1 day. User adjusts as needed.
+    const startSeed = previousBudget
+      ? addDaysIso(previousBudget.cycleEndDate, 1)
+      : (() => {
+          const [year, monthNum] = month.split("-").map(Number);
+          return `${year}-${String(monthNum).padStart(2, "0")}-25`;
+        })();
+    return addDaysIso(addMonthsIso(startSeed, 1), -1);
+  });
+  const [copyCommitments, setCopyCommitments] = useState(true);
+  const [copyCategoryBudgets, setCopyCategoryBudgets] = useState(true);
 
   const createMonth = useCreateBudgetMonth();
+  const createCommitmentMutation = useCreateFixedCommitment();
+  const createPlanMutation = useCreateCategoryPlan();
+
+  const cycleTitle = cycle
+    ? getCycleDisplayName(cycle, month)
+    : getCycleDisplayName(null, month);
+
+  const rangeIsInvalid = cycleStartDate && cycleEndDate && cycleEndDate < cycleStartDate;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!expectedIncome || !savingsTarget) return;
+    if (!expectedIncome || !savingsTarget || !cycleStartDate || !cycleEndDate) return;
+    if (rangeIsInvalid) return;
 
     await createMonth.mutateAsync({
       month,
       expectedIncome: parseFloat(expectedIncome),
-      paydayDate: new Date(paydayDate).toISOString(),
+      cycleStartDate: new Date(cycleStartDate).toISOString(),
+      cycleEndDate: new Date(cycleEndDate).toISOString(),
       savingsTargetType: savingsType,
       savingsTargetValue: parseFloat(savingsTarget),
     });
+
+    if (previousBudget) {
+      const tasks: Promise<unknown>[] = [];
+      if (copyCommitments) {
+        for (const c of previousBudget.fixedCommitments) {
+          tasks.push(
+            createCommitmentMutation.mutateAsync({
+              month,
+              data: {
+                name: c.name,
+                amount: parseFloat(c.amount),
+                categoryId: c.categoryId,
+              },
+            })
+          );
+        }
+      }
+      if (copyCategoryBudgets) {
+        for (const p of previousBudget.categoryPlans) {
+          if (!p.categoryId) continue;
+          tasks.push(
+            createPlanMutation.mutateAsync({
+              month,
+              data: {
+                categoryId: p.categoryId,
+                targetType: p.targetType,
+                targetValue: parseFloat(p.targetValue),
+              },
+            })
+          );
+        }
+      }
+      if (tasks.length > 0) await Promise.all(tasks);
+    }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Set Up Budget for {formatMonthDisplay(month)}</CardTitle>
+        <CardTitle>
+          {previousBudget ? `Start ${cycleTitle}` : `Set up ${cycleTitle}`}
+        </CardTitle>
         <CardDescription>
-          Enter your expected income and savings target to get started.
+          {previousBudget
+            ? "Defaults pre-filled from the previous cycle. Adjust before creating."
+            : "Enter your expected income and savings target to get started."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="income">Expected Income (£)</Label>
+              <Label htmlFor="cycle-start">Cycle Start</Label>
               <Input
-                id="income"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={expectedIncome}
-                onChange={(e) => setExpectedIncome(e.target.value)}
+                id="cycle-start"
+                type="date"
+                value={cycleStartDate}
+                onChange={(e) => setCycleStartDate(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="payday">Payday Date</Label>
+              <Label htmlFor="cycle-end">Cycle End</Label>
               <Input
-                id="payday"
+                id="cycle-end"
                 type="date"
-                value={paydayDate}
-                onChange={(e) => setPaydayDate(e.target.value)}
+                value={cycleEndDate}
+                onChange={(e) => setCycleEndDate(e.target.value)}
               />
             </div>
+          </div>
+          {rangeIsInvalid && (
+            <p className="text-sm text-destructive">Cycle end must be on or after cycle start.</p>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="income">Expected Income (£)</Label>
+            <Input
+              id="income"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={expectedIncome}
+              onChange={(e) => setExpectedIncome(e.target.value)}
+            />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -733,8 +910,43 @@ function SetupBudgetForm({ month }: SetupBudgetFormProps) {
               />
             </div>
           </div>
-          <Button type="submit" disabled={createMonth.isPending}>
-            Create Budget
+          {previousBudget && (
+            <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+              <p className="text-sm font-medium">Carry forward from previous cycle</p>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="copy-commitments"
+                  checked={copyCommitments}
+                  onCheckedChange={(v) => setCopyCommitments(v === true)}
+                />
+                <Label htmlFor="copy-commitments" className="text-sm font-normal">
+                  Copy fixed commitments ({previousBudget.fixedCommitments.length})
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="copy-budgets"
+                  checked={copyCategoryBudgets}
+                  onCheckedChange={(v) => setCopyCategoryBudgets(v === true)}
+                />
+                <Label htmlFor="copy-budgets" className="text-sm font-normal">
+                  Copy category budgets ({previousBudget.categoryPlans.length})
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Planned one-offs always start fresh.
+              </p>
+            </div>
+          )}
+          <Button
+            type="submit"
+            disabled={
+              createMonth.isPending ||
+              createCommitmentMutation.isPending ||
+              createPlanMutation.isPending
+            }
+          >
+            {previousBudget ? "Start Cycle" : "Create Budget"}
           </Button>
         </form>
       </CardContent>
@@ -742,8 +954,101 @@ function SetupBudgetForm({ month }: SetupBudgetFormProps) {
   );
 }
 
+interface CycleNavProps {
+  cycleHeading: string;
+  cycleSubheading: string | null;
+  isOnActive: boolean;
+  activeMonthKey: string | null;
+  prevMonth: string | null;
+  nextMonth: string | null;
+  nextIsProjected: boolean;
+  onJump: (month: string) => void;
+  rightSlot?: React.ReactNode;
+}
+
+function CycleNav({
+  cycleHeading,
+  cycleSubheading,
+  isOnActive,
+  activeMonthKey,
+  prevMonth,
+  nextMonth,
+  nextIsProjected,
+  onJump,
+  rightSlot,
+}: CycleNavProps) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold">Budget Keeper</h1>
+        <p className="text-muted-foreground">
+          {cycleHeading}
+          {cycleSubheading && (
+            <span className="text-muted-foreground/80"> · {cycleSubheading}</span>
+          )}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!prevMonth}
+          onClick={() => prevMonth && onJump(prevMonth)}
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Previous
+        </Button>
+        <Button
+          variant={isOnActive ? "secondary" : "outline"}
+          size="sm"
+          disabled={!activeMonthKey || isOnActive}
+          onClick={() => activeMonthKey && onJump(activeMonthKey)}
+        >
+          Current
+        </Button>
+        <Button
+          variant={nextIsProjected ? "default" : "outline"}
+          size="sm"
+          disabled={!nextMonth}
+          onClick={() => nextMonth && onJump(nextMonth)}
+        >
+          {nextIsProjected ? "Start Next Cycle" : "Next"}
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+        {rightSlot}
+      </div>
+    </div>
+  );
+}
+
 export function BudgetPage() {
-  const [month] = useState(getCurrentMonth());
+  const { data: recentCycles, isLoading: cyclesLoading } = useRecentCycles(24);
+  const { data: allBudgetMonths } = useBudgetMonths();
+
+  const cycles = useMemo<PayCycleSummary[]>(
+    () =>
+      [...(recentCycles?.cycles ?? [])].sort((a, b) =>
+        a.budgetMonth.localeCompare(b.budgetMonth)
+      ),
+    [recentCycles]
+  );
+
+  const sortedBudgetMonths = useMemo<BudgetMonth[]>(
+    () =>
+      [...(allBudgetMonths ?? [])].sort((a, b) => a.month.localeCompare(b.month)),
+    [allBudgetMonths]
+  );
+
+  const activeCycle = useMemo(() => findActiveCycle(cycles), [cycles]);
+
+  // User-selected override; null means follow the active cycle.
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const month =
+    selectedMonth ??
+    activeCycle?.budgetMonth ??
+    cycles[cycles.length - 1]?.budgetMonth ??
+    getCurrentMonth();
+
   const { data: budget, isLoading, error } = useBudgetMonth(month);
   const { data: spendingHistory } = useSpendingHistory(month);
   const deleteCommitment = useDeleteFixedCommitment();
@@ -771,7 +1076,50 @@ export function BudgetPage() {
     return map;
   }, [spendingHistory]);
 
-  if (isLoading) {
+  // Cycle metadata for navigation. The selected month may not yet have a cycle
+  // record (when the user navigates onto a projected next cycle that doesn't exist).
+  const selectedCycle = useMemo(
+    () => cycles.find((c) => c.budgetMonth === month) ?? null,
+    [cycles, month]
+  );
+  const currentCycleIndex = cycles.findIndex((c) => c.budgetMonth === month);
+  const isOnExistingCycle = currentCycleIndex >= 0;
+  const latestExistingMonth = cycles[cycles.length - 1]?.budgetMonth ?? null;
+  const projectedNextMonth = latestExistingMonth
+    ? addMonthsToKey(latestExistingMonth, 1)
+    : null;
+
+  const prevMonth: string | null = isOnExistingCycle
+    ? currentCycleIndex > 0
+      ? cycles[currentCycleIndex - 1].budgetMonth
+      : null
+    : latestExistingMonth;
+
+  let nextMonth: string | null = null;
+  let nextIsProjected = false;
+  if (isOnExistingCycle) {
+    if (currentCycleIndex < cycles.length - 1) {
+      nextMonth = cycles[currentCycleIndex + 1].budgetMonth;
+    } else if (projectedNextMonth) {
+      nextMonth = projectedNextMonth;
+      nextIsProjected = true;
+    }
+  }
+  // If we're on a projected (non-existent) cycle, no further navigation forward.
+
+  const activeMonthKey = activeCycle?.budgetMonth ?? null;
+  const isOnActive = activeMonthKey !== null && month === activeMonthKey;
+
+  const cycleHeading = selectedCycle
+    ? getCycleDisplayName(selectedCycle, month)
+    : getCycleDisplayName(null, month);
+  const cycleSubheading = selectedCycle
+    ? getCycleDateRange(selectedCycle)
+    : isOnExistingCycle
+    ? null
+    : "Not yet started";
+
+  if (isLoading || cyclesLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
@@ -780,11 +1128,28 @@ export function BudgetPage() {
     );
   }
 
+  // Cycle doesn't exist yet — show the setup form, seeded from the most recent
+  // existing cycle (before `month`) so commitments and category budgets can carry forward.
   if (error || !budget) {
+    const previousBudget =
+      [...sortedBudgetMonths].reverse().find((m) => m.month < month) ?? null;
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Budget Keeper</h1>
-        <SetupBudgetForm month={month} />
+        <CycleNav
+          cycleHeading={cycleHeading}
+          cycleSubheading={cycleSubheading}
+          isOnActive={isOnActive}
+          activeMonthKey={activeMonthKey}
+          prevMonth={prevMonth}
+          nextMonth={nextMonth}
+          nextIsProjected={nextIsProjected}
+          onJump={(m: string) => setSelectedMonth(m)}
+        />
+        <SetupBudgetForm
+          month={month}
+          cycle={selectedCycle}
+          previousBudget={previousBudget}
+        />
       </div>
     );
   }
@@ -815,33 +1180,41 @@ export function BudgetPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Budget Keeper</h1>
-          <p className="text-muted-foreground">{formatMonthDisplay(month)}</p>
-        </div>
-        <Dialog open={editMonthDialogOpen} onOpenChange={setEditMonthDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Month
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit {formatMonthDisplay(month)}</DialogTitle>
-            </DialogHeader>
-            <EditBudgetMonthDialog
-              month={month}
-              expectedIncome={budget.expectedIncome}
-              paydayDate={budget.paydayDate}
-              savingsTargetType={budget.savingsTargetType}
-              savingsTargetValue={budget.savingsTargetValue}
-              onClose={() => setEditMonthDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <CycleNav
+        cycleHeading={cycleHeading}
+        cycleSubheading={cycleSubheading}
+        isOnActive={isOnActive}
+        activeMonthKey={activeMonthKey}
+        prevMonth={prevMonth}
+        nextMonth={nextMonth}
+        nextIsProjected={nextIsProjected}
+        onJump={(m: string) => setSelectedMonth(m)}
+        rightSlot={
+          <Dialog open={editMonthDialogOpen} onOpenChange={setEditMonthDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Cycle
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit {cycleHeading}</DialogTitle>
+              </DialogHeader>
+              <EditBudgetMonthDialog
+                month={month}
+                expectedIncome={budget.expectedIncome}
+                cycleStartDate={budget.cycleStartDate}
+                cycleEndDate={budget.cycleEndDate}
+                savingsTargetType={budget.savingsTargetType}
+                savingsTargetValue={budget.savingsTargetValue}
+                onClose={() => setEditMonthDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        }
+      />
+
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">

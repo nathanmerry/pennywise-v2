@@ -82,7 +82,10 @@ export function useCreateBudgetMonth() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createBudgetMonth,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["budgetMonths"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["budgetMonths"] });
+      qc.invalidateQueries({ queryKey: ["recentCycles"] });
+    },
   });
 }
 

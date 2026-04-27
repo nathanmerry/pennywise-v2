@@ -1,40 +1,34 @@
 /**
- * Pay cycle semantics (Phase 1, payday-first budget model).
+ * Pay cycle semantics.
  *
- * A pay cycle is the window between two consecutive paydays. Each BudgetMonth
- * row represents the cycle *ending* on its stored paydayDate — so
- * BudgetMonth(2026-04, paydayDate=Apr 24) is the cycle that ends on Apr 24.
+ * Each BudgetMonth row stores the cycle's bounds explicitly:
+ *   - cycleStartDate: first day of the cycle (inclusive). For payday-driven cycles
+ *     this is the day the user gets paid for that cycle.
+ *   - cycleEndDate: last day of the cycle (inclusive). Day before the next payday.
  *
- * Cycle bounds use (prevPayday, thisPayday] — start payday is NOT in the
- * cycle, end payday IS. This avoids adjacent cycles overlapping on boundary
- * days. For display ("Pay cycle: 24 Mar – 24 Apr"), the struct exposes
- * previousPaydayDate separately so the UI can show both endpoints as actual
- * payday dates without the off-by-one that startInclusive would imply.
- *
- * Phase 1 keeps BudgetMonth storage monthly and derives the previous payday
- * by subtracting one month. This matches monthly-cadence pay; irregular
- * cadences will need a proper lookup later.
+ * This module derives `startInclusive` and `endExclusive` (half-open range, used for
+ * date queries) from the stored bounds, plus elapsed/remaining day counters relative
+ * to a `now` timestamp.
  */
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export interface PayCycle {
-  /** Inclusive start of the query range: prevPayday + 1 day at 00:00 local. */
+  /** Inclusive start of query range = cycleStartDate at 00:00 local. */
   startInclusive: Date;
-  /** Exclusive end of the query range: thisPayday + 1 day at 00:00 local. */
+  /** Exclusive end of query range = cycleEndDate + 1 day at 00:00 local. */
   endExclusive: Date;
-  /** The payday this cycle ends on (inclusive in the cycle). */
-  paydayDate: Date;
-  /** The previous payday, exposed for UI labeling — NOT in this cycle. */
-  previousPaydayDate: Date;
-  /** "YYYY-MM" key of the ending payday — matches BudgetMonth.month. */
+  /** First day of the cycle (inclusive) — typically the user's payday for this cycle. */
+  cycleStartDate: Date;
+  /** Last day of the cycle (inclusive) — day before the next payday. */
+  cycleEndDate: Date;
+  /** "YYYY-MM" key — matches BudgetMonth.month. */
   budgetMonth: string;
   daysInCycle: number;
   daysElapsed: number;
   daysRemaining: number;
 }
 
-/** Start of local day. We treat all cycle math in local time; payday is a date, not a timestamp. */
 function startOfLocalDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
 }
@@ -43,45 +37,29 @@ function addDaysLocal(d: Date, days: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days, 0, 0, 0, 0);
 }
 
-function subtractMonthsPreservingDay(d: Date, months: number): Date {
-  // JS Date's setMonth handles day clamping for shorter target months
-  // (Mar 31 -> 1 month back -> Mar 3; unusual but deterministic).
-  const result = new Date(d.getFullYear(), d.getMonth() - months, d.getDate());
-  return startOfLocalDay(result);
-}
-
 function monthKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 /**
- * For monthly-cadence pay, the previous payday is one calendar month back.
- * Phase 1 assumption.
- */
-export function getPreviousPaydayDate(paydayDate: Date): Date {
-  return subtractMonthsPreservingDay(paydayDate, 1);
-}
-
-/**
- * Build a PayCycle from a BudgetMonth row. `now` is used only to compute
- * elapsed/remaining day counts — the cycle bounds themselves are derived
- * purely from the stored paydayDate.
- *
- * Historical cycles (paydayDate in the past): daysElapsed caps at daysInCycle, daysRemaining is 0.
- * Future cycles (paydayDate far in the future): daysElapsed is 0, daysRemaining = daysInCycle.
+ * Build a PayCycle from a BudgetMonth row's stored bounds. `now` is used only to
+ * compute elapsed/remaining day counts.
  */
 export function getPayCycleFromBudgetMonth(
-  budgetMonth: { month: string; paydayDate: Date },
+  budgetMonth: { month: string; cycleStartDate: Date; cycleEndDate: Date },
   now: Date,
 ): PayCycle {
-  const thisPayday = startOfLocalDay(new Date(budgetMonth.paydayDate));
-  const prevPayday = getPreviousPaydayDate(thisPayday);
+  const cycleStartDate = startOfLocalDay(new Date(budgetMonth.cycleStartDate));
+  const cycleEndDate = startOfLocalDay(new Date(budgetMonth.cycleEndDate));
 
-  const startInclusive = addDaysLocal(prevPayday, 1);
-  const endExclusive = addDaysLocal(thisPayday, 1);
+  const startInclusive = cycleStartDate;
+  const endExclusive = addDaysLocal(cycleEndDate, 1);
 
-  const daysInCycle = Math.round(
-    (endExclusive.getTime() - startInclusive.getTime()) / MS_PER_DAY,
+  const daysInCycle = Math.max(
+    1,
+    Math.round(
+      (endExclusive.getTime() - startInclusive.getTime()) / MS_PER_DAY,
+    ),
   );
 
   const nowStart = startOfLocalDay(now);
@@ -100,8 +78,8 @@ export function getPayCycleFromBudgetMonth(
   return {
     startInclusive,
     endExclusive,
-    paydayDate: thisPayday,
-    previousPaydayDate: prevPayday,
+    cycleStartDate,
+    cycleEndDate,
     budgetMonth: budgetMonth.month,
     daysInCycle,
     daysElapsed,
@@ -115,51 +93,22 @@ export function getMonthKey(d: Date): string {
 }
 
 /**
- * Walk back N cycles starting from an anchor BudgetMonth, newest first.
- * Pure — callers supply the anchor (typically the upcoming BudgetMonth row,
- * else the latest past one). Returns an empty array when count <= 0.
- */
-export function buildRecentPayCycles(
-  anchor: { month: string; paydayDate: Date },
-  count: number,
-  now: Date,
-): PayCycle[] {
-  if (count <= 0) return [];
-
-  const cycles: PayCycle[] = [];
-  let paydayDate: Date = startOfLocalDay(new Date(anchor.paydayDate));
-  let budgetMonth: string = anchor.month;
-
-  for (let i = 0; i < count; i += 1) {
-    cycles.push(
-      getPayCycleFromBudgetMonth({ month: budgetMonth, paydayDate }, now),
-    );
-    paydayDate = getPreviousPaydayDate(paydayDate);
-    budgetMonth = monthKey(paydayDate);
-  }
-
-  return cycles;
-}
-
-/**
- * Pace context scoped to a pay cycle. Shape matches the legacy calendar-month
- * pace context (totalDaysInMonth/elapsedDays/remainingDays field names kept)
- * so existing MonthlyBudgetPace/CategoryPace consumers continue to typecheck —
- * but the VALUES are now cycle-based.
+ * Pace context scoped to a pay cycle. Field names (totalDaysInMonth/elapsedDays/
+ * remainingDays) are kept for compatibility with consumers that predate the
+ * cycle-based model — but the values are cycle-based, not calendar-month.
  */
 export interface CyclePaceContext {
-  totalDaysInMonth: number; // days in cycle
-  elapsedDays: number;      // days elapsed in cycle
-  remainingDays: number;    // days remaining in cycle
+  totalDaysInMonth: number;
+  elapsedDays: number;
+  remainingDays: number;
   elapsedRatio: number;
-  isCurrentMonth: boolean;  // cycle contains today
-  isPastMonth: boolean;     // cycle has fully elapsed
-  isFutureMonth: boolean;   // cycle starts after today
+  isCurrentMonth: boolean;
+  isPastMonth: boolean;
+  isFutureMonth: boolean;
 }
 
 export function getCyclePaceContext(cycle: PayCycle): CyclePaceContext {
-  const isCurrent =
-    cycle.daysElapsed > 0 && cycle.daysRemaining > 0;
+  const isCurrent = cycle.daysElapsed > 0 && cycle.daysRemaining > 0;
   const isPast = cycle.daysRemaining === 0;
   const isFuture = cycle.daysElapsed === 0 && !isPast;
   return {

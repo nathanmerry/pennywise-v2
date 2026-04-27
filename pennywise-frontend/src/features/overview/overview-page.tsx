@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
-  useBudgetOverview,
+  useCurrentBudgetOverview,
   useSpendingBreakdown,
   useOverspendCategories,
   useMonthlyPace,
@@ -224,21 +224,29 @@ function BudgetVsActualBars({ pace, spending }: {
   );
 }
 
-function getCurrentMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+/**
+ * Cycle title — named after the calendar month covering most of the cycle's days.
+ * A 25 Apr – 24 May cycle becomes "May 2026 cycle".
+ */
+function formatCycleTitle(cycleStart: string, cycleEnd: string): string {
+  const start = new Date(cycleStart);
+  const end = new Date(cycleEnd);
+  const mid = new Date((start.getTime() + end.getTime()) / 2);
+  return `${mid.toLocaleDateString("en-GB", { month: "long", year: "numeric" })} cycle`;
 }
 
-function formatMonthDisplay(month: string): string {
-  const [year, monthNum] = month.split("-");
-  const date = new Date(parseInt(year), parseInt(monthNum) - 1);
-  return date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+function formatCycleRange(cycleStart: string, cycleEnd: string): string {
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return `${fmt(cycleStart)} – ${fmt(cycleEnd)}`;
 }
 
 export function OverviewPage() {
-  const [month] = useState(getCurrentMonth());
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const { data: overview, isLoading: overviewLoading, error: overviewError } = useBudgetOverview(month);
+  const { data: overview, isLoading: overviewLoading, error: overviewError } = useCurrentBudgetOverview();
+  // All per-month queries follow whichever cycle the backend returns as active.
+  // They stay disabled until the overview lands (each hook gates on a truthy month).
+  const month = overview?.month ?? "";
   const { data: spending, isLoading: spendingLoading } = useSpendingBreakdown(month);
   const { data: overspend } = useOverspendCategories(month);
   const { data: pace } = useMonthlyPace(month);
@@ -259,13 +267,13 @@ export function OverviewPage() {
   if (overviewError || !overview) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">{formatMonthDisplay(month)}</h1>
+        <h1 className="text-2xl font-bold">Overview</h1>
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Wallet className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No budget set for this month</h3>
+            <h3 className="text-lg font-semibold mb-2">No active pay cycle</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Set up your monthly budget to see your spending overview and weekly allowance.
+              Set up a cycle to see your spending overview and weekly allowance.
             </p>
             <Button>Set Up Budget</Button>
           </CardContent>
@@ -276,11 +284,16 @@ export function OverviewPage() {
 
   const isOverBudget = overview.remainingFlexible < 0;
   const budgetUsedPercent = Math.min(100, (overview.actualSpend / overview.flexibleBudget) * 100);
+  const cycleTitle = formatCycleTitle(overview.cycleStart, overview.cycleEnd);
+  const cycleRange = formatCycleRange(overview.cycleStart, overview.cycleEnd);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">{formatMonthDisplay(month)}</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold">{cycleTitle}</h1>
+          <p className="text-sm text-muted-foreground">{cycleRange}</p>
+        </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />
           <span>{overview.daysUntilPayday} days until payday</span>

@@ -4,10 +4,9 @@ import { getCyclePaceContext, getPayCycleFromBudgetMonth } from "./cycle.js";
 export interface BudgetOverview {
   month: string;
   expectedIncome: number;
-  paydayDate: Date;
-  /** Start of the pay cycle (previous payday) — shown in UI. */
+  /** First day of the pay cycle (inclusive) — typically the user's payday. */
   cycleStart: Date;
-  /** End of the pay cycle (this payday) — shown in UI. */
+  /** Last day of the pay cycle (inclusive) — day before the next payday. */
   cycleEnd: Date;
   daysInCycle: number;
   daysElapsed: number;
@@ -18,6 +17,7 @@ export interface BudgetOverview {
   flexibleBudget: number;
   actualSpend: number;
   remainingFlexible: number;
+  /** Days remaining in the current cycle (kept name for UI compatibility). */
   daysUntilPayday: number;
   weeksUntilPayday: number;
   weeklyAllowance: number;
@@ -75,12 +75,15 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
 
   if (!budgetMonth) return null;
 
-  // Phase 1: Overview operates on the pay cycle ending on this budgetMonth's payday,
-  // NOT the calendar month. Transaction queries use (prevPayday, thisPayday] to avoid
-  // overlapping adjacent cycles.
+  // Overview is scoped to this BudgetMonth's stored cycle, not a calendar month.
+  // Transaction queries use [cycleStart, cycleEnd+1) to avoid boundary overlap.
   const now = new Date();
   const cycle = getPayCycleFromBudgetMonth(
-    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    {
+      month: budgetMonth.month,
+      cycleStartDate: new Date(budgetMonth.cycleStartDate),
+      cycleEndDate: new Date(budgetMonth.cycleEndDate),
+    },
     now,
   );
 
@@ -198,9 +201,8 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   return {
     month,
     expectedIncome,
-    paydayDate: cycle.paydayDate,
-    cycleStart: cycle.previousPaydayDate,
-    cycleEnd: cycle.paydayDate,
+    cycleStart: cycle.cycleStartDate,
+    cycleEnd: cycle.cycleEndDate,
     daysInCycle: cycle.daysInCycle,
     daysElapsed: cycle.daysElapsed,
     daysRemaining: cycle.daysRemaining,
@@ -230,7 +232,11 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
   const range = budgetMonth
     ? (() => {
         const cycle = getPayCycleFromBudgetMonth(
-          { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+          {
+            month: budgetMonth.month,
+            cycleStartDate: new Date(budgetMonth.cycleStartDate),
+            cycleEndDate: new Date(budgetMonth.cycleEndDate),
+          },
           new Date(),
         );
         return { start: cycle.startInclusive, end: cycle.endExclusive, isCycle: true };
@@ -614,9 +620,13 @@ export async function getCategoryPressureDetail(
 
   if (!budgetMonth) return null;
 
-  // Phase 1: cycle-scoped pressure view.
+  // Cycle-scoped pressure view.
   const cycle = getPayCycleFromBudgetMonth(
-    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    {
+      month: budgetMonth.month,
+      cycleStartDate: new Date(budgetMonth.cycleStartDate),
+      cycleEndDate: new Date(budgetMonth.cycleEndDate),
+    },
     new Date(),
   );
   const paceContext = getCyclePaceContext(cycle);
@@ -779,10 +789,14 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
 
   if (!budgetMonth) return null;
 
-  // Phase 1: cycle-scoped pace. Transaction range and pace context both come
-  // from the pay cycle ending on this BudgetMonth's paydayDate.
+  // Cycle-scoped pace. Transaction range and pace context both come from the
+  // BudgetMonth's stored cycle bounds.
   const cycle = getPayCycleFromBudgetMonth(
-    { month: budgetMonth.month, paydayDate: new Date(budgetMonth.paydayDate) },
+    {
+      month: budgetMonth.month,
+      cycleStartDate: new Date(budgetMonth.cycleStartDate),
+      cycleEndDate: new Date(budgetMonth.cycleEndDate),
+    },
     new Date(),
   );
   const paceContext = getCyclePaceContext(cycle);

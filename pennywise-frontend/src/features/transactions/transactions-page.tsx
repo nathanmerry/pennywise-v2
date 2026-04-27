@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { format, isAfter, parseISO, startOfDay, subMonths } from "date-fns";
+import { format, parseISO, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions } from "./hooks/use-transactions";
@@ -38,30 +38,27 @@ export function TransactionsPage() {
   const bulkUpdateTx = useBulkUpdateTransactions();
   const isMobile = useIsMobile();
 
-  // On first load, default the date filter to "last payday → today" so the page
+  // On first load, default the date filter to "cycle start → today" so the page
   // opens on the current pay cycle instead of all-time. Only applies once, and
   // never overwrites filters the user has already set.
   const hasAppliedDefault = useRef(false);
   useEffect(() => {
     if (hasAppliedDefault.current) return;
-    if (!overview?.paydayDate) return;
+    if (!overview?.cycleStart) return;
     if (filters.from || filters.to) {
       hasAppliedDefault.current = true;
       return;
     }
     const today = startOfDay(new Date());
-    const payday = startOfDay(parseISO(overview.paydayDate));
-    // paydayDate is the upcoming payday when it's still in the future.
-    // If it's already passed (budget hasn't rolled over), treat it as the last payday directly.
-    const lastPayday = isAfter(payday, today) ? subMonths(payday, 1) : payday;
+    const cycleStart = startOfDay(parseISO(overview.cycleStart));
     hasAppliedDefault.current = true;
     setFilters((f) => ({
       ...f,
-      from: format(lastPayday, "yyyy-MM-dd"),
+      from: format(cycleStart, "yyyy-MM-dd"),
       to: format(today, "yyyy-MM-dd"),
       page: 1,
     }));
-  }, [overview?.paydayDate, filters.from, filters.to]);
+  }, [overview?.cycleStart, filters.from, filters.to]);
 
   const pagination = data?.pagination;
 

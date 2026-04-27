@@ -179,7 +179,8 @@ model BudgetMonth {
   id                 String   @id @default(cuid())
   month              String   @unique // Format: YYYY-MM
   expectedIncome     Decimal  @map("expected_income") @db.Decimal(12, 2)
-  paydayDate         DateTime @map("payday_date")
+  cycleStartDate     DateTime @map("cycle_start_date") // First day of the pay cycle (inclusive).
+  cycleEndDate       DateTime @map("cycle_end_date")   // Last day of the pay cycle (inclusive).
   savingsTargetType  String   @default("fixed") @map("savings_target_type") // fixed | percent
   savingsTargetValue Decimal  @map("savings_target_value") @db.Decimal(12, 2)
   notes              String?

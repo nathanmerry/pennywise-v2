@@ -266,7 +266,10 @@ export interface BudgetMonth {
   id: string;
   month: string;
   expectedIncome: string;
-  paydayDate: string;
+  /** First day of the pay cycle (inclusive), ISO date string. */
+  cycleStartDate: string;
+  /** Last day of the pay cycle (inclusive), ISO date string. */
+  cycleEndDate: string;
   savingsTargetType: "fixed" | "percent";
   savingsTargetValue: string;
   notes: string | null;
@@ -312,10 +315,9 @@ export interface BudgetCategoryPlan {
 export interface BudgetOverview {
   month: string;
   expectedIncome: number;
-  paydayDate: string;
-  /** Start of the pay cycle (previous payday, ISO date). */
+  /** First day of the pay cycle (inclusive), ISO date string. */
   cycleStart: string;
-  /** End of the pay cycle (this payday, ISO date). */
+  /** Last day of the pay cycle (inclusive), ISO date string. */
   cycleEnd: string;
   daysInCycle: number;
   daysElapsed: number;
@@ -368,8 +370,10 @@ export interface PayCycleSummary {
   budgetMonth: string;
   startInclusive: string;
   endExclusive: string;
-  paydayDate: string;
-  previousPaydayDate: string;
+  /** First day of the cycle (inclusive), ISO date string. */
+  cycleStartDate: string;
+  /** Last day of the cycle (inclusive), ISO date string. */
+  cycleEndDate: string;
   daysInCycle: number;
 }
 
@@ -573,7 +577,8 @@ export function fetchBudgetMonth(month: string) {
 export function createBudgetMonth(data: {
   month: string;
   expectedIncome: number;
-  paydayDate: string;
+  cycleStartDate: string;
+  cycleEndDate: string;
   savingsTargetType?: "fixed" | "percent";
   savingsTargetValue: number;
   notes?: string | null;
@@ -583,7 +588,8 @@ export function createBudgetMonth(data: {
 
 export function updateBudgetMonth(month: string, data: Partial<{
   expectedIncome: number;
-  paydayDate: string;
+  cycleStartDate: string;
+  cycleEndDate: string;
   savingsTargetType: "fixed" | "percent";
   savingsTargetValue: number;
   notes: string | null;

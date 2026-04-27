@@ -5,7 +5,7 @@ import { getBudgetOverview, getSpendingBreakdown, getCategoriesOverBudget, getMo
 import { getSpendingHistoryAnalysis, getCategoryEvidenceBatch } from "../services/spending-history.js";
 import { generateBudgetRecommendations, applyBudgetRecommendations } from "../services/budget-recommendations.js";
 import { getCategoryDrilldown, getSpendingAnalysis } from "../services/spending-analysis.js";
-import { buildRecentPayCycles } from "../services/cycle.js";
+import { getPayCycleFromBudgetMonth } from "../services/cycle.js";
 
 const router = Router();
 
@@ -148,14 +148,20 @@ router.get("/months/:month", async (req, res) => {
 });
 
 // POST /api/budget/months
-const createMonthSchema = z.object({
-  month: z.string().regex(/^\d{4}-\d{2}$/),
-  expectedIncome: z.number().positive(),
-  paydayDate: z.string().datetime(),
-  savingsTargetType: z.enum(["fixed", "percent"]).default("fixed"),
-  savingsTargetValue: z.number().min(0),
-  notes: z.string().nullable().optional(),
-});
+const createMonthSchema = z
+  .object({
+    month: z.string().regex(/^\d{4}-\d{2}$/),
+    expectedIncome: z.number().positive(),
+    cycleStartDate: z.string().datetime(),
+    cycleEndDate: z.string().datetime(),
+    savingsTargetType: z.enum(["fixed", "percent"]).default("fixed"),
+    savingsTargetValue: z.number().min(0),
+    notes: z.string().nullable().optional(),
+  })
+  .refine(
+    (d) => new Date(d.cycleEndDate).getTime() >= new Date(d.cycleStartDate).getTime(),
+    { message: "cycleEndDate must be on or after cycleStartDate" },
+  );
 
 router.post("/months", async (req, res) => {
   const parsed = createMonthSchema.safeParse(req.body);
@@ -164,15 +170,24 @@ router.post("/months", async (req, res) => {
     return;
   }
 
+  const cycleStartDate = new Date(parsed.data.cycleStartDate);
+  const cycleEndDate = new Date(parsed.data.cycleEndDate);
+
   const month = await prisma.budgetMonth.upsert({
     where: { month: parsed.data.month },
     create: {
-      ...parsed.data,
-      paydayDate: new Date(parsed.data.paydayDate),
+      month: parsed.data.month,
+      expectedIncome: parsed.data.expectedIncome,
+      cycleStartDate,
+      cycleEndDate,
+      savingsTargetType: parsed.data.savingsTargetType,
+      savingsTargetValue: parsed.data.savingsTargetValue,
+      notes: parsed.data.notes,
     },
     update: {
       expectedIncome: parsed.data.expectedIncome,
-      paydayDate: new Date(parsed.data.paydayDate),
+      cycleStartDate,
+      cycleEndDate,
       savingsTargetType: parsed.data.savingsTargetType,
       savingsTargetValue: parsed.data.savingsTargetValue,
       notes: parsed.data.notes,
@@ -184,13 +199,22 @@ router.post("/months", async (req, res) => {
 });
 
 // PATCH /api/budget/months/:month
-const updateMonthSchema = z.object({
-  expectedIncome: z.number().positive().optional(),
-  paydayDate: z.string().datetime().optional(),
-  savingsTargetType: z.enum(["fixed", "percent"]).optional(),
-  savingsTargetValue: z.number().min(0).optional(),
-  notes: z.string().nullable().optional(),
-});
+const updateMonthSchema = z
+  .object({
+    expectedIncome: z.number().positive().optional(),
+    cycleStartDate: z.string().datetime().optional(),
+    cycleEndDate: z.string().datetime().optional(),
+    savingsTargetType: z.enum(["fixed", "percent"]).optional(),
+    savingsTargetValue: z.number().min(0).optional(),
+    notes: z.string().nullable().optional(),
+  })
+  .refine(
+    (d) =>
+      d.cycleStartDate === undefined ||
+      d.cycleEndDate === undefined ||
+      new Date(d.cycleEndDate).getTime() >= new Date(d.cycleStartDate).getTime(),
+    { message: "cycleEndDate must be on or after cycleStartDate" },
+  );
 
 router.patch("/months/:month", async (req, res) => {
   const parsed = updateMonthSchema.safeParse(req.body);
@@ -200,8 +224,11 @@ router.patch("/months/:month", async (req, res) => {
   }
 
   const data: Record<string, unknown> = { ...parsed.data };
-  if (parsed.data.paydayDate) {
-    data.paydayDate = new Date(parsed.data.paydayDate);
+  if (parsed.data.cycleStartDate) {
+    data.cycleStartDate = new Date(parsed.data.cycleStartDate);
+  }
+  if (parsed.data.cycleEndDate) {
+    data.cycleEndDate = new Date(parsed.data.cycleEndDate);
   }
 
   const month = await prisma.budgetMonth.update({
@@ -511,22 +538,25 @@ router.get("/overspend/:month", async (req, res) => {
 });
 
 // GET /api/budget/current - Get the overview for the active pay cycle.
-// Active cycle = the BudgetMonth whose paydayDate is the next upcoming payday.
-// If no upcoming BudgetMonth exists, fall back to the latest past row (its cycle
-// is still the most recent defined one; the frontend will see it as elapsed).
+// Active cycle = the BudgetMonth whose date range contains today.
+// If today falls outside every defined cycle, fall back to the most recent past
+// cycle (the frontend renders it as elapsed).
 router.get("/current", async (_req, res) => {
   const now = new Date();
 
-  const upcoming = await prisma.budgetMonth.findFirst({
-    where: { paydayDate: { gte: now } },
-    orderBy: { paydayDate: "asc" },
+  const containing = await prisma.budgetMonth.findFirst({
+    where: {
+      cycleStartDate: { lte: now },
+      cycleEndDate: { gte: now },
+    },
+    orderBy: { cycleStartDate: "desc" },
     select: { month: true },
   });
 
   const activeMonth =
-    upcoming ??
+    containing ??
     (await prisma.budgetMonth.findFirst({
-      orderBy: { paydayDate: "desc" },
+      orderBy: { cycleStartDate: "desc" },
       select: { month: true },
     }));
 
@@ -555,36 +585,42 @@ router.get("/cycles", async (req, res) => {
     : 12;
 
   const now = new Date();
-  const upcoming = await prisma.budgetMonth.findFirst({
-    where: { paydayDate: { gte: now } },
-    orderBy: { paydayDate: "asc" },
-    select: { month: true, paydayDate: true },
+
+  // Take up to N cycles ordered newest-first by start date. Cycles are stored
+  // explicitly (not derived), so no walking-back-from-anchor required.
+  const rows = await prisma.budgetMonth.findMany({
+    orderBy: { cycleStartDate: "desc" },
+    take: count,
+    select: {
+      month: true,
+      cycleStartDate: true,
+      cycleEndDate: true,
+    },
   });
 
-  const anchor =
-    upcoming ??
-    (await prisma.budgetMonth.findFirst({
-      orderBy: { paydayDate: "desc" },
-      select: { month: true, paydayDate: true },
-    }));
-
-  if (!anchor) {
+  if (rows.length === 0) {
     res.json({ cycles: [] });
     return;
   }
 
-  const cycles = buildRecentPayCycles(
-    { month: anchor.month, paydayDate: new Date(anchor.paydayDate) },
-    count,
-    now,
-  ).map((cycle) => ({
-    budgetMonth: cycle.budgetMonth,
-    startInclusive: cycle.startInclusive.toISOString(),
-    endExclusive: cycle.endExclusive.toISOString(),
-    paydayDate: cycle.paydayDate.toISOString(),
-    previousPaydayDate: cycle.previousPaydayDate.toISOString(),
-    daysInCycle: cycle.daysInCycle,
-  }));
+  const cycles = rows.map((row) => {
+    const cycle = getPayCycleFromBudgetMonth(
+      {
+        month: row.month,
+        cycleStartDate: new Date(row.cycleStartDate),
+        cycleEndDate: new Date(row.cycleEndDate),
+      },
+      now,
+    );
+    return {
+      budgetMonth: cycle.budgetMonth,
+      startInclusive: cycle.startInclusive.toISOString(),
+      endExclusive: cycle.endExclusive.toISOString(),
+      cycleStartDate: cycle.cycleStartDate.toISOString(),
+      cycleEndDate: cycle.cycleEndDate.toISOString(),
+      daysInCycle: cycle.daysInCycle,
+    };
+  });
 
   res.json({ cycles });
 });

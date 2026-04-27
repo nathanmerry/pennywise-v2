@@ -10,6 +10,8 @@ import { CategoryBreakdownCard } from "./components/category-breakdown-card";
 import { SpendingChartsCard } from "./components/spending-charts-card";
 import { SpendingFiltersPanel } from "./components/spending-filters-panel";
 import { TopMerchantsCard } from "./components/top-merchants-card";
+import { WeekSlice } from "./components/week-slice";
+import { getPresetLabel } from "./lib/spending-filters";
 
 function SpendingPageSkeleton() {
   return (
@@ -74,9 +76,16 @@ export function SpendingPage() {
         onIncludeIgnoredChange={state.setIncludeIgnored}
         accounts={accounts}
         categories={categories}
-        periodLabel={state.periodLabel}
         hasCustomFilters={state.hasCustomFilters}
         onReset={state.resetFilters}
+      />
+
+      <WeekSlice
+        periodLabel={state.periodLabel}
+        presetLabel={getPresetLabel(state.preset)}
+        weeks={state.weeks}
+        selectedWeekIndex={state.selectedWeekIndex}
+        onSelect={state.setSelectedWeekIndex}
       />
 
       {isLoading ? (

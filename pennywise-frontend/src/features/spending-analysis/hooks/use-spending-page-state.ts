@@ -6,17 +6,23 @@ import type {
   SpendingAnalysisFilters,
 } from "@/shared/lib/api";
 import {
+  buildCycleWeeks,
   resolvePresetRange,
   type CustomRange,
+  type CycleWeek,
 } from "../lib/spending-filters";
 import { formatDateRangeLabel } from "../lib/spending-formatters";
 import type { CategorySortKey } from "../components/category-breakdown-card";
 import type { ChartMode } from "../components/spending-charts-card";
 
+function isSingleCyclePreset(preset: AnalysisPreset): boolean {
+  return preset === "this_cycle" || preset === "last_cycle";
+}
+
 type SortDirection = "asc" | "desc";
 
 export function useSpendingPageState(cycles: PayCycleSummary[]) {
-  const [preset, setPreset] = useState<AnalysisPreset>("this_cycle");
+  const [preset, setPresetRaw] = useState<AnalysisPreset>("this_cycle");
   const [chartMode, setChartMode] = useState<ChartMode>("daily");
   const [comparePrevious, setComparePrevious] = useState(false);
   const [includeIgnored, setIncludeIgnored] = useState(false);
@@ -31,26 +37,52 @@ export function useSpendingPageState(cycles: PayCycleSummary[]) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState<number | null>(
+    null,
+  );
+
+  // Changing the preset always resets the week slice — a W3 selection has no
+  // meaning once the underlying cycle window changes.
+  const setPreset = (next: AnalysisPreset) => {
+    setPresetRaw(next);
+    setSelectedWeekIndex(null);
+  };
 
   const resolvedRange = useMemo(
     () => resolvePresetRange(preset, cycles, customRange),
     [preset, cycles, customRange],
   );
 
+  const weeks = useMemo<CycleWeek[]>(() => {
+    if (!isSingleCyclePreset(preset)) return [];
+    return buildCycleWeeks(resolvedRange.start, resolvedRange.end);
+  }, [preset, resolvedRange]);
+
+  const selectedWeek =
+    selectedWeekIndex !== null ? weeks[selectedWeekIndex] ?? null : null;
+
+  // When a week is selected, narrow the query range and force preset=custom so
+  // the backend correctly disables cycle-only budget gating (only full cycles
+  // should show budget context).
+  const effectiveRange = selectedWeek
+    ? { start: selectedWeek.start, end: selectedWeek.end }
+    : resolvedRange;
+  const effectivePreset: AnalysisPreset = selectedWeek ? "custom" : preset;
+
   const filters = useMemo<SpendingAnalysisFilters>(
     () => ({
-      start: format(resolvedRange.start, "yyyy-MM-dd"),
-      end: format(resolvedRange.end, "yyyy-MM-dd"),
+      start: format(effectiveRange.start, "yyyy-MM-dd"),
+      end: format(effectiveRange.end, "yyyy-MM-dd"),
       compare: comparePrevious,
-      preset,
+      preset: effectivePreset,
       accountId,
       categoryId,
       includeIgnored,
     }),
     [
-      resolvedRange,
+      effectiveRange,
+      effectivePreset,
       comparePrevious,
-      preset,
       accountId,
       categoryId,
       includeIgnored,
@@ -64,10 +96,12 @@ export function useSpendingPageState(cycles: PayCycleSummary[]) {
     !!accountId ||
     !!categoryId ||
     comparePrevious ||
-    includeIgnored;
+    includeIgnored ||
+    selectedWeekIndex !== null;
 
   const resetFilters = () => {
-    setPreset("this_cycle");
+    setPresetRaw("this_cycle");
+    setSelectedWeekIndex(null);
     setComparePrevious(false);
     setIncludeIgnored(false);
     setAccountId(undefined);
@@ -108,5 +142,9 @@ export function useSpendingPageState(cycles: PayCycleSummary[]) {
     periodLabel,
     hasCustomFilters,
     resetFilters,
+    weeks,
+    selectedWeekIndex,
+    setSelectedWeekIndex,
+    selectedWeek,
   };
 }
