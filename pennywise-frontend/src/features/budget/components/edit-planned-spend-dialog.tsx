@@ -10,27 +10,28 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { useCategories } from "@/shared/hooks/use-categories";
-import { useCreatePlannedSpend } from "@/shared/hooks/use-budget";
+import { useUpdatePlannedSpend } from "@/shared/hooks/use-budget";
+import type { BudgetPlannedSpend } from "@/shared/lib/api";
 
-interface AddPlannedSpendDialogProps {
-  month: string;
+interface EditPlannedSpendDialogProps {
+  planned: BudgetPlannedSpend;
   onClose: () => void;
 }
 
-export function AddPlannedSpendDialog({ month, onClose }: AddPlannedSpendDialogProps) {
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [isEssential, setIsEssential] = useState(false);
-  const [categoryId, setCategoryId] = useState<string>("");
+export function EditPlannedSpendDialog({ planned, onClose }: EditPlannedSpendDialogProps) {
+  const [name, setName] = useState(planned.name);
+  const [amount, setAmount] = useState(planned.amount);
+  const [isEssential, setIsEssential] = useState(planned.isEssential);
+  const [categoryId, setCategoryId] = useState<string>(planned.categoryId ?? "");
   const { data: categories } = useCategories();
-  const createPlanned = useCreatePlannedSpend();
+  const updatePlanned = useUpdatePlannedSpend();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !amount) return;
 
-    await createPlanned.mutateAsync({
-      month,
+    await updatePlanned.mutateAsync({
+      id: planned.id,
       data: {
         name,
         amount: parseFloat(amount),
@@ -44,21 +45,19 @@ export function AddPlannedSpendDialog({ month, onClose }: AddPlannedSpendDialogP
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="edit-planned-name">Name</Label>
         <Input
-          id="name"
-          placeholder="e.g., Holiday, Birthday gift"
+          id="edit-planned-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="amount">Amount (£)</Label>
+        <Label htmlFor="edit-planned-amount">Amount (£)</Label>
         <Input
-          id="amount"
+          id="edit-planned-amount"
           type="number"
           step="0.01"
-          placeholder="0.00"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
@@ -94,12 +93,12 @@ export function AddPlannedSpendDialog({ month, onClose }: AddPlannedSpendDialogP
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
-          id="essential"
+          id="edit-planned-essential"
           checked={isEssential}
           onChange={(e) => setIsEssential(e.target.checked)}
           className="rounded"
         />
-        <Label htmlFor="essential" className="text-sm font-normal">
+        <Label htmlFor="edit-planned-essential" className="text-sm font-normal">
           This is essential (not discretionary)
         </Label>
       </div>
@@ -107,8 +106,8 @@ export function AddPlannedSpendDialog({ month, onClose }: AddPlannedSpendDialogP
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={createPlanned.isPending}>
-          Add
+        <Button type="submit" disabled={updatePlanned.isPending}>
+          Save
         </Button>
       </div>
     </form>

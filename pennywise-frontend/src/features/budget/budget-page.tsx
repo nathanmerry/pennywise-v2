@@ -28,7 +28,7 @@ import {
   useSpendingHistory,
 } from "@/shared/hooks/use-budget";
 import { BudgetRecommendationsPanel } from "@/features/budget/components/budget-recommendations-panel";
-import { Calendar, Home, Pencil, PiggyBank, Plus, ShoppingBag, Sparkles, Trash2 } from "lucide-react";
+import { Calendar, Home, Pencil, PiggyBank, Plus, ShoppingBag, Sparkles } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type {
   BudgetFixedCommitment,
@@ -55,6 +55,7 @@ import { CommitmentRow } from "@/features/budget/components/commitment-row";
 import { CycleNav } from "@/features/budget/components/cycle-nav";
 import { EditBudgetMonthDialog } from "@/features/budget/components/edit-budget-month-dialog";
 import { EventCard } from "@/features/budget/components/event-card";
+import { PlannedSpendRow } from "@/features/budget/components/planned-spend-row";
 import { SetupBudgetForm } from "@/features/budget/components/setup-budget-form";
 
 export function BudgetPage() {
@@ -402,30 +403,11 @@ export function BudgetPage() {
               ) : (
                 <div className="space-y-2">
                   {budget.plannedSpends.map((planned: BudgetPlannedSpend) => (
-                    <div
+                    <PlannedSpendRow
                       key={planned.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                    >
-                      <div>
-                        <span className="font-medium">{planned.name}</span>
-                        {planned.isEssential && (
-                          <span className="ml-2 text-xs text-muted-foreground">(essential)</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">
-                          {formatCurrency(parseFloat(planned.amount))}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => deletePlanned.mutate(planned.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                      planned={planned}
+                      onDelete={() => deletePlanned.mutate(planned.id)}
+                    />
                   ))}
                   <div className="flex justify-between pt-4 border-t font-semibold">
                     <span>Total</span>

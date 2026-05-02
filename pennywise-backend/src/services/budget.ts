@@ -155,12 +155,19 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   }, 0);
   const unallocated = flexibleBudget - categoryAllocated;
 
-  // Build fixed-category set from linked BudgetFixedCommitments. Spend on these
-  // categories is counted toward fixed spend and excluded from flexible tally
-  // so remainingFlexible / daily+weekly allowances reflect controllable spend.
-  const fixedCategoryIds = new Set<string>();
-  const hasLinkedCommitment = budgetMonth.fixedCommitments.some((c) => c.categoryId);
-  if (hasLinkedCommitment) {
+  // Build the set of categories whose spend is already pre-allocated at planning
+  // time — fixed commitments and planned one-offs both reserve money up-front.
+  // Spend on these categories is excluded from `actualFlexibleSpend` so
+  // remainingFlexible / daily+weekly allowances reflect controllable spend only.
+  const preallocatedCategoryIds = new Set<string>();
+  const linkedCommitmentCats = budgetMonth.fixedCommitments
+    .map((c) => c.categoryId)
+    .filter((id): id is string => !!id);
+  const linkedPlannedCats = budgetMonth.plannedSpends
+    .map((p) => p.categoryId)
+    .filter((id): id is string => !!id);
+  const seedCats = [...linkedCommitmentCats, ...linkedPlannedCats];
+  if (seedCats.length > 0) {
     const allCategories = await prisma.category.findMany({
       select: { id: true, parentId: true },
     });
@@ -173,13 +180,11 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
       }
     }
     const addWithDescendants = (id: string) => {
-      if (fixedCategoryIds.has(id)) return;
-      fixedCategoryIds.add(id);
+      if (preallocatedCategoryIds.has(id)) return;
+      preallocatedCategoryIds.add(id);
       for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
     };
-    for (const commitment of budgetMonth.fixedCommitments) {
-      if (commitment.categoryId) addWithDescendants(commitment.categoryId);
-    }
+    for (const id of seedCats) addWithDescendants(id);
   }
 
   // Split spend into flexible vs fixed using the source-of-truth commitment links.
@@ -190,10 +195,10 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     if (amount >= 0) continue;
     const abs = Math.abs(amount);
     actualSpend += abs;
-    const isFixed =
-      fixedCategoryIds.size > 0 &&
-      tx.categories.some((c) => fixedCategoryIds.has(c.categoryId));
-    if (!isFixed) actualFlexibleSpend += abs;
+    const isPreallocated =
+      preallocatedCategoryIds.size > 0 &&
+      tx.categories.some((c) => preallocatedCategoryIds.has(c.categoryId));
+    if (!isPreallocated) actualFlexibleSpend += abs;
   }
 
   const remainingFlexible = flexibleBudget - actualFlexibleSpend;
@@ -982,13 +987,20 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   );
   const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
 
-  // Build the set of categories treated as "fixed": every category linked by a
-  // BudgetFixedCommitment, plus all descendants. Spend on these categories is
-  // excluded from the flexible tally so pacing reflects controllable spend only.
+  // Build the set of categories whose spend is already pre-allocated at planning
+  // time — fixed commitments and planned one-offs both reserve money up-front.
+  // Spend on these categories is excluded from the flexible tally so pacing
+  // reflects controllable spend only.
   const fixedCategoryIds = new Set<string>();
-  const hasLinkedCommitment = budgetMonth.fixedCommitments.some((c) => c.categoryId);
+  const linkedCommitmentCats = budgetMonth.fixedCommitments
+    .map((c) => c.categoryId)
+    .filter((id): id is string => !!id);
+  const linkedPlannedCats = budgetMonth.plannedSpends
+    .map((p) => p.categoryId)
+    .filter((id): id is string => !!id);
+  const seedCats = [...linkedCommitmentCats, ...linkedPlannedCats];
 
-  if (hasLinkedCommitment) {
+  if (seedCats.length > 0) {
     const allCategories = await prisma.category.findMany({
       select: { id: true, parentId: true },
     });
@@ -1007,9 +1019,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
       for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
     };
 
-    for (const commitment of budgetMonth.fixedCommitments) {
-      if (commitment.categoryId) addWithDescendants(commitment.categoryId);
-    }
+    for (const id of seedCats) addWithDescendants(id);
   }
 
   const isFixedTransaction = (tx: (typeof transactions)[number]): boolean => {
