@@ -22,7 +22,9 @@ export function AllocationSummaryBanner({ month }: AllocationSummaryBannerProps)
   return (
     <div
       className={cn(
-        "rounded-lg border bg-muted/30 px-4 py-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm",
+        "rounded-lg border bg-muted/30 px-4 py-2 text-sm",
+        "grid grid-cols-2 gap-x-4 gap-y-1.5",
+        "sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1",
         overcommitted && "border-destructive/40 bg-destructive/5"
       )}
     >
@@ -70,5 +72,9 @@ function SummaryItem({
 }
 
 function Separator() {
-  return <span aria-hidden className="text-muted-foreground/40">·</span>;
+  return (
+    <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">
+      ·
+    </span>
+  );
 }

@@ -841,6 +841,12 @@ export interface MonthlyBudgetPace {
     actualFixedSpendToDate: number;
   };
 
+  forecast: {
+    projectedFlexibleSpend: number;
+    projectedOverUnder: number;
+    isProjectedOver: boolean;
+  };
+
   categories: CategoryPace[];
 
   highlights: {

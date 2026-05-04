@@ -13,6 +13,13 @@ import {
 } from "../lib/spending-formatters";
 import { Sparkline } from "./sparkline";
 
+// Mirrors the sentinel ids the backend emits for unresolvable txs (uncategorised
+// or ambiguous multi-category). These rows show in the breakdown but have no
+// drilldown — keep the click handler from firing.
+function isUnattributedRow(categoryId: string): boolean {
+  return categoryId === "__unattributed_flexible__" || categoryId === "__unattributed_fixed__";
+}
+
 function getTarget(row: CategoryAnalysisRow): {
   target: number | null;
   label: string;
@@ -98,12 +105,16 @@ export function CategoryTableRow({
   showBudget: boolean;
 }) {
   const isFixed = row.kind === "fixed";
+  const isUnattributed = isUnattributedRow(row.categoryId);
 
   return (
     <TableRow
-      className='cursor-pointer'
+      className={cn(isUnattributed ? "text-muted-foreground" : "cursor-pointer")}
       data-state={selected ? "selected" : undefined}
-      onClick={() => onSelect(row.categoryId)}
+      onClick={() => {
+        if (isUnattributed) return;
+        onSelect(row.categoryId);
+      }}
     >
       <TableCell>
         <div className='flex items-center gap-2'>
@@ -113,7 +124,9 @@ export function CategoryTableRow({
               {row.transactionCount} transactions
             </p>
           </div>
-          <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground' />
+          {!isUnattributed && (
+            <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground' />
+          )}
         </div>
       </TableCell>
       <TableCell className='font-semibold tabular-nums'>
@@ -174,22 +187,30 @@ export function CategoryMobileRow({
 }) {
   const { target } = getTarget(row);
   const trend = <TrendGlyph row={row} />;
+  const isUnattributed = isUnattributedRow(row.categoryId);
 
   return (
     <button
       type='button'
-      onClick={() => onSelect(row.categoryId)}
+      onClick={() => {
+        if (isUnattributed) return;
+        onSelect(row.categoryId);
+      }}
+      disabled={isUnattributed}
       className={cn(
         "group block w-full py-2.5 text-left transition-colors",
         "border-l-2 border-transparent -ml-3 pl-3 pr-1",
-        "active:bg-accent/40 hover:bg-accent/20",
-        selected && "border-primary bg-accent/30",
+        !isUnattributed && "active:bg-accent/40 hover:bg-accent/20",
+        isUnattributed && "text-muted-foreground cursor-default",
+        selected && !isUnattributed && "border-primary bg-accent/30",
       )}
     >
       <div className='flex items-baseline justify-between gap-3'>
         <div className='flex min-w-0 items-center gap-1'>
           <p className='font-medium truncate'>{row.categoryName}</p>
-          <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5' />
+          {!isUnattributed && (
+            <ChevronRight className='h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5' />
+          )}
         </div>
         <p className='text-base font-semibold tabular-nums'>
           {formatCurrency(row.spend)}

@@ -19,6 +19,13 @@ import {
   SheetTrigger,
 } from "@/shared/components/ui/sheet";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import {
   useBudgetMonth,
   useBudgetMonths,
   useDeleteFixedCommitment,
@@ -98,6 +105,9 @@ export function BudgetPage() {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [editMonthDialogOpen, setEditMonthDialogOpen] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    "commitments" | "planned" | "budgets" | "events"
+  >("commitments");
 
   const avgSpendByCategoryId = useMemo(() => {
     const map = new Map<string, number>();
@@ -309,13 +319,34 @@ export function BudgetPage() {
 
       <AllocationSummaryBanner month={month} />
 
-      <Tabs defaultValue="commitments" className="space-y-4">
-        <TabsList>
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
+        className="space-y-4"
+      >
+        <TabsList className="hidden md:inline-flex">
           <TabsTrigger value="commitments">Fixed Commitments</TabsTrigger>
           <TabsTrigger value="planned">Planned One-offs</TabsTrigger>
           <TabsTrigger value="budgets">Category Budgets</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
         </TabsList>
+
+        <div className="md:hidden">
+          <Select
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as typeof activeTab)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="commitments">Fixed Commitments</SelectItem>
+              <SelectItem value="planned">Planned One-offs</SelectItem>
+              <SelectItem value="budgets">Category Budgets</SelectItem>
+              <SelectItem value="events">Events</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         <TabsContent value="commitments">
           <Card>

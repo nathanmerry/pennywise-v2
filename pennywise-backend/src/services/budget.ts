@@ -1,6 +1,12 @@
 import { prisma } from "../lib/prisma.js";
 import { effectiveAmount } from "../lib/effective-amount.js";
 import { getCyclePaceContext, getPayCycleFromBudgetMonth } from "./cycle.js";
+import { buildCategoryAncestryMap } from "./reporting/category-attribution.js";
+import {
+  getReportableOutflows,
+  getCategoryResolvedOutflows,
+} from "./reporting/reportable-transactions.js";
+import { getCategoryBudgetRoleMap } from "./reporting/budget-role.js";
 
 export interface BudgetOverview {
   month: string;
@@ -155,39 +161,17 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
   }, 0);
   const unallocated = flexibleBudget - categoryAllocated;
 
-  // Build the set of categories whose spend is already pre-allocated at planning
-  // time — fixed commitments and planned one-offs both reserve money up-front.
-  // Spend on these categories is excluded from `actualFlexibleSpend` so
-  // remainingFlexible / daily+weekly allowances reflect controllable spend only.
-  const preallocatedCategoryIds = new Set<string>();
-  const linkedCommitmentCats = budgetMonth.fixedCommitments
-    .map((c) => c.categoryId)
-    .filter((id): id is string => !!id);
-  const linkedPlannedCats = budgetMonth.plannedSpends
-    .map((p) => p.categoryId)
-    .filter((id): id is string => !!id);
-  const seedCats = [...linkedCommitmentCats, ...linkedPlannedCats];
-  if (seedCats.length > 0) {
-    const allCategories = await prisma.category.findMany({
-      select: { id: true, parentId: true },
-    });
-    const childrenMap = new Map<string, string[]>();
-    for (const cat of allCategories) {
-      if (cat.parentId) {
-        const kids = childrenMap.get(cat.parentId) ?? [];
-        kids.push(cat.id);
-        childrenMap.set(cat.parentId, kids);
-      }
-    }
-    const addWithDescendants = (id: string) => {
-      if (preallocatedCategoryIds.has(id)) return;
-      preallocatedCategoryIds.add(id);
-      for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
-    };
-    for (const id of seedCats) addWithDescendants(id);
-  }
+  // Source of truth for fixed/flexible classification — shared with pace and
+  // spending-analysis so the three views can't drift on which categories are
+  // pre-allocated at planning time.
+  const ancestryMap = await buildCategoryAncestryMap();
+  const roleMap = await getCategoryBudgetRoleMap(month, ancestryMap);
 
-  // Split spend into flexible vs fixed using the source-of-truth commitment links.
+  // Split spend into flexible vs fixed. We keep the raw outflow sum here
+  // (rather than using getCategoryResolvedOutflows) so `actualSpend` stays a
+  // true total — multi-cat-ambiguous txs would otherwise be silently dropped
+  // by the resolver and the "Already Spent" headline wouldn't tally with the
+  // user's statement.
   let actualSpend = 0;
   let actualFlexibleSpend = 0;
   for (const tx of transactions) {
@@ -195,10 +179,8 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     if (amount >= 0) continue;
     const abs = Math.abs(amount);
     actualSpend += abs;
-    const isPreallocated =
-      preallocatedCategoryIds.size > 0 &&
-      tx.categories.some((c) => preallocatedCategoryIds.has(c.categoryId));
-    if (!isPreallocated) actualFlexibleSpend += abs;
+    const isFixed = tx.categories.some((c) => roleMap.get(c.categoryId) === "fixed");
+    if (!isFixed) actualFlexibleSpend += abs;
   }
 
   const remainingFlexible = flexibleBudget - actualFlexibleSpend;
@@ -373,7 +355,7 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
     where: { month },
     include: { categoryPlans: true },
   });
-  const range = budgetMonth
+  const { startDate, endDate } = budgetMonth
     ? (() => {
         const cycle = getPayCycleFromBudgetMonth(
           {
@@ -383,47 +365,32 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
           },
           new Date(),
         );
-        return { start: cycle.startInclusive, end: cycle.endExclusive, isCycle: true };
+        // Cycle range was historically queried with `lt endExclusive`; convert
+        // to an inclusive endDate by stepping back 1ms so the reporting helpers
+        // (which use `lte`) return the same set.
+        return { startDate: cycle.startInclusive, endDate: new Date(cycle.endExclusive.getTime() - 1) };
       })()
     : (() => {
         const { start, end } = getMonthDateRange(month);
-        return { start, end, isCycle: false };
+        return { startDate: start, endDate: end };
       })();
 
-  // Get all non-ignored transactions with categories
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      transactionDate: range.isCycle
-        ? { gte: range.start, lt: range.end }
-        : { gte: range.start, lte: range.end },
-      isIgnored: false,
-      amount: { lt: 0 }, // Only outflows
-    },
-    include: {
-      categories: {
-        include: {
-          category: {
-            include: {
-              parent: true,
-              budgetGroupMappings: { include: { budgetGroup: true } },
-            },
-          },
-        },
-      },
-    },
-  });
+  const ancestryMap = await buildCategoryAncestryMap();
+  // outflows: every non-ignored outflow — including uncategorised and
+  // ambiguous ones. Drives daily/merchant rollups so the headline totals
+  // match the bank statement.
+  // resolvedTransactions: only those with a single safe category. Drives the
+  // category buckets where attributing to a specific bucket is required.
+  const txFilters = { startDate, endDate, includeIgnored: false };
+  const [outflows, resolvedTransactions] = await Promise.all([
+    getReportableOutflows(txFilters, ancestryMap),
+    getCategoryResolvedOutflows(txFilters, ancestryMap),
+  ]);
 
-  // Get all categories for hierarchy
-  const allCategories = await prisma.category.findMany({
-    include: { parent: true },
-  });
-
-  // Get budget groups
+  // Build category -> budget group map (group can live at any level of the tree).
   const budgetGroups = await prisma.budgetGroup.findMany({
-    include: { categoryMappings: { include: { category: true } } },
+    include: { categoryMappings: { select: { categoryId: true } } },
   });
-
-  // Build category -> budget group map
   const categoryToBudgetGroup = new Map<string, { id: string; name: string }>();
   for (const group of budgetGroups) {
     for (const mapping of group.categoryMappings) {
@@ -431,58 +398,60 @@ export async function getSpendingBreakdown(month: string): Promise<SpendingBreak
     }
   }
 
-  // Aggregate by parent category
+  // Aggregations: parent buckets are keyed by root category (so deep hierarchies
+  // collapse into the user's top-level category, matching Spending Analysis).
   const parentSpend = new Map<string, { name: string; spent: number }>();
-  // Aggregate by child category
-  const childSpend = new Map<string, { name: string; parentId: string | null; parentName: string | null; spent: number }>();
-  // Aggregate by budget group
+  const childSpend = new Map<
+    string,
+    { name: string; parentId: string | null; parentName: string | null; spent: number }
+  >();
   const groupSpend = new Map<string, { name: string; spent: number }>();
-  // Aggregate by merchant
   const merchantSpend = new Map<string, { spent: number; count: number }>();
-  // Daily spend
   const dailySpend = new Map<string, number>();
 
-  for (const tx of transactions) {
-    const amount = Math.abs(effectiveAmount(tx));
-    const dateKey = tx.transactionDate.toISOString().split("T")[0];
+  // Daily + merchant totals run against ALL outflows so uncategorised txs
+  // still show up in the time series and merchant leaderboard.
+  for (const tx of outflows) {
+    dailySpend.set(tx.transactionDateKey, (dailySpend.get(tx.transactionDateKey) || 0) + tx.amount);
 
-    // Daily spend
-    dailySpend.set(dateKey, (dailySpend.get(dateKey) || 0) + amount);
-
-    // Merchant spend
     const merchant = tx.normalizedMerchant || tx.merchantName || tx.description;
     if (merchant) {
       const existing = merchantSpend.get(merchant) || { spent: 0, count: 0 };
-      merchantSpend.set(merchant, { spent: existing.spent + amount, count: existing.count + 1 });
+      merchantSpend.set(merchant, { spent: existing.spent + tx.amount, count: existing.count + 1 });
+    }
+  }
+
+  // Category buckets only count txs that resolve to a single safe category.
+  for (const tx of resolvedTransactions) {
+    // Parent (root) category aggregation
+    const existingParent = parentSpend.get(tx.rootCategoryId) || { name: tx.rootCategoryName, spent: 0 };
+    parentSpend.set(tx.rootCategoryId, { ...existingParent, spent: existingParent.spent + tx.amount });
+
+    // Child category aggregation — only when the resolved category isn't itself a root.
+    if (tx.categoryId !== tx.rootCategoryId) {
+      const node = ancestryMap.get(tx.categoryId);
+      const parent = node?.parentId ? ancestryMap.get(node.parentId) : null;
+      const existingChild = childSpend.get(tx.categoryId) || {
+        name: node?.name ?? "Uncategorised",
+        parentId: node?.parentId ?? null,
+        parentName: parent?.name ?? null,
+        spent: 0,
+      };
+      childSpend.set(tx.categoryId, { ...existingChild, spent: existingChild.spent + tx.amount });
     }
 
-    // Category spend - use first category if multiple
-    if (tx.categories.length > 0) {
-      const cat = tx.categories[0].category;
-      const parentCat = cat.parent || cat; // If no parent, treat as parent itself
-
-      // Parent category aggregation
-      const parentKey = parentCat.id;
-      const existingParent = parentSpend.get(parentKey) || { name: parentCat.name, spent: 0 };
-      parentSpend.set(parentKey, { ...existingParent, spent: existingParent.spent + amount });
-
-      // Child category aggregation (only if it has a parent)
-      if (cat.parentId) {
-        const existingChild = childSpend.get(cat.id) || {
-          name: cat.name,
-          parentId: cat.parentId,
-          parentName: cat.parent?.name || null,
-          spent: 0,
-        };
-        childSpend.set(cat.id, { ...existingChild, spent: existingChild.spent + amount });
-      }
-
-      // Budget group aggregation
-      const group = categoryToBudgetGroup.get(cat.id) || categoryToBudgetGroup.get(parentCat.id);
+    // Budget group: walk from the resolved category up to the root, taking the
+    // first ancestor with a group mapping. Matches the historical "self or
+    // immediate parent" lookup but extends naturally to deeper trees.
+    let groupCursor: string | null = tx.categoryId;
+    while (groupCursor) {
+      const group = categoryToBudgetGroup.get(groupCursor);
       if (group) {
         const existingGroup = groupSpend.get(group.id) || { name: group.name, spent: 0 };
-        groupSpend.set(group.id, { ...existingGroup, spent: existingGroup.spent + amount });
+        groupSpend.set(group.id, { ...existingGroup, spent: existingGroup.spent + tx.amount });
+        break;
       }
+      groupCursor = ancestryMap.get(groupCursor)?.parentId ?? null;
     }
   }
 
@@ -633,6 +602,13 @@ export interface MonthlyBudgetPace {
     status: OverallPaceStatus;
     fixedPlanned: number;
     actualFixedSpendToDate: number;
+  };
+
+  /** Linear month-end projection from the current burn rate. */
+  forecast: {
+    projectedFlexibleSpend: number;
+    projectedOverUnder: number;
+    isProjectedOver: boolean;
   };
 
   categories: CategoryPace[];
@@ -930,6 +906,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
       categoryPlans: {
         include: { category: true },
       },
+      events: true,
     },
   });
 
@@ -947,27 +924,25 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   );
   const paceContext = getCyclePaceContext(cycle);
 
-  // Get all non-ignored, non-pending spending transactions for the cycle
-  // Only use direct category assignments (source != 'inherited') to avoid double counting
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
-      isIgnored: false,
-      amount: { lt: 0 }, // Only outflows (spending)
-    },
-    include: {
-      categories: {
-        where: {
-          source: { not: "inherited" }, // Exclude inherited to avoid double counting
-        },
-        include: {
-          category: {
-            include: { parent: true },
-          },
-        },
-      },
-    },
-  });
+  const ancestryMap = await buildCategoryAncestryMap();
+  const roleMap = await getCategoryBudgetRoleMap(month, ancestryMap);
+
+  // Two views of the same cycle:
+  //   - outflows: every non-ignored outflow, including uncategorised and
+  //     ambiguously-categorised ones. Drives the headline totals + forecast
+  //     so the "spent" numbers tally with the user's bank statement.
+  //   - resolvedTransactions: only those that resolve to a single safe
+  //     category. Used for per-category pace attribution where a bucket is
+  //     mandatory.
+  const txFilters = {
+    startDate: cycle.startInclusive,
+    endDate: new Date(cycle.endExclusive.getTime() - 1),
+    includeIgnored: false,
+  };
+  const [outflows, resolvedTransactions] = await Promise.all([
+    getReportableOutflows(txFilters, ancestryMap),
+    getCategoryResolvedOutflows(txFilters, ancestryMap),
+  ]);
 
   // Calculate overall flexible budget
   const expectedIncome = toNumber(budgetMonth.expectedIncome);
@@ -985,56 +960,25 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
     (sum, s) => sum + toNumber(s.amount),
     0
   );
-  const flexibleBudget = expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs;
+  // Flexible-funded events are carved out of flexibleBudget at planning time —
+  // mirrors getBudgetOverview so pace/overview/analysis agree on the same number.
+  const flexibleEventReserves = budgetMonth.events
+    .filter((e) => e.fundingSource === "flexible")
+    .reduce((sum, e) => sum + toNumber(e.cap), 0);
+  const flexibleBudget =
+    expectedIncome - savingsTarget - fixedCommitments - plannedOneOffs - flexibleEventReserves;
 
-  // Build the set of categories whose spend is already pre-allocated at planning
-  // time — fixed commitments and planned one-offs both reserve money up-front.
-  // Spend on these categories is excluded from the flexible tally so pacing
-  // reflects controllable spend only.
-  const fixedCategoryIds = new Set<string>();
-  const linkedCommitmentCats = budgetMonth.fixedCommitments
-    .map((c) => c.categoryId)
-    .filter((id): id is string => !!id);
-  const linkedPlannedCats = budgetMonth.plannedSpends
-    .map((p) => p.categoryId)
-    .filter((id): id is string => !!id);
-  const seedCats = [...linkedCommitmentCats, ...linkedPlannedCats];
-
-  if (seedCats.length > 0) {
-    const allCategories = await prisma.category.findMany({
-      select: { id: true, parentId: true },
-    });
-    const childrenMap = new Map<string, string[]>();
-    for (const cat of allCategories) {
-      if (cat.parentId) {
-        const kids = childrenMap.get(cat.parentId) ?? [];
-        kids.push(cat.id);
-        childrenMap.set(cat.parentId, kids);
-      }
-    }
-
-    const addWithDescendants = (id: string) => {
-      if (fixedCategoryIds.has(id)) return;
-      fixedCategoryIds.add(id);
-      for (const kid of childrenMap.get(id) ?? []) addWithDescendants(kid);
-    };
-
-    for (const id of seedCats) addWithDescendants(id);
-  }
-
-  const isFixedTransaction = (tx: (typeof transactions)[number]): boolean => {
-    if (fixedCategoryIds.size === 0) return false;
-    return tx.categories.some((tc) => fixedCategoryIds.has(tc.categoryId));
-  };
-
+  // Overall fixed/flexible split runs against ALL outflows. A tx counts as
+  // fixed if any of its direct categories is fixed — matches the original
+  // pace behaviour and means uncategorised txs are treated as flexible.
   let actualFlexibleSpendToDate = 0;
   let actualFixedSpendToDate = 0;
-  for (const tx of transactions) {
-    const amount = Math.abs(effectiveAmount(tx));
-    if (isFixedTransaction(tx)) {
-      actualFixedSpendToDate += amount;
+  for (const tx of outflows) {
+    const isFixed = tx.categoryIds.some((id) => roleMap.get(id) === "fixed");
+    if (isFixed) {
+      actualFixedSpendToDate += tx.amount;
     } else {
-      actualFlexibleSpendToDate += amount;
+      actualFlexibleSpendToDate += tx.amount;
     }
   }
 
@@ -1064,7 +1008,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
   // and fixed categories belong to the fixed-commitment ledger, not pacing.
   const categoryBudgets = new Map<string, { budget: number; categoryName: string }>();
   for (const plan of budgetMonth.categoryPlans) {
-    if (plan.categoryId && plan.category && !fixedCategoryIds.has(plan.categoryId)) {
+    if (plan.categoryId && plan.category && roleMap.get(plan.categoryId) !== "fixed") {
       categoryBudgets.set(plan.categoryId, {
         budget: toNumber(plan.targetValue),
         categoryName: plan.category.name,
@@ -1072,41 +1016,23 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
     }
   }
 
-  // Aggregate spend by category (using parent category for hierarchy)
-  // Only count transactions with a single direct budgeted category to avoid ambiguity
+  // Attribute each flexible tx to the closest budgeted ancestor (including
+  // self). Walking the full chain catches deeper hierarchies — old code only
+  // checked self and immediate parent and silently dropped deeper assignments.
+  // Uses the resolved-category view: ambiguous multi-category txs are skipped
+  // here (they still count toward the overall flexible total above).
   const categorySpendMap = new Map<string, number>();
+  for (const tx of resolvedTransactions) {
+    if (roleMap.get(tx.categoryId) === "fixed") continue;
 
-  for (const tx of transactions) {
-    // Skip fixed-commitment transactions: they shouldn't inflate the flexible
-    // spend on any budgeted category.
-    if (isFixedTransaction(tx)) continue;
-
-    const amount = Math.abs(effectiveAmount(tx));
-
-    // Get direct category assignments
-    const directCategories = tx.categories.filter(tc => tc.source !== "inherited");
-
-    if (directCategories.length === 0) continue;
-    
-    // Find which categories have budgets (check both direct and parent)
-    const budgetedCategories: string[] = [];
-    for (const tc of directCategories) {
-      const cat = tc.category;
-      // Check if this category or its parent has a budget
-      if (categoryBudgets.has(cat.id)) {
-        budgetedCategories.push(cat.id);
-      } else if (cat.parentId && categoryBudgets.has(cat.parentId)) {
-        budgetedCategories.push(cat.parentId);
+    let cursor: string | null = tx.categoryId;
+    while (cursor) {
+      if (categoryBudgets.has(cursor)) {
+        categorySpendMap.set(cursor, (categorySpendMap.get(cursor) || 0) + tx.amount);
+        break;
       }
+      cursor = ancestryMap.get(cursor)?.parentId ?? null;
     }
-    
-    // Only count if exactly one budgeted category to avoid double counting
-    if (budgetedCategories.length === 1) {
-      const catId = budgetedCategories[0];
-      categorySpendMap.set(catId, (categorySpendMap.get(catId) || 0) + amount);
-    }
-    // If multiple budgeted categories, we skip this transaction for category pace
-    // This is conservative but avoids fake accuracy
   }
 
   // Build category pace array
@@ -1168,6 +1094,22 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
       overAmount: Math.abs(c.remainingBudget!),
     }));
 
+  // Linear month-end projection from the current burn rate. Mirrors the
+  // formula previously computed client-side in overview-page.tsx.
+  const forecast = (() => {
+    if (paceContext.elapsedDays === 0) {
+      return { projectedFlexibleSpend: 0, projectedOverUnder: 0, isProjectedOver: false };
+    }
+    const dailyRate = actualFlexibleSpendToDate / paceContext.elapsedDays;
+    const projectedFlexibleSpend = dailyRate * paceContext.totalDaysInMonth;
+    const projectedOverUnder = projectedFlexibleSpend - flexibleBudget;
+    return {
+      projectedFlexibleSpend,
+      projectedOverUnder,
+      isProjectedOver: projectedOverUnder > 0,
+    };
+  })();
+
   return {
     month,
     ...paceContext,
@@ -1183,6 +1125,7 @@ export async function getMonthlyBudgetPace(month: string): Promise<MonthlyBudget
       fixedPlanned: fixedCommitments,
       actualFixedSpendToDate,
     },
+    forecast,
     categories,
     highlights: {
       topOverPaceCategories,

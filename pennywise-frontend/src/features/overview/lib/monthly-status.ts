@@ -33,18 +33,16 @@ export function getMonthlyStatusFromPace(
   pace: MonthlyBudgetPace,
   daysUntilPayday: number,
 ): MonthlyStatusResult {
-  const { overall, highlights } = pace;
+  const { overall, highlights, forecast } = pace;
   const state = overall.status;
 
-  // Determine headline based on state - one short sentence
   const headlines: Record<MonthlyStatusState, string> = {
-    on_track: "You are on track this month",
-    over_pace: "You are spending ahead of pace",
-    over_budget: "Some categories are over budget",
-    overspent: "You are overspent this month",
+    on_track: "You're okay until payday",
+    over_pace: "You need to slow down",
+    over_budget: "You're out of flexible budget",
+    overspent: "You've overspent this cycle",
   };
 
-  // Determine tone
   const tones: Record<MonthlyStatusState, MonthlyStatusTone> = {
     on_track: "neutral",
     over_pace: "warning",
@@ -52,49 +50,45 @@ export function getMonthlyStatusFromPace(
     overspent: "destructive",
   };
 
-  // Primary stat: exactly one bold supporting fact
-  // Priority: overspent > over pace > remaining
   let primaryStat: string;
   if (overall.remainingFlexibleBudget < 0) {
     primaryStat = `${formatCurrency(Math.abs(overall.remainingFlexibleBudget))} over flexible budget`;
   } else if (overall.paceDelta > 0) {
-    primaryStat = `${formatCurrency(overall.paceDelta)} over expected spend by now`;
+    primaryStat = `${formatCurrency(overall.paceDelta)} ahead of pace`;
   } else {
     primaryStat = `${formatCurrency(overall.remainingFlexibleBudget)} left from flexible budget`;
   }
 
-  // Secondary facts: max 2, prioritized
   const secondaryFacts: string[] = [];
 
-  // Priority 1: Safe daily spend — computed against payday horizon, not calendar month,
-  // because remainingFlexibleBudget is a payday-cycle number.
+  // Safe daily spend pairs with the payday horizon — remainingFlexibleBudget is a cycle figure.
   const safeDailyUntilPayday =
     daysUntilPayday > 0
       ? Math.max(0, overall.remainingFlexibleBudget / daysUntilPayday)
       : 0;
   if (safeDailyUntilPayday > 0) {
-    secondaryFacts.push(`Safe to spend ${formatCurrencyPrecise(safeDailyUntilPayday)}/day until payday`);
+    secondaryFacts.push(`Safe today: ${formatCurrencyPrecise(safeDailyUntilPayday)}`);
   }
 
-  // Priority 2: Main category issue
+  if (forecast.isProjectedOver && forecast.projectedOverUnder > 0) {
+    secondaryFacts.push(`Forecast: ${formatCurrency(forecast.projectedOverUnder)} over by payday`);
+  } else if (!forecast.isProjectedOver && forecast.projectedOverUnder < 0) {
+    secondaryFacts.push(`Forecast: ${formatCurrency(Math.abs(forecast.projectedOverUnder))} under by payday`);
+  }
+
   if (highlights.topOverBudgetCategories.length > 0) {
     const worst = highlights.topOverBudgetCategories[0];
-    secondaryFacts.push(`Main issue: ${worst.categoryName} is ${formatCurrency(worst.overAmount)} over budget`);
+    secondaryFacts.push(`Main pressure: ${worst.categoryName} +${formatCurrency(worst.overAmount)}`);
   } else if (highlights.topOverPaceCategories.length > 0 && state !== "on_track") {
     const worst = highlights.topOverPaceCategories[0];
-    secondaryFacts.push(`Main pressure: ${worst.categoryName}`);
-  }
-
-  // Priority 3: Days until payday (only if we have room)
-  if (secondaryFacts.length < 2 && daysUntilPayday > 0) {
-    secondaryFacts.push(`${daysUntilPayday} days until payday`);
+    secondaryFacts.push(`Main pressure: ${worst.categoryName} +${formatCurrency(worst.paceDelta)}`);
   }
 
   return {
     state,
     headline: headlines[state],
     primaryStat,
-    secondaryFacts: secondaryFacts.slice(0, 2),
+    secondaryFacts: secondaryFacts.slice(0, 3),
     tone: tones[state],
   };
 }

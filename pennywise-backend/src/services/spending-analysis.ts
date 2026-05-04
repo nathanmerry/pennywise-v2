@@ -1,10 +1,33 @@
-import { prisma } from "../lib/prisma.js";
-import { effectiveAmount } from "../lib/effective-amount.js";
 import {
   getMonthlyBudgetPace,
   type CategoryPaceStatus,
   type MonthlyBudgetPace,
 } from "./budget.js";
+import {
+  buildCategoryAncestryMap,
+  buildDescendantSet,
+  getRootCategoryId,
+} from "./reporting/category-attribution.js";
+import {
+  getCategoryResolvedOutflows,
+  getReportableOutflows,
+  type CategoryResolvedOutflow,
+  type ReportableOutflow,
+} from "./reporting/reportable-transactions.js";
+import {
+  getCategoryBudgetRoleMap,
+  getFixedCategoryMap,
+  type FixedCategoryEntry,
+} from "./reporting/budget-role.js";
+
+/**
+ * Sentinel category ids for txs that don't resolve to a single safe category
+ * (uncategorised + ambiguous multi-category). Surfaced as synthetic rows in
+ * the breakdown so the spend totals tally with pace's bank-statement view.
+ * Frontend treats these ids as non-clickable.
+ */
+const UNATTRIBUTED_FLEXIBLE_ID = "__unattributed_flexible__";
+const UNATTRIBUTED_FIXED_ID = "__unattributed_fixed__";
 
 export type AnalysisPreset =
   | "this_cycle"
@@ -157,39 +180,6 @@ export interface CategoryDrilldownResponse {
   };
 }
 
-interface CategoryNode {
-  id: string;
-  name: string;
-  parentId: string | null;
-}
-
-interface CategoryWithAncestry extends CategoryNode {
-  depth: number;
-}
-
-interface AttributedTransaction {
-  id: string;
-  transactionDate: Date;
-  transactionDateKey: string;
-  amount: number;
-  description: string;
-  merchantName: string | null;
-  normalizedMerchant: string | null;
-  merchantKey: string;
-  categoryId: string;
-  rootCategoryId: string;
-  rootCategoryName: string;
-}
-
-function toNumber(val: unknown): number {
-  if (val === null || val === undefined) return 0;
-  if (typeof val === "number") return val;
-  if (typeof val === "object" && val !== null && "toNumber" in val) {
-    return (val as { toNumber: () => number }).toNumber();
-  }
-  return Number(val);
-}
-
 function parseStartDate(date: string): Date {
   const parsed = new Date(`${date}T00:00:00.000Z`);
   if (Number.isNaN(parsed.getTime())) {
@@ -257,186 +247,14 @@ function getPreviousPeriod(
   return { start: previousStart, end: previousEnd };
 }
 
-async function buildCategoryAncestryMap(): Promise<Map<string, CategoryWithAncestry>> {
-  const categories = await prisma.category.findMany({
-    select: { id: true, name: true, parentId: true },
-  });
-
-  const categoryMap = new Map(categories.map((category) => [category.id, category]));
-  const ancestryMap = new Map<string, CategoryWithAncestry>();
-
-  function getDepth(categoryId: string): number {
-    let depth = 0;
-    let current = categoryMap.get(categoryId);
-
-    while (current?.parentId) {
-      depth += 1;
-      current = categoryMap.get(current.parentId);
-    }
-
-    return depth;
-  }
-
-  for (const category of categories) {
-    ancestryMap.set(category.id, {
-      ...category,
-      depth: getDepth(category.id),
-    });
-  }
-
-  return ancestryMap;
-}
-
-function isDescendantOf(
-  categoryId: string,
-  potentialAncestorId: string,
-  ancestryMap: Map<string, CategoryWithAncestry>
-): boolean {
-  let current = ancestryMap.get(categoryId);
-
-  while (current?.parentId) {
-    if (current.parentId === potentialAncestorId) {
-      return true;
-    }
-    current = ancestryMap.get(current.parentId);
-  }
-
-  return false;
-}
-
-function resolveMultiCategoryTransaction(
-  directCategoryIds: string[],
-  ancestryMap: Map<string, CategoryWithAncestry>
-): string | null {
-  if (directCategoryIds.length === 0) {
-    return null;
-  }
-
-  if (directCategoryIds.length === 1) {
-    return directCategoryIds[0];
-  }
-
-  const withDepth = directCategoryIds
-    .map((id) => ({ id, depth: ancestryMap.get(id)?.depth ?? 0 }))
-    .sort((a, b) => b.depth - a.depth);
-
-  const deepest = withDepth[0];
-
-  for (const other of withDepth.slice(1)) {
-    if (isDescendantOf(deepest.id, other.id, ancestryMap)) {
-      return deepest.id;
-    }
-  }
-
-  return null;
-}
-
-function getRootCategoryId(
-  categoryId: string,
-  ancestryMap: Map<string, CategoryWithAncestry>
-): string {
-  let current = ancestryMap.get(categoryId);
-
-  while (current?.parentId) {
-    current = ancestryMap.get(current.parentId);
-  }
-
-  return current?.id ?? categoryId;
-}
-
-function buildDescendantSet(
-  targetCategoryId: string,
-  categories: Map<string, CategoryWithAncestry>
-): Set<string> {
-  const descendants = new Set<string>([targetCategoryId]);
-
-  for (const [categoryId] of categories) {
-    if (categoryId !== targetCategoryId && isDescendantOf(categoryId, targetCategoryId, categories)) {
-      descendants.add(categoryId);
-    }
-  }
-
-  return descendants;
-}
-
-async function getAttributedTransactions(
-  range: { start: Date; end: Date },
-  filters: Pick<SpendingAnalysisFilters, "accountId" | "categoryId" | "includeIgnored">,
-  ancestryMap: Map<string, CategoryWithAncestry>
-): Promise<AttributedTransaction[]> {
-  const rawTransactions = await prisma.transaction.findMany({
-    where: {
-      transactionDate: { gte: range.start, lte: range.end },
-      amount: { lt: 0 },
-      ...(filters.includeIgnored ? {} : { isIgnored: false }),
-      ...(filters.accountId ? { accountId: filters.accountId } : {}),
-    },
-    select: {
-      id: true,
-      transactionDate: true,
-      amount: true,
-      updatedTransactionAmount: true,
-      description: true,
-      merchantName: true,
-      normalizedMerchant: true,
-      categories: {
-        where: { source: { not: "inherited" } },
-        select: { categoryId: true },
-      },
-    },
-    orderBy: { transactionDate: "asc" },
-  });
-
-  const descendantSet = filters.categoryId
-    ? buildDescendantSet(filters.categoryId, ancestryMap)
-    : null;
-
-  const attributed: AttributedTransaction[] = [];
-
-  for (const transaction of rawTransactions) {
-    const resolvedCategoryId = resolveMultiCategoryTransaction(
-      transaction.categories.map((category) => category.categoryId),
-      ancestryMap
-    );
-
-    if (!resolvedCategoryId) {
-      continue;
-    }
-
-    if (descendantSet && !descendantSet.has(resolvedCategoryId)) {
-      continue;
-    }
-
-    const rootCategoryId = getRootCategoryId(resolvedCategoryId, ancestryMap);
-    const rootCategory = ancestryMap.get(rootCategoryId);
-
-    attributed.push({
-      id: transaction.id,
-      transactionDate: transaction.transactionDate,
-      transactionDateKey: formatDateKey(transaction.transactionDate),
-      amount: Math.abs(effectiveAmount(transaction)),
-      description: transaction.description,
-      merchantName: transaction.merchantName,
-      normalizedMerchant: transaction.normalizedMerchant,
-      merchantKey:
-        transaction.normalizedMerchant || transaction.merchantName || transaction.description.slice(0, 80),
-      categoryId: resolvedCategoryId,
-      rootCategoryId,
-      rootCategoryName: rootCategory?.name ?? ancestryMap.get(resolvedCategoryId)?.name ?? "Uncategorised",
-    });
-  }
-
-  return attributed;
-}
-
 function roundCurrency(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
 function buildTimeSeries(
-  currentTransactions: AttributedTransaction[],
+  currentTransactions: CategoryResolvedOutflow[],
   currentPeriod: { start: Date; end: Date },
-  previousTransactions: AttributedTransaction[],
+  previousTransactions: CategoryResolvedOutflow[],
   previousPeriod: { start: Date; end: Date } | null
 ): AnalysisTimeSeriesPoint[] {
   const currentDates: string[] = [];
@@ -506,7 +324,7 @@ function getBucketIndex(date: Date, start: Date, dayCount: number, bucketCount: 
 }
 
 function buildSparkline(
-  transactions: AttributedTransaction[],
+  transactions: CategoryResolvedOutflow[],
   start: Date,
   end: Date
 ): number[] {
@@ -545,7 +363,7 @@ function getChangeMetrics(current: number, previous: number | null): {
   };
 }
 
-function buildMerchantRows(transactions: AttributedTransaction[], limit: number): AnalysisMerchantRow[] {
+function buildMerchantRows(transactions: CategoryResolvedOutflow[], limit: number): AnalysisMerchantRow[] {
   const merchantTotals = new Map<string, { spend: number; transactionCount: number }>();
 
   for (const transaction of transactions) {
@@ -586,7 +404,7 @@ function getAmountVariance(values: number[]): number {
   return Math.sqrt(variance) / mean;
 }
 
-function isRecurringMerchant(transactions: AttributedTransaction[]): boolean {
+function isRecurringMerchant(transactions: CategoryResolvedOutflow[]): boolean {
   if (transactions.length < 2) {
     return false;
   }
@@ -611,8 +429,8 @@ function isRecurringMerchant(transactions: AttributedTransaction[]): boolean {
   return medianGap >= 20 && medianGap <= 40 && amountVariance <= 0.25;
 }
 
-function buildRecurringMerchantSet(history: AttributedTransaction[]): Set<string> {
-  const merchants = new Map<string, AttributedTransaction[]>();
+function buildRecurringMerchantSet(history: CategoryResolvedOutflow[]): Set<string> {
+  const merchants = new Map<string, CategoryResolvedOutflow[]>();
 
   for (const transaction of history) {
     const group = merchants.get(transaction.merchantKey) || [];
@@ -685,33 +503,6 @@ function buildBudgetByCategory(
   return budgetByCategory;
 }
 
-interface FixedCategoryEntry {
-  plannedAmount: number;
-}
-
-async function getFixedCategoryMap(
-  month: string,
-  ancestryMap: Map<string, CategoryWithAncestry>
-): Promise<Map<string, FixedCategoryEntry>> {
-  const budgetMonth = await prisma.budgetMonth.findUnique({
-    where: { month },
-    include: { fixedCommitments: true },
-  });
-
-  const rootFixed = new Map<string, FixedCategoryEntry>();
-  if (!budgetMonth) return rootFixed;
-
-  for (const commitment of budgetMonth.fixedCommitments) {
-    if (!commitment.categoryId) continue;
-    const rootCategoryId = getRootCategoryId(commitment.categoryId, ancestryMap);
-    const existing = rootFixed.get(rootCategoryId) ?? { plannedAmount: 0 };
-    existing.plannedAmount += toNumber(commitment.amount);
-    rootFixed.set(rootCategoryId, existing);
-  }
-
-  return rootFixed;
-}
-
 async function getPaceForFilters(filters: SpendingAnalysisFilters): Promise<MonthlyBudgetPace | null> {
   if (filters.preset !== "this_cycle" && filters.preset !== "last_cycle") {
     return null;
@@ -747,10 +538,25 @@ export async function getSpendingAnalysis(
     end: currentRange.end,
   };
 
-  const [currentTransactions, previousTransactions, recurringHistory, pace] = await Promise.all([
-    getAttributedTransactions(currentRange, filters, ancestryMap),
-    previousRange ? getAttributedTransactions(previousRange, filters, ancestryMap) : Promise.resolve([]),
-    getAttributedTransactions(lookbackRange, filters, ancestryMap),
+  const [currentTransactions, currentReportableOutflows, previousTransactions, recurringHistory, pace] = await Promise.all([
+    getCategoryResolvedOutflows(
+      { startDate: currentRange.start, endDate: currentRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+      ancestryMap,
+    ),
+    getReportableOutflows(
+      { startDate: currentRange.start, endDate: currentRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+      ancestryMap,
+    ),
+    previousRange
+      ? getCategoryResolvedOutflows(
+          { startDate: previousRange.start, endDate: previousRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+          ancestryMap,
+        )
+      : Promise.resolve([]),
+    getCategoryResolvedOutflows(
+      { startDate: lookbackRange.start, endDate: lookbackRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+      ancestryMap,
+    ),
     getPaceForFilters(filters),
   ]);
 
@@ -760,6 +566,11 @@ export async function getSpendingAnalysis(
   const fixedCategoryMap = budgetContext.month
     ? await getFixedCategoryMap(budgetContext.month, ancestryMap)
     : new Map<string, FixedCategoryEntry>();
+  // Per-category role map mirrors pace's fixed-vs-flexible split exactly, so
+  // unattributed txs land in the same bucket they'd land in for pace.
+  const roleMap = budgetContext.month
+    ? await getCategoryBudgetRoleMap(budgetContext.month, ancestryMap)
+    : null;
   const previousByCategory = new Map<string, { spend: number; transactionCount: number }>();
 
   for (const transaction of previousTransactions) {
@@ -778,16 +589,33 @@ export async function getSpendingAnalysis(
       categoryName: string;
       spend: number;
       transactionCount: number;
-      transactions: AttributedTransaction[];
+      transactions: CategoryResolvedOutflow[];
     }
   >();
+
+  // Seed every budgeted (flexible) category root so categories with a budget
+  // but no spend in the period still render — the breakdown should reflect
+  // every plan, not just where money has flowed.
+  if (pace) {
+    for (const category of pace.categories) {
+      const rootCategoryId = getRootCategoryId(category.categoryId, ancestryMap);
+      if (currentByCategory.has(rootCategoryId)) continue;
+      const rootName = ancestryMap.get(rootCategoryId)?.name ?? category.categoryName;
+      currentByCategory.set(rootCategoryId, {
+        categoryName: rootName,
+        spend: 0,
+        transactionCount: 0,
+        transactions: [],
+      });
+    }
+  }
 
   for (const transaction of currentTransactions) {
     const existing = currentByCategory.get(transaction.rootCategoryId) || {
       categoryName: transaction.rootCategoryName,
       spend: 0,
       transactionCount: 0,
-      transactions: [] as AttributedTransaction[],
+      transactions: [] as CategoryResolvedOutflow[],
     };
     existing.spend += transaction.amount;
     existing.transactionCount += 1;
@@ -795,8 +623,33 @@ export async function getSpendingAnalysis(
     currentByCategory.set(transaction.rootCategoryId, existing);
   }
 
+  // Unattributed bucket: every reportable outflow that isn't in the resolved
+  // set (uncategorised + ambiguous multi-category). Split by pace's
+  // fixed-vs-flexible rule so headline totals tally with /budget/pace.
+  const resolvedTxIds = new Set(currentTransactions.map((tx) => tx.id));
+  const unattributedFlexible: ReportableOutflow[] = [];
+  const unattributedFixed: ReportableOutflow[] = [];
+  for (const tx of currentReportableOutflows) {
+    if (resolvedTxIds.has(tx.id)) continue;
+    const isFixed = roleMap
+      ? tx.categoryIds.some((id) => roleMap.get(id) === "fixed")
+      : false;
+    if (isFixed) {
+      unattributedFixed.push(tx);
+    } else {
+      unattributedFlexible.push(tx);
+    }
+  }
+
+  const sumOutflows = (rows: ReportableOutflow[]) =>
+    rows.reduce((sum, row) => sum + row.amount, 0);
+  const unattributedFlexibleSpend = sumOutflows(unattributedFlexible);
+  const unattributedFixedSpend = sumOutflows(unattributedFixed);
+
   const totalSpend = roundCurrency(
     currentTransactions.reduce((sum, transaction) => sum + transaction.amount, 0)
+      + unattributedFlexibleSpend
+      + unattributedFixedSpend
   );
   const previousTotalSpend = previousRange
     ? roundCurrency(previousTransactions.reduce((sum, transaction) => sum + transaction.amount, 0))
@@ -832,6 +685,38 @@ export async function getSpendingAnalysis(
       };
     })
     .sort((a, b) => b.spend - a.spend);
+
+  const buildUnattributedRow = (
+    categoryId: string,
+    name: string,
+    kind: "fixed" | "flexible",
+    rows: ReportableOutflow[],
+  ): CategoryAnalysisRow | null => {
+    if (rows.length === 0) return null;
+    const spend = roundCurrency(sumOutflows(rows));
+    return {
+      categoryId,
+      categoryName: name,
+      kind,
+      spend,
+      previousSpend: filters.compare ? 0 : null,
+      changeAmount: null,
+      changePercent: null,
+      shareOfTotal: totalSpend > 0 ? roundCurrency((spend / totalSpend) * 100) : 0,
+      transactionCount: rows.length,
+      averageTransaction: roundCurrency(spend / rows.length),
+      sparkline: [],
+      budget: null,
+      plannedAmount: null,
+    };
+  };
+
+  const unattributedRows = [
+    buildUnattributedRow(UNATTRIBUTED_FLEXIBLE_ID, "Unattributed (flexible)", "flexible", unattributedFlexible),
+    buildUnattributedRow(UNATTRIBUTED_FIXED_ID, "Unattributed (fixed)", "fixed", unattributedFixed),
+  ].filter((row): row is CategoryAnalysisRow => row !== null);
+
+  categories.push(...unattributedRows);
 
   const fixedSpend = roundCurrency(
     categories
@@ -900,14 +785,28 @@ export async function getCategoryDrilldown(
 
   const [currentTransactions, previousTransactions, recurringHistory, historyTransactions, pace] =
     await Promise.all([
-      getAttributedTransactions(currentRange, filters, ancestryMap),
-      previousRange ? getAttributedTransactions(previousRange, filters, ancestryMap) : Promise.resolve([]),
-      getAttributedTransactions(lookbackRange, filters, ancestryMap),
-      getAttributedTransactions({ start: historyStart, end: currentRange.end }, filters, ancestryMap),
+      getCategoryResolvedOutflows(
+        { startDate: currentRange.start, endDate: currentRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+        ancestryMap,
+      ),
+      previousRange
+        ? getCategoryResolvedOutflows(
+            { startDate: previousRange.start, endDate: previousRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+            ancestryMap,
+          )
+        : Promise.resolve([]),
+      getCategoryResolvedOutflows(
+        { startDate: lookbackRange.start, endDate: lookbackRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+        ancestryMap,
+      ),
+      getCategoryResolvedOutflows(
+        { startDate: historyStart, endDate: currentRange.end, accountId: filters.accountId, categoryId: filters.categoryId, includeIgnored: filters.includeIgnored },
+        ancestryMap,
+      ),
       getPaceForFilters(filters),
     ]);
 
-  const filterCategoryTransactions = (transactions: AttributedTransaction[]) =>
+  const filterCategoryTransactions = (transactions: CategoryResolvedOutflow[]) =>
     transactions.filter((transaction) => descendantSet.has(transaction.categoryId));
 
   const currentCategoryTransactions = filterCategoryTransactions(currentTransactions);

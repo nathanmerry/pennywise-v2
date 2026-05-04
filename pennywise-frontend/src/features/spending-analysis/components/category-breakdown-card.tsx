@@ -23,6 +23,8 @@ export type CategorySortKey =
 interface CategoryBreakdownCardProps {
   flexibleCategories: CategoryAnalysisRow[];
   fixedCategories: CategoryAnalysisRow[];
+  flexibleBudget: number | null;
+  fixedPlanned: number | null;
   onToggleSort: (key: CategorySortKey) => void;
   selectedCategoryId: string | null;
   onSelectCategory: (id: string) => void;
@@ -37,16 +39,21 @@ function sumSpend(rows: CategoryAnalysisRow[]): number {
 function GroupHeading({
   label,
   total,
+  budget,
   sharePercent,
 }: {
   label: string;
   total: number;
+  budget: number | null;
   sharePercent: number;
 }) {
   return (
     <p className='text-sm font-semibold text-muted-foreground'>
-      {label} — {formatCurrency(total)}{" "}
-      <span className='font-normal'>({Math.round(sharePercent)}%)</span>
+      {label} — {formatCurrency(total)}
+      {budget !== null && (
+        <span className='font-normal'> / {formatCurrency(budget)} budget</span>
+      )}{" "}
+      <span className='font-normal'>({Math.round(sharePercent)}% of spend)</span>
     </p>
   );
 }
@@ -54,6 +61,8 @@ function GroupHeading({
 export function CategoryBreakdownCard({
   flexibleCategories,
   fixedCategories,
+  flexibleBudget,
+  fixedPlanned,
   onToggleSort,
   selectedCategoryId,
   onSelectCategory,
@@ -83,6 +92,7 @@ export function CategoryBreakdownCard({
           <GroupHeading
             label='Flexible'
             total={flexibleTotal}
+            budget={flexibleBudget}
             sharePercent={flexibleShare}
           />
           <div className='divide-y divide-border'>
@@ -103,6 +113,7 @@ export function CategoryBreakdownCard({
           <GroupHeading
             label='Fixed'
             total={fixedTotal}
+            budget={fixedPlanned}
             sharePercent={fixedShare}
           />
           <div className='divide-y divide-border'>
@@ -212,6 +223,7 @@ export function CategoryBreakdownCard({
                           <GroupHeading
                             label='Flexible'
                             total={flexibleTotal}
+                            budget={flexibleBudget}
                             sharePercent={flexibleShare}
                           />
                         </TableCell>
@@ -236,6 +248,7 @@ export function CategoryBreakdownCard({
                           <GroupHeading
                             label='Fixed'
                             total={fixedTotal}
+                            budget={fixedPlanned}
                             sharePercent={fixedShare}
                           />
                         </TableCell>

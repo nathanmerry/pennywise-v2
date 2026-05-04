@@ -95,6 +95,8 @@ export function SpendingPage() {
           <CategoryBreakdownCard
             flexibleCategories={viewModel.flexibleCategories}
             fixedCategories={viewModel.fixedCategories}
+            flexibleBudget={analysis.budgetContext.overall?.flexibleBudget ?? null}
+            fixedPlanned={analysis.budgetContext.overall?.fixedPlanned ?? null}
             onToggleSort={state.toggleSort}
             selectedCategoryId={state.selectedCategoryId}
             onSelectCategory={state.setSelectedCategoryId}
