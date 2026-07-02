@@ -613,7 +613,12 @@ export function BudgetPage() {
               ) : (
                 <div className="space-y-3">
                   {budget.events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      cycleStart={budget.cycleStartDate}
+                      cycleEnd={budget.cycleEndDate}
+                    />
                   ))}
                 </div>
               )}

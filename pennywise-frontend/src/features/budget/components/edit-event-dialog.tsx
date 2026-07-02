@@ -22,6 +22,9 @@ import { isoDateOnly } from "@/features/budget/lib/cycle";
 
 interface EditEventDialogProps {
   event: BudgetEvent;
+  /** Cycle bounds (ISO) — event dates must stay within these. */
+  cycleStart?: string;
+  cycleEnd?: string;
   onClose: () => void;
 }
 
@@ -55,7 +58,7 @@ function newPotDraft(): PotDraft {
   };
 }
 
-export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
+export function EditEventDialog({ event, cycleStart, cycleEnd, onClose }: EditEventDialogProps) {
   const [name, setName] = useState(event.name);
   const [startDate, setStartDate] = useState(() => isoDateOnly(event.startDate));
   const [endDate, setEndDate] = useState(() => isoDateOnly(event.endDate));
@@ -71,7 +74,13 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
   const updatePotMutation = useUpdateEventPot();
   const deletePot = useDeleteEventPot();
 
+  const cycleStartDay = isoDateOnly(cycleStart ?? "");
+  const cycleEndDay = isoDateOnly(cycleEnd ?? "");
   const rangeIsInvalid = startDate && endDate && endDate < startDate;
+  const outOfCycle = Boolean(
+    (cycleStartDay && startDate && startDate < cycleStartDay) ||
+      (cycleEndDay && endDate && endDate > cycleEndDay),
+  );
   const isPending =
     updateEvent.isPending ||
     createPot.isPending ||
@@ -88,7 +97,7 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !startDate || !endDate || !cap) return;
-    if (rangeIsInvalid) return;
+    if (rangeIsInvalid || outOfCycle) return;
 
     await updateEvent.mutateAsync({
       id: event.id,
@@ -163,6 +172,8 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
           <Input
             id="edit-event-start"
             type="date"
+            min={cycleStartDay || undefined}
+            max={cycleEndDay || undefined}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
@@ -172,6 +183,8 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
           <Input
             id="edit-event-end"
             type="date"
+            min={cycleStartDay || undefined}
+            max={cycleEndDay || undefined}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
@@ -179,6 +192,11 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
       </div>
       {rangeIsInvalid && (
         <p className="text-sm text-destructive">End date must be on or after start date.</p>
+      )}
+      {!rangeIsInvalid && outOfCycle && (
+        <p className="text-sm text-destructive">
+          Event dates must fall within this cycle ({cycleStartDay} to {cycleEndDay}).
+        </p>
       )}
       <div className="space-y-2">
         <Label htmlFor="edit-event-cap">Cap (£)</Label>
@@ -259,7 +277,7 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isPending || !!rangeIsInvalid}>
+        <Button type="submit" disabled={isPending || !!rangeIsInvalid || outOfCycle}>
           Save
         </Button>
       </div>

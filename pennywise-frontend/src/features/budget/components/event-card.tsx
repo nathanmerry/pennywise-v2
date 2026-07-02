@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { AlertTriangle, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import {
@@ -11,12 +11,15 @@ import {
 } from "@/shared/components/ui/sheet";
 import { useDeleteBudgetEvent } from "@/shared/hooks/use-budget";
 import type { BudgetEvent } from "@/shared/lib/api";
-import { formatCurrency, formatDateRange } from "@/features/budget/lib/cycle";
+import { formatCurrency, formatDateRange, isoDateOnly } from "@/features/budget/lib/cycle";
 import { EditEventDialog } from "./edit-event-dialog";
 import { EventPotRow } from "./event-pot-row";
 
 interface EventCardProps {
   event: BudgetEvent;
+  /** Cycle bounds (ISO) — used to flag events dated outside the cycle. */
+  cycleStart?: string;
+  cycleEnd?: string;
 }
 
 const fundingLabels: Record<BudgetEvent["fundingSource"], string> = {
@@ -25,11 +28,17 @@ const fundingLabels: Record<BudgetEvent["fundingSource"], string> = {
   external: "Funded externally",
 };
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, cycleStart, cycleEnd }: EventCardProps) {
   const [editOpen, setEditOpen] = useState(false);
   const deleteEvent = useDeleteBudgetEvent();
 
   const cap = parseFloat(event.cap);
+  const outOfCycle = Boolean(
+    cycleStart &&
+      cycleEnd &&
+      (isoDateOnly(event.startDate) < isoDateOnly(cycleStart) ||
+        isoDateOnly(event.endDate) > isoDateOnly(cycleEnd)),
+  );
 
   return (
     <Card>
@@ -56,7 +65,12 @@ export function EventCard({ event }: EventCardProps) {
                 <SheetTitle>Edit Event</SheetTitle>
               </SheetHeader>
               <div className="px-4 pb-6">
-                <EditEventDialog event={event} onClose={() => setEditOpen(false)} />
+                <EditEventDialog
+                  event={event}
+                  cycleStart={cycleStart}
+                  cycleEnd={cycleEnd}
+                  onClose={() => setEditOpen(false)}
+                />
               </div>
             </SheetContent>
           </Sheet>
@@ -71,6 +85,19 @@ export function EventCard({ event }: EventCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {outOfCycle && (
+          <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              These dates fall outside this cycle
+              {cycleStart && cycleEnd
+                ? ` (${formatDateRange(cycleStart, cycleEnd)})`
+                : ""}
+              , yet the cap is still reserved from this cycle&apos;s flexible
+              budget. Delete it here and re-add it under the cycle it belongs to.
+            </span>
+          </div>
+        )}
         <div>
           <div className="flex items-baseline justify-between text-sm">
             <span className="text-muted-foreground">Cap reserved</span>

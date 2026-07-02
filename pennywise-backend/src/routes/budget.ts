@@ -474,6 +474,25 @@ router.delete("/plans/:id", async (req, res) => {
 // EVENTS
 // ============================================================================
 
+// Events must fall within their cycle's window — an out-of-cycle event would
+// reserve budget in (and pull spend into) the wrong cycle. Compared by calendar
+// day (cycle bounds and event dates are both stored at UTC midnight);
+// cycleEndDate is the inclusive last day.
+function eventCycleError(
+  startDate: Date,
+  endDate: Date,
+  cycleStartDate: Date,
+  cycleEndDate: Date,
+): string | null {
+  const day = (d: Date) => d.toISOString().slice(0, 10);
+  const cs = day(cycleStartDate);
+  const ce = day(cycleEndDate);
+  if (day(startDate) < cs || day(endDate) > ce) {
+    return `Event dates must fall within the cycle (${cs} to ${ce}).`;
+  }
+  return null;
+}
+
 const potInputSchema = z.object({
   name: z.string().min(1),
   amount: z.number().min(0),
@@ -538,7 +557,7 @@ router.post("/months/:month/events", async (req, res) => {
 
   const budgetMonth = await prisma.budgetMonth.findUnique({
     where: { month: req.params.month },
-    select: { id: true },
+    select: { id: true, cycleStartDate: true, cycleEndDate: true },
   });
   if (!budgetMonth) {
     res.status(404).json({ error: "Budget month not found" });
@@ -546,6 +565,17 @@ router.post("/months/:month/events", async (req, res) => {
   }
 
   const { pots, ...eventData } = parsed.data;
+
+  const cycleError = eventCycleError(
+    new Date(eventData.startDate),
+    new Date(eventData.endDate),
+    budgetMonth.cycleStartDate,
+    budgetMonth.cycleEndDate,
+  );
+  if (cycleError) {
+    res.status(400).json({ error: cycleError });
+    return;
+  }
   const event = await prisma.budgetEvent.create({
     data: {
       budgetMonthId: budgetMonth.id,
@@ -581,6 +611,34 @@ router.patch("/events/:id", async (req, res) => {
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues });
     return;
+  }
+
+  // If dates change, they must still fall within the event's cycle.
+  if (parsed.data.startDate !== undefined || parsed.data.endDate !== undefined) {
+    const existing = await prisma.budgetEvent.findUnique({
+      where: { id: req.params.id },
+      select: {
+        startDate: true,
+        endDate: true,
+        budgetMonth: { select: { cycleStartDate: true, cycleEndDate: true } },
+      },
+    });
+    if (!existing) {
+      res.status(404).json({ error: "Event not found" });
+      return;
+    }
+    const effStart = parsed.data.startDate ? new Date(parsed.data.startDate) : existing.startDate;
+    const effEnd = parsed.data.endDate ? new Date(parsed.data.endDate) : existing.endDate;
+    const cycleError = eventCycleError(
+      effStart,
+      effEnd,
+      existing.budgetMonth.cycleStartDate,
+      existing.budgetMonth.cycleEndDate,
+    );
+    if (cycleError) {
+      res.status(400).json({ error: cycleError });
+      return;
+    }
   }
 
   const data: Record<string, unknown> = { ...parsed.data };

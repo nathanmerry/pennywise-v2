@@ -49,12 +49,18 @@ export function AddEventDialog({ month, cycleStart, cycleEnd, onClose }: AddEven
   const parentCategories = categories?.filter((c) => !c.parentId) ?? [];
   const createEvent = useCreateBudgetEvent();
 
+  const cycleStartDay = isoDateOnly(cycleStart);
+  const cycleEndDay = isoDateOnly(cycleEnd);
   const rangeIsInvalid = startDate && endDate && endDate < startDate;
+  const outOfCycle = Boolean(
+    (cycleStartDay && startDate && startDate < cycleStartDay) ||
+      (cycleEndDay && endDate && endDate > cycleEndDay),
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !startDate || !endDate || !cap) return;
-    if (rangeIsInvalid) return;
+    if (rangeIsInvalid || outOfCycle) return;
 
     const filledPots = pots
       .filter((p) => p.name && p.amount)
@@ -103,6 +109,8 @@ export function AddEventDialog({ month, cycleStart, cycleEnd, onClose }: AddEven
           <Input
             id="event-start"
             type="date"
+            min={cycleStartDay || undefined}
+            max={cycleEndDay || undefined}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
@@ -112,6 +120,8 @@ export function AddEventDialog({ month, cycleStart, cycleEnd, onClose }: AddEven
           <Input
             id="event-end"
             type="date"
+            min={cycleStartDay || undefined}
+            max={cycleEndDay || undefined}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
@@ -119,6 +129,12 @@ export function AddEventDialog({ month, cycleStart, cycleEnd, onClose }: AddEven
       </div>
       {rangeIsInvalid && (
         <p className="text-sm text-destructive">End date must be on or after start date.</p>
+      )}
+      {!rangeIsInvalid && outOfCycle && (
+        <p className="text-sm text-destructive">
+          Event dates must fall within this cycle ({cycleStartDay} to {cycleEndDay}).
+          To budget for another cycle, switch to it first.
+        </p>
       )}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
@@ -223,7 +239,7 @@ export function AddEventDialog({ month, cycleStart, cycleEnd, onClose }: AddEven
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={createEvent.isPending || !!rangeIsInvalid}>
+        <Button type="submit" disabled={createEvent.isPending || !!rangeIsInvalid || outOfCycle}>
           Create Event
         </Button>
       </div>
