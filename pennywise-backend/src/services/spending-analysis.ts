@@ -18,16 +18,41 @@ import {
   getCategoryBudgetRoleMap,
   getFixedCategoryMap,
   type FixedCategoryEntry,
+  type CategoryBudgetRole,
 } from "./reporting/budget-role.js";
 
 /**
  * Sentinel category ids for txs that don't resolve to a single safe category
  * (uncategorised + ambiguous multi-category). Surfaced as synthetic rows in
  * the breakdown so the spend totals tally with pace's bank-statement view.
- * Frontend treats these ids as non-clickable.
+ * getCategoryDrilldown handles these ids specially so the frontend can drill in
+ * and list the underlying transactions.
  */
 const UNATTRIBUTED_FLEXIBLE_ID = "__unattributed_flexible__";
 const UNATTRIBUTED_FIXED_ID = "__unattributed_fixed__";
+
+/**
+ * Split reportable outflows that aren't in the resolved (single-safe-category)
+ * set into flexible vs fixed buckets, using pace's fixed-vs-flexible role map.
+ * Shared by the breakdown (getSpendingAnalysis) and the drilldown so both agree
+ * on exactly which transactions are "unattributed".
+ */
+function splitUnattributedOutflows(
+  reportableOutflows: ReportableOutflow[],
+  resolvedTransactionIds: Set<string>,
+  roleMap: Map<string, CategoryBudgetRole> | null,
+): { flexible: ReportableOutflow[]; fixed: ReportableOutflow[] } {
+  const flexible: ReportableOutflow[] = [];
+  const fixed: ReportableOutflow[] = [];
+  for (const tx of reportableOutflows) {
+    if (resolvedTransactionIds.has(tx.id)) continue;
+    const isFixed = roleMap
+      ? tx.categoryIds.some((id) => roleMap.get(id) === "fixed")
+      : false;
+    (isFixed ? fixed : flexible).push(tx);
+  }
+  return { flexible, fixed };
+}
 
 export type AnalysisPreset =
   | "this_cycle"
@@ -626,20 +651,12 @@ export async function getSpendingAnalysis(
   // Unattributed bucket: every reportable outflow that isn't in the resolved
   // set (uncategorised + ambiguous multi-category). Split by pace's
   // fixed-vs-flexible rule so headline totals tally with /budget/pace.
-  const resolvedTxIds = new Set(currentTransactions.map((tx) => tx.id));
-  const unattributedFlexible: ReportableOutflow[] = [];
-  const unattributedFixed: ReportableOutflow[] = [];
-  for (const tx of currentReportableOutflows) {
-    if (resolvedTxIds.has(tx.id)) continue;
-    const isFixed = roleMap
-      ? tx.categoryIds.some((id) => roleMap.get(id) === "fixed")
-      : false;
-    if (isFixed) {
-      unattributedFixed.push(tx);
-    } else {
-      unattributedFlexible.push(tx);
-    }
-  }
+  const { flexible: unattributedFlexible, fixed: unattributedFixed } =
+    splitUnattributedOutflows(
+      currentReportableOutflows,
+      new Set(currentTransactions.map((tx) => tx.id)),
+      roleMap,
+    );
 
   const sumOutflows = (rows: ReportableOutflow[]) =>
     rows.reduce((sum, row) => sum + row.amount, 0);
@@ -757,11 +774,106 @@ export async function getSpendingAnalysis(
   };
 }
 
+/**
+ * Drilldown for the synthetic unattributed buckets: lists the reportable
+ * outflows that didn't resolve to a single safe category (uncategorised +
+ * ambiguous multi-category), split fixed/flexible the same way the breakdown
+ * does. Analysis-heavy fields (trend, budget, monthly history, recurring split)
+ * are left empty since they're meaningless for a mixed bucket.
+ */
+async function buildUnattributedDrilldown(
+  categoryId: string,
+  filters: SpendingAnalysisFilters,
+  ancestryMap: Awaited<ReturnType<typeof buildCategoryAncestryMap>>,
+): Promise<CategoryDrilldownResponse> {
+  const currentRange = {
+    start: parseStartDate(filters.start),
+    end: parseEndDate(filters.end),
+  };
+  const txFilters = {
+    startDate: currentRange.start,
+    endDate: currentRange.end,
+    accountId: filters.accountId,
+    categoryId: filters.categoryId,
+    includeIgnored: filters.includeIgnored,
+  };
+
+  const [resolved, reportable, pace] = await Promise.all([
+    getCategoryResolvedOutflows(txFilters, ancestryMap),
+    getReportableOutflows(txFilters, ancestryMap),
+    getPaceForFilters(filters),
+  ]);
+
+  const budgetContext = buildBudgetContext(filters, pace);
+  const roleMap = budgetContext.month
+    ? await getCategoryBudgetRoleMap(budgetContext.month, ancestryMap)
+    : null;
+
+  const { flexible, fixed } = splitUnattributedOutflows(
+    reportable,
+    new Set(resolved.map((tx) => tx.id)),
+    roleMap,
+  );
+  const rows = categoryId === UNATTRIBUTED_FIXED_ID ? fixed : flexible;
+  const name =
+    categoryId === UNATTRIBUTED_FIXED_ID
+      ? "Unattributed (fixed)"
+      : "Unattributed (flexible)";
+  const spend = roundCurrency(rows.reduce((sum, row) => sum + row.amount, 0));
+
+  return {
+    currentPeriod: getPeriodMeta(currentRange.start, currentRange.end),
+    previousPeriod: null,
+    budget: null,
+    category: {
+      categoryId,
+      categoryName: name,
+      spend,
+      previousSpend: null,
+      changeAmount: null,
+      changePercent: null,
+      transactionCount: rows.length,
+      averageTransaction: rows.length > 0 ? roundCurrency(spend / rows.length) : 0,
+    },
+    series: [],
+    topMerchants: [],
+    transactions: [...rows]
+      .sort((a, b) => b.amount - a.amount)
+      .map((tx) => ({
+        transactionId: tx.id,
+        transactionDate: tx.transactionDateKey,
+        merchantName: tx.normalizedMerchant || tx.merchantName,
+        description: tx.description,
+        amount: roundCurrency(tx.amount),
+      })),
+    monthlyHistory: [],
+    recurringSplit: {
+      recurringSpend: 0,
+      recurringTransactionCount: 0,
+      oneOffSpend: spend,
+      oneOffTransactionCount: rows.length,
+    },
+    weekdayWeekendSplit: {
+      weekdaySpend: 0,
+      weekendSpend: 0,
+      weekdayTransactionCount: 0,
+      weekendTransactionCount: 0,
+    },
+  };
+}
+
 export async function getCategoryDrilldown(
   categoryId: string,
   filters: SpendingAnalysisFilters
 ): Promise<CategoryDrilldownResponse | null> {
   const ancestryMap = await buildCategoryAncestryMap();
+
+  // Synthetic "unattributed" rows aren't real categories — resolve them to the
+  // underlying reportable transactions so the drawer can list them.
+  if (categoryId === UNATTRIBUTED_FLEXIBLE_ID || categoryId === UNATTRIBUTED_FIXED_ID) {
+    return buildUnattributedDrilldown(categoryId, filters, ancestryMap);
+  }
+
   const category = ancestryMap.get(categoryId);
 
   if (!category) {

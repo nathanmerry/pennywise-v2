@@ -6,6 +6,7 @@ import { getSpendingHistoryAnalysis, getCategoryEvidenceBatch } from "../service
 import { generateBudgetRecommendations, applyBudgetRecommendations } from "../services/budget-recommendations.js";
 import { getCategoryDrilldown, getSpendingAnalysis } from "../services/spending-analysis.js";
 import { getPayCycleFromBudgetMonth } from "../services/cycle.js";
+import { buildMonthlyExport } from "../services/monthly-export.js";
 
 const router = Router();
 
@@ -668,6 +669,25 @@ router.get("/overview/:month", async (req, res) => {
 router.get("/spending/:month", async (req, res) => {
   const breakdown = await getSpendingBreakdown(req.params.month);
   res.json(breakdown);
+});
+
+// GET /api/budget/export/:month - Structured monthly snapshot (budget + spending +
+// transactions) for handing to an LLM. Reuses the same calculation services as
+// the Budget/Spending pages so it can't drift from the UI.
+router.get("/export/:month", async (req, res) => {
+  try {
+    const data = await buildMonthlyExport(req.params.month);
+    if (!data) {
+      res.status(404).json({
+        error: "Budget month not found. Create a budget for this month first.",
+      });
+      return;
+    }
+    res.json(data);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
 });
 
 // GET /api/budget/analysis - Range-based spending analysis workspace

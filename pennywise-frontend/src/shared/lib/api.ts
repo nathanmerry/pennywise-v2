@@ -925,6 +925,114 @@ export function fetchOverspendCategories(month: string) {
 }
 
 // ============================================================================
+// MONTHLY EXPORT
+// ============================================================================
+
+/** Structured snapshot of a budget month for handing to an LLM. Mirrors the
+ * backend `MonthlyExport` shape (services/monthly-export.ts). */
+export interface MonthlyExport {
+  schemaVersion: number;
+  generatedAt: string;
+  currency: string;
+  month: string;
+  /** Plain-English rules for correctly interpreting the numbers below. */
+  guidance: string[];
+  cycle: {
+    label: string;
+    startDate: string;
+    endDate: string;
+    daysInCycle: number;
+    daysElapsed: number;
+    daysRemaining: number;
+    status: "current" | "past" | "future";
+  };
+  summary: {
+    expectedIncome: number;
+    savingsTarget: number;
+    fixedCommitmentsTotal: number;
+    plannedOneOffsTotal: number;
+    eventsReservedTotal: number;
+    flexibleBudget: number;
+    unallocated: number;
+    actualSpend: number;
+    remainingFlexible: number;
+    moneyIn: number;
+    moneyOut: number;
+    netAfterIgnored: number;
+  };
+  budget: {
+    fixedCommitments: Array<{
+      name: string;
+      amount: number;
+      category: string | null;
+      dueDate: string | null;
+    }>;
+    plannedOneOffs: Array<{
+      name: string;
+      amount: number;
+      category: string | null;
+      budgetGroup: string | null;
+      plannedDate: string | null;
+      isEssential: boolean;
+    }>;
+    categoryBudgets: Array<{
+      name: string;
+      scope: "category" | "group";
+      targetType: "fixed" | "percent";
+      target: number;
+      resolvedAmount: number;
+      spent: number;
+      remaining: number;
+    }>;
+    budgetGroups: Array<{
+      name: string;
+      budget: number | null;
+      spent: number;
+      remaining: number | null;
+      categories: string[];
+    }>;
+    events: Array<{
+      name: string;
+      startDate: string;
+      endDate: string;
+      cap: number;
+      fundingSource: string;
+      actualSpend: number;
+      notes: string | null;
+      pots: Array<{
+        name: string;
+        amount: number;
+        category: string | null;
+        actualSpend: number | null;
+      }>;
+    }>;
+  };
+  spending: {
+    byCategory: Array<{
+      category: string;
+      spent: number;
+      budget: number | null;
+      remaining: number | null;
+      percentUsed: number | null;
+    }>;
+    topMerchants: Array<{ merchant: string; spent: number; transactionCount: number }>;
+  };
+  transactions: Array<{
+    date: string;
+    description: string;
+    merchant: string | null;
+    amount: number;
+    categories: string[];
+    note: string | null;
+    ignored: boolean;
+  }>;
+}
+
+export function fetchMonthlyExport(month: string) {
+  return request<MonthlyExport>(`/budget/export/${month}`);
+}
+
+// ============================================================================
 // AI CATEGORISATION
 // ============================================================================
 

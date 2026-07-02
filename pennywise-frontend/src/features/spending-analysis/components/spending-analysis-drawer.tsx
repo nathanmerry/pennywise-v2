@@ -25,6 +25,7 @@ import { Button } from "@/shared/components/ui/button";
 import { XIcon } from "lucide-react";
 import { useCategoryDrilldown } from "@/shared/hooks/use-budget";
 import type { SpendingAnalysisFilters } from "@/shared/lib/api";
+import { isUnattributedRow } from "../lib/unattributed";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-GB", {
@@ -96,6 +97,7 @@ export function SpendingAnalysisDrawer({
   filters,
 }: SpendingAnalysisDrawerProps) {
   const { data, isLoading } = useCategoryDrilldown(categoryId, filters);
+  const isUnattributed = categoryId ? isUnattributedRow(categoryId) : false;
   const [showAllMerchants, setShowAllMerchants] = useState(false);
   const [sortMode, setSortMode] = useState<"amount" | "date">("amount");
   const [dayFilter, setDayFilter] = useState<"all" | "weekdays" | "weekends">(
@@ -103,9 +105,10 @@ export function SpendingAnalysisDrawer({
   );
   const [visibleCount, setVisibleCount] = useState(15);
 
+  const transactions = data?.transactions;
   const visibleTransactions = useMemo(() => {
-    if (!data?.transactions) return [];
-    const filtered = data.transactions.filter((transaction) => {
+    if (!transactions) return [];
+    const filtered = transactions.filter((transaction) => {
       if (dayFilter === "all") return true;
       const day = new Date(
         `${transaction.transactionDate}T00:00:00.000Z`,
@@ -118,7 +121,7 @@ export function SpendingAnalysisDrawer({
       return b.transactionDate.localeCompare(a.transactionDate);
     });
     return sorted;
-  }, [data?.transactions, sortMode, dayFilter]);
+  }, [transactions, sortMode, dayFilter]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -161,6 +164,22 @@ export function SpendingAnalysisDrawer({
             </SheetHeader>
 
             <div className="space-y-4 px-4 pb-6">
+              {isUnattributed && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">What is this?</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm text-muted-foreground">
+                    These transactions couldn&apos;t be tied to a single category —
+                    they&apos;re either uncategorised or split across unrelated
+                    categories, so they don&apos;t roll up under any one category in
+                    the breakdown. Categorise them (or add a rule) to move them into a
+                    category.
+                  </CardContent>
+                </Card>
+              )}
+              {!isUnattributed && (
+              <>
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader className="pb-2">
@@ -355,6 +374,8 @@ export function SpendingAnalysisDrawer({
                   </CardContent>
                 </Card>
               </div>
+              </>
+              )}
 
               <Card>
                 <CardHeader className="pb-2 space-y-3">

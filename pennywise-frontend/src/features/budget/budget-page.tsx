@@ -61,6 +61,7 @@ import { CategoryPlanRow } from "@/features/budget/components/category-plan-row"
 import { CommitmentRow } from "@/features/budget/components/commitment-row";
 import { CycleNav } from "@/features/budget/components/cycle-nav";
 import { EditBudgetMonthDialog } from "@/features/budget/components/edit-budget-month-dialog";
+import { ExportMonthDialog } from "@/features/budget/components/export-month-dialog";
 import { EventCard } from "@/features/budget/components/event-card";
 import { PlannedSpendRow } from "@/features/budget/components/planned-spend-row";
 import { SetupBudgetForm } from "@/features/budget/components/setup-budget-form";
@@ -242,28 +243,31 @@ export function BudgetPage() {
         nextIsProjected={nextIsProjected}
         onJump={(m: string) => setSelectedMonth(m)}
         rightSlot={
-          <Dialog open={editMonthDialogOpen} onOpenChange={setEditMonthDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit Cycle
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit {cycleHeading}</DialogTitle>
-              </DialogHeader>
-              <EditBudgetMonthDialog
-                month={month}
-                expectedIncome={budget.expectedIncome}
-                cycleStartDate={budget.cycleStartDate}
-                cycleEndDate={budget.cycleEndDate}
-                savingsTargetType={budget.savingsTargetType}
-                savingsTargetValue={budget.savingsTargetValue}
-                onClose={() => setEditMonthDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <>
+            <ExportMonthDialog month={month} />
+            <Dialog open={editMonthDialogOpen} onOpenChange={setEditMonthDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Cycle
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit {cycleHeading}</DialogTitle>
+                </DialogHeader>
+                <EditBudgetMonthDialog
+                  month={month}
+                  expectedIncome={budget.expectedIncome}
+                  cycleStartDate={budget.cycleStartDate}
+                  cycleEndDate={budget.cycleEndDate}
+                  savingsTargetType={budget.savingsTargetType}
+                  savingsTargetValue={budget.savingsTargetValue}
+                  onClose={() => setEditMonthDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
         }
       />
 
