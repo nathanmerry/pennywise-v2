@@ -21,8 +21,13 @@ const schema = z.object({
   MCP_AUTH_TOKEN: z
     .string()
     .min(24, "MCP_AUTH_TOKEN must be at least 24 characters (use e.g. `openssl rand -hex 32`)"),
-  /** Port this MCP server listens on. */
+  /**
+   * Port this MCP server listens on. Falls back to PORT (injected by most
+   * platform hosts, e.g. DigitalOcean App Platform sets PORT=8080 and
+   * health-checks that port) before the local default.
+   */
   MCP_PORT: z.coerce.number().int().positive().default(3391),
+  PORT: z.coerce.number().int().positive().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -39,5 +44,7 @@ if (!parsed.success) {
 export const config = {
   apiUrl: parsed.data.PENNYWISE_API_URL.replace(/\/+$/, ""),
   authToken: parsed.data.MCP_AUTH_TOKEN,
-  port: parsed.data.MCP_PORT,
+  // PORT (injected by the platform host) is authoritative when present — the
+  // host health-checks that exact port. MCP_PORT is the local-dev default.
+  port: parsed.data.PORT ?? parsed.data.MCP_PORT,
 } as const;

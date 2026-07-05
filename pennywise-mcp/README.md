@@ -15,16 +15,36 @@ ChatGPT ──(MCP over HTTPS, bearer/token auth)──▶ pennywise-mcp ──(
 
 ## Tools exposed
 
+**Read — whole-month snapshots**
+
 | Tool | Args | Returns |
 | --- | --- | --- |
 | `get_current_month_spending_summary` | – | Full snapshot of the **current pay cycle**: total spend, category breakdown, top merchants, the full transaction ledger (with notes + `ignored` flags), budget context, and plain-English `guidance`. |
 | `get_spending_summary_for_month` | `month` (`YYYY-MM`) | The same snapshot for a **specific** month, e.g. `2026-06` for last month. |
 
-Both return the backend's structured export verbatim, so ChatGPT has everything
-it needs to give a conversational summary (biggest category, largest transaction,
-excluded totals, patterns) without any extra calculation. The payload is returned
-as `structuredContent` validated against a declared `outputSchema` (plus the same
-JSON as text, for clients that only read text content).
+**Read — range / cycle / week analysis** (mirrors the `/spending` page)
+
+| Tool | Args | Returns |
+| --- | --- | --- |
+| `get_spending_analysis` | `range` (`this_cycle`\|`last_cycle`\|`last_3_cycles`\|`last_6_cycles`\|`ytd`\|`custom`), optional `start`/`end`, `week` (1–6), `compare`, `includeIgnored` | Category breakdown (share, counts, trend), day-by-day series, top merchants, over a preset/custom/weekly range. |
+| `get_category_drilldown` | `categoryId` + same range args | One category's transactions, top merchants, series, monthly history, recurring vs one-off, weekday/weekend. |
+
+**Write — budget "core knobs"** (create/update only, no deletes; flagged so ChatGPT confirms first)
+
+| Tool | Args | Effect |
+| --- | --- | --- |
+| `set_category_budget` | `category` (name), `amount`, optional `type` (`fixed`\|`percent`), `month` | Create/adjust a category or group budget target. |
+| `update_budget_month` | optional `month`, `expectedIncome`, `savingsTargetType`, `savingsTargetValue` | Update month income / savings target. |
+| `add_planned_spend` | `name`, `amount`, optional `month`, `plannedDate`, `category`, `budgetGroup`, `isEssential` | Add/update a planned one-off. |
+| `add_fixed_commitment` | `name`, `amount`, optional `month`, `dueDate`, `category` | Add/update a fixed commitment. |
+
+Read tools return the backend's structured payload verbatim (as `structuredContent`
+validated against a declared `outputSchema`) — no calculation is duplicated in the
+bridge; the analysis tools only replicate the UI's date-range/week resolution. Write
+tools resolve category/group **names → ids** server-side, choose create-vs-update
+automatically, and are annotated `readOnlyHint: false` so ChatGPT surfaces a
+confirmation before running them. Deleting and structural changes (new/removed
+months, groups, events) and bank **sync** are intentionally not exposed.
 
 ## Setup
 

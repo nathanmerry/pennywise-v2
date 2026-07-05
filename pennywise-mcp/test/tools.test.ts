@@ -55,14 +55,26 @@ describe("tools integration", () => {
     );
   });
 
-  it("lists both tools, each advertising an outputSchema", async () => {
+  it("advertises all tools, each with an outputSchema; writes are not read-only", async () => {
     const { tools } = await client.listTools();
-    const names = tools.map((t) => t.name).sort();
-    assert.deepEqual(names, [
+    const names = tools.map((t) => t.name);
+    for (const expected of [
       "get_current_month_spending_summary",
       "get_spending_summary_for_month",
-    ]);
+      "get_spending_analysis",
+      "get_category_drilldown",
+      "set_category_budget",
+      "update_budget_month",
+      "add_planned_spend",
+      "add_fixed_commitment",
+    ]) {
+      assert.ok(names.includes(expected), `missing tool ${expected}`);
+    }
     for (const t of tools) assert.ok(t.outputSchema, `${t.name} should advertise an outputSchema`);
+    // Read tools are flagged read-only; write tools are not.
+    const byName = new Map(tools.map((t) => [t.name, t]));
+    assert.equal(byName.get("get_spending_analysis")?.annotations?.readOnlyHint, true);
+    assert.equal(byName.get("set_category_budget")?.annotations?.readOnlyHint, false);
   });
 
   it("current-month summary returns structuredContent with the FULL ledger (not stripped)", async () => {
