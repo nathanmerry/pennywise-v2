@@ -22,7 +22,9 @@ ChatGPT ──(MCP over HTTPS, bearer/token auth)──▶ pennywise-mcp ──(
 
 Both return the backend's structured export verbatim, so ChatGPT has everything
 it needs to give a conversational summary (biggest category, largest transaction,
-excluded totals, patterns) without any extra calculation.
+excluded totals, patterns) without any extra calculation. The payload is returned
+as `structuredContent` validated against a declared `outputSchema` (plus the same
+JSON as text, for clients that only read text content).
 
 ## Setup
 
@@ -57,9 +59,13 @@ You should see: `pennywise-mcp listening on http://localhost:3391/mcp`.
 ## Verify it works
 
 ```bash
+npm test                     # 28 automated tests (auth, schema, client, full tool path)
 node smoke-test.mjs          # auth gate + protocol + tool listing (no backend needed)
 node smoke-test.mjs --call   # also calls the current-month tool (backend must be running)
 ```
+
+See [TESTING.md](TESTING.md) for the full test strategy, the ChatGPT golden-prompt
+set, and the launch regression checklist.
 
 Or explore interactively with the MCP Inspector:
 

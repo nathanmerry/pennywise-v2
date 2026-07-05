@@ -5,6 +5,7 @@ import {
   getMonthlyExport,
   PennywiseApiError,
 } from "./pennywise-client.js";
+import { spendingExportShape } from "./export-schema.js";
 
 const MONTH_RE = /^\d{4}-\d{2}$/;
 
@@ -18,10 +19,19 @@ const SERVER_INSTRUCTIONS = [
   "reporting. All amounts are in GBP unless the `currency` field says otherwise.",
 ].join(" ");
 
-/** Wrap a JSON payload as an MCP tool result the model can read. */
+/**
+ * Wrap a spending export as an MCP tool result.
+ *
+ * Returns the data in BOTH channels for maximum client compatibility:
+ *   - `structuredContent`: the canonical structured payload (validated against
+ *     the tool's outputSchema; what the ChatGPT Apps runtime reasons over).
+ *   - `content` text: the same JSON, so clients that only read text content
+ *     still get the full data.
+ */
 function jsonResult(data: unknown) {
   return {
     content: [{ type: "text" as const, text: JSON.stringify(data) }],
+    structuredContent: data as Record<string, unknown>,
   };
 }
 
@@ -66,6 +76,7 @@ export function buildServer(): McpServer {
         "spending this month', 'what have I spent most on', or 'any unusual " +
         "transactions this month'.",
       inputSchema: {},
+      outputSchema: spendingExportShape,
     },
     async () => {
       try {
@@ -98,6 +109,7 @@ export function buildServer(): McpServer {
           .regex(MONTH_RE, "month must be in YYYY-MM format, e.g. 2026-06")
           .describe("The budget month to summarise, formatted as YYYY-MM (e.g. 2026-06)."),
       },
+      outputSchema: spendingExportShape,
     },
     async ({ month }) => {
       try {
