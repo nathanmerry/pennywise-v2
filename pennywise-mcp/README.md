@@ -39,6 +39,20 @@ ChatGPT ──(MCP over HTTPS, bearer/token auth)──▶ pennywise-mcp ──(
 | `add_planned_spend` | `name`, `amount`, optional `month`, `plannedDate`, `category`, `budgetGroup`, `isEssential` | Add/update a planned one-off. |
 | `add_fixed_commitment` | `name`, `amount`, optional `month`, `dueDate`, `category` | Add/update a fixed commitment. |
 
+### Inline chart widget (ChatGPT Apps SDK)
+
+`get_budget_pace` also ships an **inline chart** that ChatGPT renders in the
+conversation — a horizontal "budget spent" bar with a *pace* marker (how far
+through the cycle you are), plus per-category bars, theme-aware for light/dark.
+
+It's wired the Apps SDK way: the MCP registers the HTML template as a
+`ui://widget/pennywise-budget-pace.html` resource (mime `text/html+skybridge`,
+[src/widgets/budget-pace.html](src/widgets/budget-pace.html), fully self-contained
+— all CSS/JS inline for the sandbox CSP), and the tool references it via
+`_meta["openai/outputTemplate"]`. The component reads the tool's `structuredContent`
+from `window.openai.toolOutput`. Preview it locally in the MCP Inspector (it renders
+components inline); the full styled render only appears in ChatGPT.
+
 Read tools return the backend's structured payload verbatim (as `structuredContent`
 validated against a declared `outputSchema`) — no calculation is duplicated in the
 bridge; the analysis tools only replicate the UI's date-range/week resolution. Write

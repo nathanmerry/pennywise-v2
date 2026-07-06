@@ -5,6 +5,7 @@ import { spendingExportShape } from "./export-schema.js";
 import { jsonResult, errorResult, describeError } from "./tool-helpers.js";
 import { registerSpendingTools } from "./tools-spending.js";
 import { registerBudgetTools } from "./tools-budget.js";
+import { registerBudgetPaceWidget } from "./widgets/budget-pace.js";
 
 const MONTH_RE = /^\d{4}-\d{2}$/;
 
@@ -100,6 +101,9 @@ export function buildServer(): McpServer {
       }
     },
   );
+
+  // --- Inline chart widget (ChatGPT Apps SDK) for get_budget_pace ---
+  registerBudgetPaceWidget(server);
 
   // --- Range/cycle/week analysis (read-only) ---
   registerSpendingTools(server);

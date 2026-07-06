@@ -6,7 +6,7 @@ UX" is out of scope; the focus is **tool correctness** and **discovery precision
 
 ## 1. Automated tests (`npm test`)
 
-Runs on Node's built-in test runner via `tsx` (no extra deps). 60 tests across:
+Runs on Node's built-in test runner via `tsx` (no extra deps). 63 tests across:
 
 | File | Covers |
 | --- | --- |
@@ -17,6 +17,7 @@ Runs on Node's built-in test runner via `tsx` (no extra deps). 60 tests across:
 | `test/client-down.test.ts` | Backend unreachable → `PennywiseApiError(0)` with a helpful message. |
 | `test/tools.test.ts` | Full path (real MCP client → auth → tools → mock backend): rejects bad tokens; advertises all 9 tools each with an `outputSchema` and correct read-only annotations; current-month returns `structuredContent` with the **full** ledger (proves validation doesn't strip data); specific/empty/missing/bad-format months. Plus raw-HTTP checks: unauthenticated → 401 "missing credentials", wrong token → 401 "invalid token", `/health` open, `GET /mcp` without a session → 404. |
 | `test/tools-analysis.test.ts` | `get_spending_analysis` end-to-end: presets resolve to the right window, week 2 → second 7-day slice with `preset=custom`, custom pass-through + missing-dates error, week-on-multi-cycle error, `compare`/`includeIgnored` forwarded, and `get_category_drilldown`. |
+| `test/widget.test.ts` | Apps SDK widget wiring: the `ui://widget/pennywise-budget-pace.html` resource is listed + readable as `text/html+skybridge`, the HTML is self-contained (reads `window.openai`, subscribes to `openai:set_globals`, no external scripts), and `get_budget_pace` links to it via `_meta["openai/outputTemplate"]`. |
 | `test/tools-budget.test.ts` | Budget writes end-to-end: `set_category_budget` update-existing vs create (name→id), group budgets, percent targets, unknown-name lists options; `update_budget_month`; `add_planned_spend`/`add_fixed_commitment` update-by-name vs create with category+date resolution; friendly error writing to an unconfigured month. |
 
 Representative fixtures live in `test/support/` next to the tests so they track the

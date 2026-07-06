@@ -10,6 +10,7 @@ import {
 import { resolveRange, RANGE_PRESETS, type RangePreset } from "./range.js";
 import { analysisOutputShape, drilldownOutputShape, paceOutputShape } from "./analysis-schema.js";
 import { textAndStructured, errorResult, describeError } from "./tool-helpers.js";
+import { BUDGET_PACE_TOOL_META } from "./widgets/budget-pace.js";
 
 /** Shape of the fields we read from GET /api/budget/pace/:month. */
 interface PaceResponse {
@@ -190,6 +191,7 @@ export function registerSpendingTools(server: McpServer): void {
       },
       outputSchema: paceOutputShape,
       annotations: { readOnlyHint: true },
+      _meta: BUDGET_PACE_TOOL_META,
     },
     async ({ month }) => {
       let m = month;

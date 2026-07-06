@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --card: #f7f7f8;
+        --border: #e6e6e9;
+        --text: #1a1a1f;
+        --muted: #6b7280;
+        --track: #e6e6ea;
+        --ok: #16a34a;
+        --warn: #d97706;
+        --bad: #dc2626;
+        --grey: #9ca3af;
+        --accent: #4b5563;
+      }
+      :root[data-theme="dark"] {
+        --bg: #1c1c1f;
+        --card: #26262b;
+        --border: #33333a;
+        --text: #f3f3f5;
+        --muted: #a1a1aa;
+        --track: #3a3a42;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+        --bad: #ef4444;
+        --grey: #6b7280;
+        --accent: #9ca3af;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #1c1c1f; --card: #26262b; --border: #33333a; --text: #f3f3f5;
+          --muted: #a1a1aa; --track: #3a3a42; --ok: #22c55e; --warn: #f59e0b;
+          --bad: #ef4444; --grey: #6b7280; --accent: #9ca3af;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { padding: 16px; max-width: 640px; margin: 0 auto; }
+      .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+      .title { font-size: 15px; font-weight: 650; }
+      .pill { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+      .pill.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+      .pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+      .pill.bad { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+      .pill.muted { background: color-mix(in srgb, var(--grey) 18%, transparent); color: var(--muted); }
+      .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
+
+      .hero { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+      .hero .row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+      .hero .big { font-size: 22px; font-weight: 680; letter-spacing: -0.01em; }
+      .hero .big .of { color: var(--muted); font-size: 14px; font-weight: 500; }
+      .caption { font-size: 12.5px; color: var(--muted); margin-top: 9px; }
+      .caption b { color: var(--text); font-weight: 600; }
+
+      /* pace track */
+      .track { position: relative; height: 26px; background: var(--track); border-radius: 7px; overflow: visible; }
+      .fill { position: absolute; inset: 0 auto 0 0; border-radius: 7px 0 0 7px; transition: width .2s; }
+      .fill.full { border-radius: 7px; }
+      .fill.ok { background: var(--ok); } .fill.warn { background: var(--warn); }
+      .fill.bad { background: var(--bad); } .fill.muted { background: var(--grey); }
+      .marker { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--accent); }
+      .marker::after {
+        content: "pace"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+        font-size: 10px; color: var(--accent); white-space: nowrap; font-weight: 600;
+      }
+      .marker.low::after { left: 0; transform: none; }
+      .marker.high::after { left: auto; right: 0; transform: none; }
+
+      .cats { }
+      .cats h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+      .cat { display: grid; grid-template-columns: 1fr 130px; gap: 12px; align-items: center; padding: 7px 0; border-top: 1px solid var(--border); }
+      .cat:first-of-type { border-top: none; }
+      .cat .name { font-weight: 550; }
+      .cat .amt { color: var(--muted); font-size: 12px; }
+      .cat .over { color: var(--bad); } .cat .under { color: var(--ok); }
+      .mini { position: relative; height: 8px; background: var(--track); border-radius: 4px; }
+      .mini .mfill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+      .mini .mmark { position: absolute; top: -2px; bottom: -2px; width: 1.5px; background: var(--accent); opacity: .7; }
+      .mini .mpct { position: absolute; right: 0; top: -15px; font-size: 10.5px; color: var(--muted); }
+      .empty { color: var(--muted); padding: 24px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap"><div id="root"><div class="empty">Loading budget pace…</div></div></div>
+    <script>
+      var STATUS = {
+        on_track: { label: "On track", cls: "ok" },
+        over_pace: { label: "Ahead of pace", cls: "warn" },
+        over_budget: { label: "Over budget", cls: "bad" },
+        overspent: { label: "Overspent", cls: "bad" },
+        no_budget: { label: "No budget", cls: "muted" },
+      };
+      function money(n) {
+        var v = Math.round(Number(n) || 0);
+        return "£" + v.toLocaleString();
+      }
+      function monthName(m) {
+        if (!m) return "";
+        var p = String(m).split("-");
+        var d = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, 1));
+        return d.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+      }
+      function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+      function clamp(n) { return Math.max(0, Math.min(100, Number(n) || 0)); }
+      function markerClass(p) { return p <= 6 ? "low" : p >= 94 ? "high" : ""; }
+
+      function applyTheme(theme) {
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+      }
+
+      function render() {
+        var data = (window.openai && window.openai.toolOutput) || null;
+        var root = document.getElementById("root");
+        if (!data || !data.overall) {
+          root.innerHTML = '<div class="empty">No budget pace to show yet.</div>';
+          return;
+        }
+        var o = data.overall;
+        var elapsed = clamp(data.elapsedPct);
+        var spent = o.spentPct == null ? 0 : clamp(o.spentPct);
+        var st = STATUS[o.status] || STATUS.no_budget;
+        var ahead = o.spentPct != null && o.spentPct > data.elapsedPct;
+
+        var html = "";
+        html += '<div class="head"><div class="title">Budget pace · ' + esc(monthName(data.month)) + "</div>";
+        html += '<span class="pill ' + st.cls + '">' + esc(st.label) + "</span></div>";
+        html += '<div class="sub">Day ' + esc(data.daysElapsed) + " of " + esc(data.daysInCycle) + " · flexible budget</div>";
+
+        // hero: spent vs pace
+        html += '<div class="hero">';
+        html += '<div class="row"><div class="big">' + money(o.spent) + ' <span class="of">of ' + money(o.flexibleBudget) + "</span></div>";
+        html += '<div class="big" style="font-size:16px">' + (o.spentPct == null ? "—" : o.spentPct + "%") + "</div></div>";
+        html += '<div class="track"><div class="fill ' + (spent >= 100 ? "full " : "") + st.cls + '" style="width:' + spent + '%"></div>';
+        html += '<div class="marker ' + markerClass(elapsed) + '" style="left:' + elapsed + '%"></div></div>';
+        html += '<div class="caption">You are <b>' + Math.round(data.elapsedPct) + "%</b> through the cycle and have spent <b>" +
+          (o.spentPct == null ? "—" : o.spentPct + "%") + "</b> of your flexible budget — " +
+          (ahead ? "spending <b>ahead of</b> pace." : "<b>within</b> pace.") +
+          " " + money(o.remaining) + " remaining.</div>";
+        html += "</div>";
+
+        // categories
+        var cats = (data.categories || []).slice().sort(function (a, b) { return (b.spent || 0) - (a.spent || 0); });
+        if (cats.length) {
+          html += '<div class="cats"><h3>By category</h3>';
+          for (var i = 0; i < cats.length; i++) {
+            var c = cats[i];
+            var cst = STATUS[c.status] || STATUS.no_budget;
+            var cpct = c.spentPct == null ? 0 : clamp(c.spentPct);
+            var amt = c.budget != null ? money(c.spent) + " / " + money(c.budget) : money(c.spent) + " · no budget";
+            var diff = "";
+            if (c.budget != null) {
+              var rem = c.budget - c.spent;
+              diff = rem >= 0 ? ' <span class="under">' + money(rem) + " left</span>" : ' <span class="over">' + money(-rem) + " over</span>";
+            }
+            html += '<div class="cat"><div><div class="name">' + esc(c.name) + '</div><div class="amt">' + amt + diff + "</div></div>";
+            html += '<div class="mini"><div class="mfill ' + cst.cls + '" style="width:' + cpct + '%"></div>';
+            if (c.budget != null) html += '<div class="mmark" style="left:' + clamp(data.elapsedPct) + '%"></div>';
+            html += '<div class="mpct">' + (c.spentPct == null ? "—" : c.spentPct + "%") + "</div></div></div>";
+          }
+          html += "</div>";
+        }
+
+        root.innerHTML = html;
+      }
+
+      // React to host global updates (data arriving, theme changes).
+      window.addEventListener(
+        "openai:set_globals",
+        function (e) {
+          var g = (e && e.detail && e.detail.globals) || {};
+          if ("theme" in g) applyTheme(g.theme);
+          if ("toolOutput" in g) render();
+        },
+        { passive: true }
+      );
+
+      // Initial paint + short poll in case globals land after first frame.
+      if (window.openai && window.openai.theme) applyTheme(window.openai.theme);
+      render();
+      var tries = 0;
+      var poll = setInterval(function () {
+        tries++;
+        if (window.openai && window.openai.toolOutput) { applyTheme(window.openai.theme); render(); clearInterval(poll); }
+        if (tries > 40) clearInterval(poll);
+      }, 250);
+    </script>
+  </body>
+</html>
