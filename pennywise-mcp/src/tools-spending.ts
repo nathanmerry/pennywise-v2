@@ -1,13 +1,38 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
+  getActiveMonth,
   getRecentCycles,
   getSpendingAnalysis,
   getCategoryDrilldown,
+  getBudgetPace,
 } from "./pennywise-client.js";
 import { resolveRange, RANGE_PRESETS, type RangePreset } from "./range.js";
-import { analysisOutputShape, drilldownOutputShape } from "./analysis-schema.js";
+import { analysisOutputShape, drilldownOutputShape, paceOutputShape } from "./analysis-schema.js";
 import { textAndStructured, errorResult, describeError } from "./tool-helpers.js";
+
+/** Shape of the fields we read from GET /api/budget/pace/:month. */
+interface PaceResponse {
+  elapsedDays: number;
+  totalDaysInMonth: number;
+  elapsedRatio: number;
+  overall: {
+    flexibleBudget: number;
+    actualFlexibleSpendToDate: number;
+    expectedFlexibleSpendByNow: number;
+    remainingFlexibleBudget: number;
+    status: string;
+  };
+  categories: Array<{
+    categoryName: string;
+    monthlyBudget: number | null;
+    actualSpendToDate: number;
+    status: string;
+  }>;
+}
+
+const pct = (num: number, den: number): number | null =>
+  den > 0 ? Math.round((num / den) * 100) : null;
 
 const rangeEnum = z.enum(RANGE_PRESETS);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -140,6 +165,72 @@ export function registerSpendingTools(server: McpServer): void {
       } catch (err) {
         return errorResult(
           describeError(err, `No category found for id "${categoryId}" in that range.`),
+        );
+      }
+    },
+  );
+
+  server.registerTool(
+    "get_budget_pace",
+    {
+      title: "Budget pace — spend % vs cycle-elapsed %",
+      description:
+        "Chart-ready budget pace for a month: how much of the flexible budget has been " +
+        "spent (spentPct) versus how far through the pay cycle you are (elapsedPct) — e.g. " +
+        "£200 of a £400 budget → spentPct 50. Also returns per-category budget/spent/percent " +
+        "and an overall on-track status. Use this for 'am I on track this month', 'chart my " +
+        "budget spent vs how far through the month I am', or 'which categories are ahead of " +
+        "pace'. Read-only.",
+      inputSchema: {
+        month: z
+          .string()
+          .regex(/^\d{4}-\d{2}$/)
+          .optional()
+          .describe("Budget month YYYY-MM. Defaults to the current cycle if omitted."),
+      },
+      outputSchema: paceOutputShape,
+      annotations: { readOnlyHint: true },
+    },
+    async ({ month }) => {
+      let m = month;
+      try {
+        if (!m) m = await getActiveMonth();
+        const pace = (await getBudgetPace(m)) as PaceResponse;
+        const o = pace.overall;
+        const compact = {
+          month: m,
+          daysElapsed: pace.elapsedDays,
+          daysInCycle: pace.totalDaysInMonth,
+          elapsedPct: Math.round(pace.elapsedRatio * 100),
+          overall: {
+            flexibleBudget: o.flexibleBudget,
+            spent: o.actualFlexibleSpendToDate,
+            spentPct: pct(o.actualFlexibleSpendToDate, o.flexibleBudget),
+            expectedByNow: o.expectedFlexibleSpendByNow,
+            expectedPct: pct(o.expectedFlexibleSpendByNow, o.flexibleBudget),
+            remaining: o.remainingFlexibleBudget,
+            status: o.status,
+          },
+          categories: pace.categories.map((c) => ({
+            name: c.categoryName,
+            budget: c.monthlyBudget,
+            spent: c.actualSpendToDate,
+            spentPct: c.monthlyBudget ? pct(c.actualSpendToDate, c.monthlyBudget) : null,
+            status: c.status,
+          })),
+        };
+        const text =
+          `${compact.elapsedPct}% through the cycle; spent ${compact.overall.spentPct ?? "—"}% of the ` +
+          `flexible budget (£${compact.overall.spent} of £${compact.overall.flexibleBudget}). ` +
+          `Status: ${compact.overall.status}.`;
+        return textAndStructured(text, compact);
+      } catch (err) {
+        return errorResult(
+          describeError(
+            err,
+            `No budget is configured for ${m ?? "the current cycle"}, so there's no pace to ` +
+              `show. Set up the month's budget in the app first.`,
+          ),
         );
       }
     },

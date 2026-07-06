@@ -6,7 +6,7 @@ UX" is out of scope; the focus is **tool correctness** and **discovery precision
 
 ## 1. Automated tests (`npm test`)
 
-Runs on Node's built-in test runner via `tsx` (no extra deps). 59 tests across:
+Runs on Node's built-in test runner via `tsx` (no extra deps). 60 tests across:
 
 | File | Covers |
 | --- | --- |
@@ -15,7 +15,7 @@ Runs on Node's built-in test runner via `tsx` (no extra deps). 59 tests across:
 | `test/range.test.ts` | Pure range resolution: every preset (this/last/3/6 cycles, ytd, custom), week slicing (forces `preset=custom`), out-of-range / multi-cycle-week / not-enough-cycles errors, and `buildCycleWeeks`. |
 | `test/client.test.ts` | Backend client: resolves current month, fetches a month, raises `PennywiseApiError(404)` for a missing month (against an in-process mock backend). |
 | `test/client-down.test.ts` | Backend unreachable → `PennywiseApiError(0)` with a helpful message. |
-| `test/tools.test.ts` | Full path (real MCP client → auth → tools → mock backend): rejects bad tokens; advertises all 8 tools each with an `outputSchema` and correct read-only annotations; current-month returns `structuredContent` with the **full** ledger (proves validation doesn't strip data); specific/empty/missing/bad-format months. Plus raw-HTTP checks: unauthenticated → 401 "missing credentials", wrong token → 401 "invalid token", `/health` open, `GET /mcp` without a session → 404. |
+| `test/tools.test.ts` | Full path (real MCP client → auth → tools → mock backend): rejects bad tokens; advertises all 9 tools each with an `outputSchema` and correct read-only annotations; current-month returns `structuredContent` with the **full** ledger (proves validation doesn't strip data); specific/empty/missing/bad-format months. Plus raw-HTTP checks: unauthenticated → 401 "missing credentials", wrong token → 401 "invalid token", `/health` open, `GET /mcp` without a session → 404. |
 | `test/tools-analysis.test.ts` | `get_spending_analysis` end-to-end: presets resolve to the right window, week 2 → second 7-day slice with `preset=custom`, custom pass-through + missing-dates error, week-on-multi-cycle error, `compare`/`includeIgnored` forwarded, and `get_category_drilldown`. |
 | `test/tools-budget.test.ts` | Budget writes end-to-end: `set_category_budget` update-existing vs create (name→id), group budgets, percent targets, unknown-name lists options; `update_budget_month`; `add_planned_spend`/`add_fixed_commitment` update-by-name vs create with category+date resolution; friendly error writing to an unconfigured month. |
 
@@ -68,6 +68,7 @@ a new chat and run this set. Record which tool was selected and the arguments pa
 | "What did I spend in week 2 of this cycle?" | `get_spending_analysis` | `range` = `this_cycle`, `week` = 2 |
 | "Show my spending so far this year." | `get_spending_analysis` | `range` = `ytd` |
 | "Break down my Eating Out spending this cycle." | `get_spending_analysis` then `get_category_drilldown` | drilldown with that `categoryId` |
+| "Am I on track this month? Chart budget spent vs how far through the cycle I am." | `get_budget_pace` then plot | ChatGPT data-analysis draws spentPct vs elapsedPct |
 
 ### Writes — should call the tool, but confirm first
 

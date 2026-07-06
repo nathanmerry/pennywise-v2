@@ -28,6 +28,7 @@ ChatGPT ──(MCP over HTTPS, bearer/token auth)──▶ pennywise-mcp ──(
 | --- | --- | --- |
 | `get_spending_analysis` | `range` (`this_cycle`\|`last_cycle`\|`last_3_cycles`\|`last_6_cycles`\|`ytd`\|`custom`), optional `start`/`end`, `week` (1–6), `compare`, `includeIgnored` | Category breakdown (share, counts, trend), day-by-day series, top merchants, over a preset/custom/weekly range. |
 | `get_category_drilldown` | `categoryId` + same range args | One category's transactions, top merchants, series, monthly history, recurring vs one-off, weekday/weekend. |
+| `get_budget_pace` | optional `month` | **Chart-ready** pace: `spentPct` (flexible budget spent) vs `elapsedPct` (cycle elapsed), overall + per category. Feed straight to ChatGPT's data-analysis to plot a spend-vs-time chart. |
 
 **Write — budget "core knobs"** (create/update only, no deletes; flagged so ChatGPT confirms first)
 

@@ -66,4 +66,13 @@ describe("spending analysis tools", () => {
     assert.notEqual(r.isError, true);
     assert.equal((r.structuredContent as any).category.categoryId, "cat-eatingout");
   });
+
+  it("budget pace precomputes spent% and elapsed% (chart-ready)", async () => {
+    const r = await h.client.callTool({ name: "get_budget_pace", arguments: {} });
+    const sc = r.structuredContent as any;
+    assert.equal(sc.elapsedPct, 50); // elapsedRatio 0.5
+    assert.equal(sc.overall.spentPct, 53); // 607 / 1137 ≈ 53%
+    assert.equal(sc.overall.flexibleBudget, 1137);
+    assert.equal(sc.categories[0].spentPct, 47); // Eating Out 186 / 400 ≈ 47%
+  });
 });

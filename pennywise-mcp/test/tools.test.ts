@@ -63,6 +63,7 @@ describe("tools integration", () => {
       "get_spending_summary_for_month",
       "get_spending_analysis",
       "get_category_drilldown",
+      "get_budget_pace",
       "set_category_budget",
       "update_budget_month",
       "add_planned_spend",

@@ -68,3 +68,39 @@ export const drilldownOutputShape = {
   topMerchants: z.array(passthrough),
   transactions: z.array(passthrough),
 } as const;
+
+/**
+ * Chart-ready budget pace: the two headline percentages (budget spent vs cycle
+ * elapsed) plus per-category budget/spent, all precomputed so the model can plot
+ * directly. Percentages are 0–100 (null when there's no budget to divide by).
+ */
+export const paceOutputShape = {
+  month: z.string(),
+  daysElapsed: z.number(),
+  daysInCycle: z.number(),
+  /** How far through the cycle you are, 0–100. */
+  elapsedPct: z.number(),
+  overall: z
+    .object({
+      flexibleBudget: z.number(),
+      spent: z.number(),
+      /** Spent as a % of the flexible budget, 0–100 (the "50%" line). */
+      spentPct: z.number().nullable(),
+      expectedByNow: z.number(),
+      expectedPct: z.number().nullable(),
+      remaining: z.number(),
+      status: z.string(),
+    })
+    .passthrough(),
+  categories: z.array(
+    z
+      .object({
+        name: z.string(),
+        budget: z.number().nullable(),
+        spent: z.number(),
+        spentPct: z.number().nullable(),
+        status: z.string(),
+      })
+      .passthrough(),
+  ),
+} as const;

@@ -130,6 +130,11 @@ export async function getSpendingAnalysis(params: Record<string, string>): Promi
   return apiGet<unknown>(`/api/budget/analysis?${qs}`);
 }
 
+/** Budget pace for a month (spend-to-date vs expected-by-now, overall + per category). */
+export async function getBudgetPace(month: string): Promise<unknown> {
+  return apiGet<unknown>(`/api/budget/pace/${encodeURIComponent(month)}`);
+}
+
 /** Per-category drilldown for a range. */
 export async function getCategoryDrilldown(
   categoryId: string,

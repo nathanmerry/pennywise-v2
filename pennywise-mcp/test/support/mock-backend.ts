@@ -130,6 +130,37 @@ function drilldownFixture(categoryId: string, query: URLSearchParams) {
   };
 }
 
+function paceFixture(month: string) {
+  return {
+    month,
+    totalDaysInMonth: 28,
+    elapsedDays: 14,
+    remainingDays: 14,
+    elapsedRatio: 0.5,
+    isCurrentMonth: true,
+    isPastMonth: false,
+    isFutureMonth: false,
+    overall: {
+      flexibleBudget: 1137,
+      actualFlexibleSpendToDate: 607,
+      expectedFlexibleSpendByNow: 568.5,
+      paceDelta: 38.5,
+      remainingFlexibleBudget: 530,
+      safeDailySpend: 37.8,
+      weeklyAllowance: 265,
+      status: "on_track",
+      fixedPlanned: 1563,
+      actualFixedSpendToDate: 1466,
+    },
+    forecast: { projectedFlexibleSpend: 1214, projectedOverUnder: -77, isProjectedOver: true },
+    categories: [
+      { categoryId: "cat-eatingout", categoryName: "Eating Out", monthlyBudget: 400, actualSpendToDate: 186, expectedSpendByNow: 200, paceDelta: -14, remainingBudget: 214, status: "on_track" },
+      { categoryId: "cat-groceries", categoryName: "Groceries", monthlyBudget: 350, actualSpendToDate: 166, expectedSpendByNow: 175, paceDelta: -9, remainingBudget: 184, status: "on_track" },
+    ],
+    highlights: { topOverPaceCategories: [] },
+  };
+}
+
 export interface MockBackend {
   url: string;
   port: number;
@@ -171,6 +202,13 @@ export function startMockBackend(): Promise<MockBackend> {
 
     const drill = p.match(/^\/api\/budget\/analysis\/category\/(.+)$/);
     if (method === "GET" && drill) return send(200, drilldownFixture(decodeURIComponent(drill[1]), url.searchParams));
+
+    const pace = p.match(/^\/api\/budget\/pace\/([^/]+)$/);
+    if (method === "GET" && pace) {
+      const month = decodeURIComponent(pace[1]);
+      if (!SETUP_MONTHS.has(month)) return send(404, { error: "Budget month not found." });
+      return send(200, paceFixture(month));
+    }
 
     const exportMatch = p.match(/^\/api\/budget\/export\/(.+)$/);
     if (method === "GET" && exportMatch) {
