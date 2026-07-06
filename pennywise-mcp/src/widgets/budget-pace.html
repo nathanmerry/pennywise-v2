@@ -77,17 +77,21 @@
       .marker.low::after { left: 0; transform: none; }
       .marker.high::after { left: auto; right: 0; transform: none; }
 
-      .cats { }
-      .cats h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
-      .cat { display: grid; grid-template-columns: 1fr 130px; gap: 12px; align-items: center; padding: 7px 0; border-top: 1px solid var(--border); }
+      .cats h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+      .cat { padding: 10px 0; border-top: 1px solid var(--border); }
       .cat:first-of-type { border-top: none; }
-      .cat .name { font-weight: 550; }
-      .cat .amt { color: var(--muted); font-size: 12px; }
+      .cat .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 7px; }
+      .cat .name { font-weight: 560; }
+      .cat .amt { color: var(--muted); font-size: 12px; margin-top: 1px; }
       .cat .over { color: var(--bad); } .cat .under { color: var(--ok); }
-      .mini { position: relative; height: 8px; background: var(--track); border-radius: 4px; }
-      .mini .mfill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
-      .mini .mmark { position: absolute; top: -2px; bottom: -2px; width: 1.5px; background: var(--accent); opacity: .7; }
-      .mini .mpct { position: absolute; right: 0; top: -15px; font-size: 10.5px; color: var(--muted); }
+      .cat .cpct { font-size: 13px; font-weight: 650; white-space: nowrap; }
+      /* minified version of the main pace bar, one per category */
+      .bar { position: relative; height: 14px; background: var(--track); border-radius: 5px; }
+      .bar .bfill { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; transition: width .2s; }
+      .bar .bfill.full { border-radius: 5px; }
+      .bar .bfill.ok { background: var(--ok); } .bar .bfill.warn { background: var(--warn); }
+      .bar .bfill.bad { background: var(--bad); } .bar .bfill.muted { background: var(--grey); }
+      .bar .bmark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--accent); border-radius: 1px; }
       .empty { color: var(--muted); padding: 24px; text-align: center; }
     </style>
   </head>
@@ -154,21 +158,25 @@
         // categories
         var cats = (data.categories || []).slice().sort(function (a, b) { return (b.spent || 0) - (a.spent || 0); });
         if (cats.length) {
+          var elapsedMark = clamp(data.elapsedPct);
           html += '<div class="cats"><h3>By category</h3>';
           for (var i = 0; i < cats.length; i++) {
             var c = cats[i];
             var cst = STATUS[c.status] || STATUS.no_budget;
+            var hasBudget = c.budget != null;
             var cpct = c.spentPct == null ? 0 : clamp(c.spentPct);
-            var amt = c.budget != null ? money(c.spent) + " / " + money(c.budget) : money(c.spent) + " · no budget";
+            var amt = hasBudget ? money(c.spent) + " of " + money(c.budget) : money(c.spent) + " · no budget";
             var diff = "";
-            if (c.budget != null) {
+            if (hasBudget) {
               var rem = c.budget - c.spent;
-              diff = rem >= 0 ? ' <span class="under">' + money(rem) + " left</span>" : ' <span class="over">' + money(-rem) + " over</span>";
+              diff = rem >= 0 ? ' · <span class="under">' + money(rem) + " left</span>" : ' · <span class="over">' + money(-rem) + " over</span>";
             }
-            html += '<div class="cat"><div><div class="name">' + esc(c.name) + '</div><div class="amt">' + amt + diff + "</div></div>";
-            html += '<div class="mini"><div class="mfill ' + cst.cls + '" style="width:' + cpct + '%"></div>';
-            if (c.budget != null) html += '<div class="mmark" style="left:' + clamp(data.elapsedPct) + '%"></div>';
-            html += '<div class="mpct">' + (c.spentPct == null ? "—" : c.spentPct + "%") + "</div></div></div>";
+            html += '<div class="cat"><div class="top">';
+            html += '<div><div class="name">' + esc(c.name) + '</div><div class="amt">' + amt + diff + "</div></div>";
+            html += '<div class="cpct">' + (c.spentPct == null ? "—" : c.spentPct + "%") + "</div></div>";
+            html += '<div class="bar"><div class="bfill ' + (cpct >= 100 ? "full " : "") + cst.cls + '" style="width:' + cpct + '%"></div>';
+            if (hasBudget) html += '<div class="bmark" style="left:' + elapsedMark + '%"></div>';
+            html += "</div></div>";
           }
           html += "</div>";
         }

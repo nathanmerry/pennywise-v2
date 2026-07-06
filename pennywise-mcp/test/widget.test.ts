@@ -2,7 +2,7 @@ import { describe, it, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { startHarness, type Harness } from "./support/harness.js";
 
-const TEMPLATE_URI = "ui://widget/pennywise-budget-pace.html";
+const TEMPLATE_URI = "ui://widget/pennywise-budget-pace-v2.html";
 
 /** Verifies the ChatGPT Apps SDK wiring: template resource + tool→template link. */
 describe("budget pace widget (Apps SDK)", () => {

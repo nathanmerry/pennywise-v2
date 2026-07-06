@@ -13,7 +13,9 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
  * blocks external scripts/styles).
  */
 
-export const BUDGET_PACE_TEMPLATE_URI = "ui://widget/pennywise-budget-pace.html";
+// Versioned URI: bump the suffix whenever the widget HTML changes so ChatGPT's
+// host cache fetches the new template instead of serving a stale one.
+export const BUDGET_PACE_TEMPLATE_URI = "ui://widget/pennywise-budget-pace-v2.html";
 const MIME_TYPE = "text/html+skybridge";
 
 // Read once at startup. The .html lives beside this module in src/ (dev via tsx)
