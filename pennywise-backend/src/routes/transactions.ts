@@ -1,7 +1,9 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod/v4";
 import { prisma } from "../lib/prisma.js";
-import { expandCategoryIds, setTransactionCategories } from "../services/rules.js";
+import { expandCategoryIds, setTransactionCategories, applyRulesToTransaction } from "../services/rules.js";
+import { normalizeMerchant } from "../services/normalize.js";
 
 const router = Router();
 
@@ -81,6 +83,85 @@ router.get("/", async (req, res) => {
       totalPages: Math.ceil(total / limitNum),
     },
   });
+});
+
+// POST /api/transactions — create a manual transaction
+// Amount is entered POSITIVE; `direction` sets the stored sign (spend is stored
+// negative to match the reporting convention, income positive).
+const createTransactionSchema = z.object({
+  description: z.string().min(1),
+  amount: z.number().positive(),
+  direction: z.enum(["expense", "income"]).default("expense"),
+  transactionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  accountId: z.string().optional(),
+  merchantName: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  categoryIds: z.array(z.string()).optional(),
+  isIgnored: z.boolean().optional().default(false),
+  currency: z.string().optional(),
+});
+
+router.post("/", async (req, res) => {
+  const parsed = createTransactionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues });
+    return;
+  }
+  const d = parsed.data;
+
+  // Attach to the given account, or fall back to the first one.
+  const account = d.accountId
+    ? await prisma.account.findUnique({ where: { id: d.accountId } })
+    : await prisma.account.findFirst({ orderBy: { createdAt: "asc" } });
+  if (!account) {
+    res.status(400).json({
+      error: d.accountId
+        ? "Account not found"
+        : "No account exists to attach the transaction to. Connect a bank account first.",
+    });
+    return;
+  }
+
+  const signedAmount = d.direction === "income" ? d.amount : -d.amount;
+  const dateStr = d.transactionDate ?? new Date().toISOString().slice(0, 10);
+  const merchantName = d.merchantName ?? null;
+
+  const created = await prisma.transaction.create({
+    data: {
+      source: "manual",
+      sourceTransactionId: `manual-${randomUUID()}`,
+      accountId: account.id,
+      amount: signedAmount,
+      currency: d.currency ?? account.currency,
+      transactionDate: new Date(dateStr + "T00:00:00.000Z"),
+      description: d.description,
+      merchantName,
+      normalizedMerchant: normalizeMerchant(merchantName, d.description) || null,
+      pending: false,
+      note: d.note ?? null,
+      isIgnored: d.isIgnored,
+      ignoreSource: d.isIgnored ? "manual" : null,
+    },
+  });
+
+  // Explicit categories → set + lock so rules don't overwrite. Otherwise let the
+  // recurring rules auto-categorise it, exactly like a synced transaction.
+  if (d.categoryIds && d.categoryIds.length > 0) {
+    const expanded = await expandCategoryIds(d.categoryIds, "manual");
+    await setTransactionCategories(created.id, expanded);
+    await prisma.transaction.update({
+      where: { id: created.id },
+      data: { categoriesLockedByUser: true },
+    });
+  } else {
+    await applyRulesToTransaction(created.id);
+  }
+
+  const transaction = await prisma.transaction.findUniqueOrThrow({
+    where: { id: created.id },
+    include: transactionInclude,
+  });
+  res.status(201).json(transaction);
 });
 
 // PATCH /api/transactions/bulk — bulk update transactions

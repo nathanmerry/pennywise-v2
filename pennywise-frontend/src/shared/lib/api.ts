@@ -76,6 +76,25 @@ export function bulkUpdateTransactions(
   });
 }
 
+// Create a manual transaction. Amount is POSITIVE; `direction` sets the sign
+// server-side (expense stored negative, income positive).
+export function createTransaction(data: {
+  description: string;
+  amount: number;
+  direction?: "expense" | "income";
+  transactionDate?: string;
+  accountId?: string;
+  merchantName?: string | null;
+  categoryIds?: string[];
+  note?: string | null;
+  isIgnored?: boolean;
+}) {
+  return request<Transaction>("/transactions", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 // Categories
 export function fetchCategories() {
   return request<Category[]>("/categories");

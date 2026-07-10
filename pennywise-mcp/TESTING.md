@@ -6,7 +6,7 @@ UX" is out of scope; the focus is **tool correctness** and **discovery precision
 
 ## 1. Automated tests (`npm test`)
 
-Runs on Node's built-in test runner via `tsx` (no extra deps). 63 tests across:
+Runs on Node's built-in test runner via `tsx` (no extra deps). 69 tests across:
 
 | File | Covers |
 | --- | --- |
@@ -17,6 +17,7 @@ Runs on Node's built-in test runner via `tsx` (no extra deps). 63 tests across:
 | `test/client-down.test.ts` | Backend unreachable → `PennywiseApiError(0)` with a helpful message. |
 | `test/tools.test.ts` | Full path (real MCP client → auth → tools → mock backend): rejects bad tokens; advertises all 9 tools each with an `outputSchema` and correct read-only annotations; current-month returns `structuredContent` with the **full** ledger (proves validation doesn't strip data); specific/empty/missing/bad-format months. Plus raw-HTTP checks: unauthenticated → 401 "missing credentials", wrong token → 401 "invalid token", `/health` open, `GET /mcp` without a session → 404. |
 | `test/tools-analysis.test.ts` | `get_spending_analysis` end-to-end: presets resolve to the right window, week 2 → second 7-day slice with `preset=custom`, custom pass-through + missing-dates error, week-on-multi-cycle error, `compare`/`includeIgnored` forwarded, and `get_category_drilldown`. |
+| `test/tools-transactions.test.ts` | `add_transaction` end-to-end: basic expense (defaults), category name→id, account name→id + date pass-through, income + note + ignore, unknown category/account → friendly errors listing options. |
 | `test/widget.test.ts` | Apps SDK widget wiring: the `ui://widget/pennywise-budget-pace.html` resource is listed + readable as `text/html+skybridge`, the HTML is self-contained (reads `window.openai`, subscribes to `openai:set_globals`, no external scripts), and `get_budget_pace` links to it via `_meta["openai/outputTemplate"]`. |
 | `test/tools-budget.test.ts` | Budget writes end-to-end: `set_category_budget` update-existing vs create (name→id), group budgets, percent targets, unknown-name lists options; `update_budget_month`; `add_planned_spend`/`add_fixed_commitment` update-by-name vs create with category+date resolution; friendly error writing to an unconfigured month. |
 
@@ -81,6 +82,8 @@ These are `readOnlyHint: false`, so ChatGPT should confirm before running.
 | "Bump Eating Out to 10% of my flexible budget." | `set_category_budget` | `category` = "Eating Out", `amount` = 10, `type` = "percent" |
 | "Set my expected income to £3,500 and save 20%." | `update_budget_month` | `expectedIncome` = 3500, savings percent 20 |
 | "Add a £400 planned spend for flights on the 20th." | `add_planned_spend` | `name`, `amount` = 400, `plannedDate` |
+| "Log £12 cash I spent on lunch today." | `add_transaction` | `description`, `amount` = 12, `direction` = expense |
+| "Add £50 income — refund from Amazon." | `add_transaction` | `amount` = 50, `direction` = income |
 
 **What good looks like for writes:** ChatGPT confirms the specific change, calls the
 right tool with a resolved name, and reports back exactly what changed (created vs

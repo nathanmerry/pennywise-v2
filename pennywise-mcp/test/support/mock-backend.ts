@@ -37,6 +37,11 @@ const CATEGORIES = [
 
 const GROUPS = [{ id: "grp-1", name: "Essentials" }];
 
+const ACCOUNTS = [
+  { id: "acc-1", accountName: "Everyday", currency: "GBP", connection: { institutionName: "Monzo" } },
+  { id: "acc-2", accountName: "Savings", currency: "GBP", connection: { institutionName: "Monzo" } },
+];
+
 function budgetMonthFixture(month: string) {
   return {
     month,
@@ -198,6 +203,7 @@ export function startMockBackend(): Promise<MockBackend> {
     if (method === "GET" && p === "/api/budget/cycles") return send(200, { cycles: buildCycles() });
     if (method === "GET" && p === "/api/categories") return send(200, CATEGORIES);
     if (method === "GET" && p === "/api/budget/groups") return send(200, GROUPS);
+    if (method === "GET" && p === "/api/accounts") return send(200, ACCOUNTS);
     if (method === "GET" && p === "/api/budget/analysis") return send(200, analysisFixture(url.searchParams));
 
     const drill = p.match(/^\/api\/budget\/analysis\/category\/(.+)$/);
@@ -229,6 +235,8 @@ export function startMockBackend(): Promise<MockBackend> {
     if (method === "POST" || method === "PATCH") {
       const body = (await readBody(req)) as Record<string, unknown>;
       const echo = { id: `w${++writeSeq}`, ...body, _path: p, _method: method };
+      // Manual transaction create.
+      if (method === "POST" && p === "/api/transactions") return send(201, echo);
       // month must exist for the create-under-month routes
       const underMonth = p.match(/^\/api\/budget\/months\/([^/]+)\/(plans|planned|commitments)$/);
       if (method === "POST" && underMonth && !SETUP_MONTHS.has(decodeURIComponent(underMonth[1]))) {

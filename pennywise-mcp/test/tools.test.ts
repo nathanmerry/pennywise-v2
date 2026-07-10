@@ -68,6 +68,7 @@ describe("tools integration", () => {
       "update_budget_month",
       "add_planned_spend",
       "add_fixed_commitment",
+      "add_transaction",
     ]) {
       assert.ok(names.includes(expected), `missing tool ${expected}`);
     }

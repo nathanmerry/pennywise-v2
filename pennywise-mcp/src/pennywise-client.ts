@@ -188,6 +188,22 @@ export async function listGroups(): Promise<GroupRow[]> {
   return apiGet<GroupRow[]>(`/api/budget/groups`);
 }
 
+export interface AccountRow {
+  id: string;
+  accountName: string;
+  currency: string;
+  connection?: { institutionName?: string | null } | null;
+}
+
+export async function listAccounts(): Promise<AccountRow[]> {
+  return apiGet<AccountRow[]>(`/api/accounts`);
+}
+
+/** Create a manual transaction (POST /api/transactions). */
+export async function createTransaction(body: unknown): Promise<unknown> {
+  return apiSend("POST", `/api/transactions`, body);
+}
+
 export async function createCategoryPlan(month: string, body: unknown): Promise<unknown> {
   return apiSend("POST", `/api/budget/months/${encodeURIComponent(month)}/plans`, body);
 }

@@ -39,6 +39,12 @@ ChatGPT ──(MCP over HTTPS, bearer/token auth)──▶ pennywise-mcp ──(
 | `add_planned_spend` | `name`, `amount`, optional `month`, `plannedDate`, `category`, `budgetGroup`, `isEssential` | Add/update a planned one-off. |
 | `add_fixed_commitment` | `name`, `amount`, optional `month`, `dueDate`, `category` | Add/update a fixed commitment. |
 
+**Write — transactions**
+
+| Tool | Args | Effect |
+| --- | --- | --- |
+| `add_transaction` | `description`, `amount` (positive), optional `direction` (`expense`\|`income`), `date`, `category`, `account`, `merchant`, `note`, `ignore` | Record a manual transaction (e.g. cash spend). Amount is entered positive; the backend stores expense as negative to match the reporting convention. |
+
 ### Inline chart widget (ChatGPT Apps SDK)
 
 `get_budget_pace` also ships an **inline chart** that ChatGPT renders in the

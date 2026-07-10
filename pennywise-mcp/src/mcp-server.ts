@@ -5,6 +5,7 @@ import { spendingExportShape } from "./export-schema.js";
 import { jsonResult, errorResult, describeError } from "./tool-helpers.js";
 import { registerSpendingTools } from "./tools-spending.js";
 import { registerBudgetTools } from "./tools-budget.js";
+import { registerTransactionTools } from "./tools-transactions.js";
 import { registerBudgetPaceWidget } from "./widgets/budget-pace.js";
 
 const MONTH_RE = /^\d{4}-\d{2}$/;
@@ -110,6 +111,9 @@ export function buildServer(): McpServer {
 
   // --- Budget writes: core knobs, create/update only (no deletes) ---
   registerBudgetTools(server);
+
+  // --- Manual transaction entry ---
+  registerTransactionTools(server);
 
   return server;
 }

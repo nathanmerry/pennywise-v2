@@ -3,6 +3,7 @@ import {
   fetchTransactions,
   updateTransaction,
   bulkUpdateTransactions,
+  createTransaction,
   type TransactionFilters,
 } from "@/shared/lib/api";
 
@@ -25,6 +26,20 @@ export function useUpdateTransaction() {
     }) => updateTransaction(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
+export function useCreateTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createTransaction,
+    onSuccess: () => {
+      // A manual transaction shifts spend totals, so refresh the budget/spend views too.
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+      qc.invalidateQueries({ queryKey: ["currentBudgetOverview"] });
+      qc.invalidateQueries({ queryKey: ["budgetOverview"] });
+      qc.invalidateQueries({ queryKey: ["spendingBreakdown"] });
     },
   });
 }

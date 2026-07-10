@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { format, parseISO, startOfDay } from "date-fns";
-import { ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, Plus } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions } from "./hooks/use-transactions";
+import { useTransactions, useUpdateTransaction, useBulkUpdateTransactions, useCreateTransaction } from "./hooks/use-transactions";
 import { useCategories } from "@/shared/hooks/use-categories";
 import { useAccounts } from "@/shared/hooks/use-accounts";
 import { useCurrentBudgetOverview } from "@/shared/hooks/use-budget";
@@ -12,6 +12,7 @@ import { TransactionTable } from "./components/transaction-table";
 import { BulkNoteDialog } from "./components/bulk-note-dialog";
 import { BulkCategoryDialog } from "./components/bulk-category-dialog";
 import { BulkDateDialog } from "./components/bulk-date-dialog";
+import { AddTransactionDialog } from "./components/add-transaction-dialog";
 import { MobileTransactionsPage } from "./components/mobile/mobile-transactions-page";
 import { runAiCategorisation, type TransactionFilters, type AiCategorisationResult } from "@/shared/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,7 @@ export function TransactionsPage() {
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
   const [bulkDateOpen, setBulkDateOpen] = useState(false);
   const [pendingBulkIds, setPendingBulkIds] = useState<string[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { data, isLoading } = useTransactions(filters);
@@ -36,6 +38,7 @@ export function TransactionsPage() {
   const { data: overview } = useCurrentBudgetOverview();
   const updateTx = useUpdateTransaction();
   const bulkUpdateTx = useBulkUpdateTransactions();
+  const createTx = useCreateTransaction();
   const isMobile = useIsMobile();
 
   // On first load, default the date filter to "cycle start → today" so the page
@@ -111,6 +114,10 @@ export function TransactionsPage() {
               {aiResult.categoriesCreated > 0 && `, ${aiResult.categoriesCreated} new categories`}
             </span>
           )}
+          <Button size="sm" onClick={() => setAddOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add transaction
+          </Button>
           <Button
             onClick={handleAiCategorise}
             disabled={aiRunning}
@@ -238,6 +245,15 @@ export function TransactionsPage() {
             }
           );
         }}
+      />
+
+      <AddTransactionDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        accounts={accounts}
+        categories={categories}
+        isSaving={createTx.isPending}
+        onSave={(data) => createTx.mutate(data, { onSuccess: () => setAddOpen(false) })}
       />
     </div>
   );
