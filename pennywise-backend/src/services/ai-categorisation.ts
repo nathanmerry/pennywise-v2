@@ -266,7 +266,17 @@ async function callCategorisationModel(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    let detail = "";
+    try {
+      const errorBody = JSON.parse(errorText) as { error?: { message?: unknown } };
+      if (typeof errorBody.error?.message === "string") {
+        const message = errorBody.error.message.trim();
+        detail = `: ${message.length > 300 ? `${message.slice(0, 297)}...` : message}`;
+      }
+    } catch {
+      // Avoid including a potentially large HTML or JSON response in logs.
+    }
+    throw new Error(`OpenAI request failed (${response.status})${detail}`);
   }
 
   const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
@@ -279,7 +289,7 @@ async function callCategorisationModel(
   try {
     return JSON.parse(content) as AiResponse;
   } catch {
-    throw new Error(`Failed to parse OpenAI response as JSON: ${content}`);
+    throw new Error("OpenAI returned invalid JSON");
   }
 }
 
@@ -432,7 +442,7 @@ export async function runAiCategorisationBackfill(
     },
   });
 
-  logger.info({ runId: run.id, options }, "Starting AI categorisation backfill");
+  logger.info(`AI categorisation started${dryRun ? " (dry run)" : ""}`);
 
   try {
     const categoryTree = await getCategoryTree();
@@ -445,7 +455,7 @@ export async function runAiCategorisationBackfill(
     });
 
     if (transactions.length === 0) {
-      logger.info({ runId: run.id }, "No uncategorised transactions found");
+      logger.info("AI categorisation complete: nothing to categorise");
       await prisma.aiCategorisationRun.update({
         where: { id: run.id },
         data: { finishedAt: new Date(), transactionsConsidered: 0 },
@@ -466,8 +476,8 @@ export async function runAiCategorisationBackfill(
     const userPrompt = buildUserPrompt(transactionPayloads);
 
     logger.info(
-      { runId: run.id, transactionCount: transactions.length },
-      "Calling OpenAI for categorisation"
+      `AI categorisation: processing ${transactions.length} ` +
+      `transaction${transactions.length === 1 ? "" : "s"}`
     );
 
     const aiResponse = await callCategorisationModel(systemPrompt, userPrompt, model);
@@ -482,10 +492,7 @@ export async function runAiCategorisationBackfill(
       const validation = validateAiDecision(decision, existingCategoryIds);
 
       if (!validation.valid) {
-        logger.warn(
-          { runId: run.id, transactionId: decision.transactionId, error: validation.error },
-          "Invalid AI decision"
-        );
+        logger.warn(`AI categorisation skipped an invalid decision: ${validation.error}`);
         errors.push(`Transaction ${decision.transactionId}: ${validation.error}`);
 
         await prisma.aiCategorisationDecision.create({
@@ -504,11 +511,6 @@ export async function runAiCategorisationBackfill(
       }
 
       if (decision.confidence < minConfidence) {
-        logger.info(
-          { runId: run.id, transactionId: decision.transactionId, confidence: decision.confidence },
-          "Skipping low confidence decision"
-        );
-
         await prisma.aiCategorisationDecision.create({
           data: {
             runId: run.id,
@@ -582,22 +584,9 @@ export async function runAiCategorisationBackfill(
         });
 
         transactionsCategorised++;
-        logger.info(
-          {
-            runId: run.id,
-            transactionId: decision.transactionId,
-            decision: decision.decision,
-            categoryIds: finalCategoryIds,
-            dryRun,
-          },
-          "Transaction categorised"
-        );
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        logger.error(
-          { runId: run.id, transactionId: decision.transactionId, error: errorMessage },
-          "Failed to process decision"
-        );
+        logger.error(`AI categorisation could not process a decision: ${errorMessage}`);
         errors.push(`Transaction ${decision.transactionId}: ${errorMessage}`);
 
         await prisma.aiCategorisationDecision.create({
@@ -627,15 +616,9 @@ export async function runAiCategorisationBackfill(
     });
 
     logger.info(
-      {
-        runId: run.id,
-        transactionsConsidered: transactions.length,
-        transactionsCategorised,
-        categoriesCreated,
-        transactionsSkipped,
-        dryRun,
-      },
-      "AI categorisation backfill completed"
+      `AI categorisation complete: ${transactionsCategorised} categorised, ` +
+      `${transactionsSkipped} skipped, ${categoriesCreated} ` +
+      `categor${categoriesCreated === 1 ? "y" : "ies"} created`
     );
 
     return {
@@ -649,7 +632,7 @@ export async function runAiCategorisationBackfill(
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    logger.error({ runId: run.id, error: errorMessage }, "AI categorisation backfill failed");
+    logger.error(`AI categorisation failed: ${errorMessage}`);
 
     await prisma.aiCategorisationRun.update({
       where: { id: run.id },

@@ -672,7 +672,8 @@ export function BudgetRecommendationsPanel({
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Get personalized budget recommendations based on your last 4 months of spending.
-            Recommendations stay grounded in your actual behavior and keep each branch at one clean budgeting level.
+            Only categories already listed under Category Budgets will be considered, and the
+            recommended total will stay within your target flexible budget.
           </p>
           <div className="flex gap-2">
             <Button onClick={handleGenerate}>

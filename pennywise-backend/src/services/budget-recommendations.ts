@@ -152,6 +152,64 @@ function roundCurrency(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+function capRecommendationsToTarget(
+  categories: CategoryRecommendation[],
+  targetFlexibleBudget: number
+): { categories: CategoryRecommendation[]; totalRecommendedBudget: number; adjusted: boolean } {
+  const targetCents = Math.max(0, Math.round(targetFlexibleBudget * 100));
+  const recommendations = categories
+    .map((category, index) => ({
+      index,
+      cents: category.recommendedBudget === null
+        ? 0
+        : Math.max(0, Math.round(category.recommendedBudget * 100)),
+    }))
+    .filter((recommendation) => recommendation.cents > 0);
+  const totalCents = recommendations.reduce((sum, recommendation) => sum + recommendation.cents, 0);
+
+  if (totalCents <= targetCents) {
+    return {
+      categories,
+      totalRecommendedBudget: roundCurrency(totalCents / 100),
+      adjusted: false,
+    };
+  }
+
+  const scaled = recommendations.map((recommendation) => {
+    const exactCents = recommendation.cents * targetCents / totalCents;
+    const cents = Math.floor(exactCents);
+    return { ...recommendation, cents, remainder: exactCents - cents };
+  });
+
+  let centsToDistribute = targetCents - scaled.reduce((sum, recommendation) => sum + recommendation.cents, 0);
+  scaled.sort((a, b) => b.remainder - a.remainder);
+  for (const recommendation of scaled) {
+    if (centsToDistribute <= 0) break;
+    recommendation.cents++;
+    centsToDistribute--;
+  }
+
+  const centsByIndex = new Map(scaled.map((recommendation) => [recommendation.index, recommendation.cents]));
+  const adjustedCategories = categories.map((category, index) => {
+    if (!centsByIndex.has(index)) return category;
+
+    const recommendedBudget = (centsByIndex.get(index) ?? 0) / 100;
+    return {
+      ...category,
+      recommendedBudget,
+      recommendationStatus: "trimmed_for_savings" as const,
+      adjustmentVsAverage: roundCurrency(recommendedBudget - category.historicalAverage),
+      rationale: "Adjusted proportionally to keep all recommendations within the target flexible budget.",
+    };
+  });
+
+  return {
+    categories: adjustedCategories,
+    totalRecommendedBudget: roundCurrency(targetCents / 100),
+    adjusted: true,
+  };
+}
+
 function calculateMedian(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
@@ -367,11 +425,8 @@ async function buildResolvedRecommendationHistory(
   }
 
   const branchIds = new Set<string>();
-  for (const category of history.categories) {
-    branchIds.add(getRootCategoryId(category.categoryId, categoryTree, rootCache));
-  }
-  for (const branchId of manualChildBudgetIdsByBranch.keys()) {
-    branchIds.add(branchId);
+  for (const categoryId of currentBudgetMap.keys()) {
+    branchIds.add(getRootCategoryId(categoryId, categoryTree, rootCache));
   }
 
   const resolvedCategories: ResolvedHistoryCategory[] = [];
@@ -813,6 +868,7 @@ function buildAiPrompt(
 5. Trim where there is room. Variable and spiky categories can be trimmed more aggressively than stable essentials.
 6. Do not give generic finance advice. No 50/30/20 rules. No moralizing.
 7. Use hedged language. Say "suggested", "based on recent history", or "typical" rather than "optimal".
+8. The combined recommended budgets must not exceed the Target Flexible Budget.
 
 ## Output Format
 
@@ -853,7 +909,8 @@ ${JSON.stringify(categoryList, null, 2)}
 Generate realistic budget recommendations that:
 1. Stay close to historical averages for stable and lifestyle categories
 2. Trim discretionary categories if needed to approach the target flexible budget
-3. Explain the reasoning for each recommendation`;
+3. Keep the combined total equal to or below the target flexible budget
+4. Explain the reasoning for each recommendation`;
 
   return { system, user };
 }
@@ -1037,6 +1094,16 @@ export async function generateBudgetRecommendations(
     overallRationale = result.overallRationale;
   }
 
+  const cappedRecommendations = capRecommendationsToTarget(
+    categories,
+    context.targetFlexibleBudget
+  );
+  categories = cappedRecommendations.categories;
+  totalRecommendedBudget = cappedRecommendations.totalRecommendedBudget;
+  if (cappedRecommendations.adjusted) {
+    overallRationale = "Recommendations were adjusted proportionally to stay within your target flexible budget.";
+  }
+
   const uncoveredHighSpend: UncoveredHighSpend[] = history.categories
     .filter((category) => !category.hasBudget && category.shareOfFlexibleSpend >= 5)
     .map((category) => ({
@@ -1124,48 +1191,22 @@ export async function applyBudgetRecommendations(
 
   const budgetMonth = await prisma.budgetMonth.findUnique({
     where: { month },
+    include: {
+      categoryPlans: {
+        select: { categoryId: true },
+      },
+    },
   });
 
   if (!budgetMonth) {
     throw new Error(`Budget month ${month} not found`);
   }
 
-  const normalizedResponse = (
-    typeof run.normalizedResponse === "object" &&
-    run.normalizedResponse !== null &&
-    "branches" in run.normalizedResponse
-  )
-    ? run.normalizedResponse as { branches?: RecommendationBranch[] }
-    : {};
-
-  const branches = Array.isArray(normalizedResponse.branches)
-    ? normalizedResponse.branches
-    : [];
-  const branchByCategoryId = new Map<string, RecommendationBranch>();
-
-  for (const branch of branches) {
-    for (const categoryId of branch.recommendedCategoryIds) {
-      branchByCategoryId.set(categoryId, branch);
-    }
-  }
-
-  const childModeBranchIds = new Set<string>();
-  for (const selection of selections) {
-    if (!selection.apply) continue;
-    const branch = branchByCategoryId.get(selection.categoryId);
-    if (branch?.budgetLevel === "child") {
-      childModeBranchIds.add(branch.branchCategoryId);
-    }
-  }
-
-  for (const branchCategoryId of childModeBranchIds) {
-    await prisma.budgetCategoryPlan.deleteMany({
-      where: {
-        budgetMonthId: budgetMonth.id,
-        categoryId: branchCategoryId,
-      },
-    });
-  }
+  const existingCategoryIds = new Set(
+    budgetMonth.categoryPlans
+      .map((plan) => plan.categoryId)
+      .filter((categoryId): categoryId is string => categoryId !== null)
+  );
 
   let applied = 0;
   let skipped = 0;
@@ -1178,20 +1219,18 @@ export async function applyBudgetRecommendations(
 
     const budget = selection.editedBudget ?? selection.recommendedBudget;
 
-    await prisma.budgetCategoryPlan.upsert({
+    if (!existingCategoryIds.has(selection.categoryId)) {
+      throw new Error("Recommendations can only update existing category budgets");
+    }
+
+    await prisma.budgetCategoryPlan.update({
       where: {
         budgetMonthId_categoryId: {
           budgetMonthId: budgetMonth.id,
           categoryId: selection.categoryId,
         },
       },
-      update: {
-        targetValue: budget,
-        targetType: "fixed",
-      },
-      create: {
-        budgetMonthId: budgetMonth.id,
-        categoryId: selection.categoryId,
+      data: {
         targetValue: budget,
         targetType: "fixed",
       },

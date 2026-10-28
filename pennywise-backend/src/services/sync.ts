@@ -11,6 +11,7 @@ export function amountTolerance(amount: number): number {
 }
 
 export async function syncConnection(connectionId: string) {
+  logger.info(`Syncing Connection ${connectionId}`)
   const connection = await prisma.bankConnection.findUniqueOrThrow({
     where: { id: connectionId },
     include: { accounts: true },
@@ -43,10 +44,13 @@ export async function syncConnection(connectionId: string) {
     return { synced: 0, connectionId, status: "requires_reconnect" };
   }
 
-  // Fetch accounts from provider and upsert
+  // Fetch accounts from provider and upsert. Keep this response as the source of
+  // truth for which accounts can be synced: locally retained accounts may have
+  // since been closed or removed from the connection and their API IDs return 404.
   const providerAccounts = await truelayer.fetchAccounts(accessToken);
+  const accounts = [];
   for (const pa of providerAccounts) {
-    await prisma.account.upsert({
+    const account = await prisma.account.upsert({
       where: {
         connectionId_providerAccountId: {
           connectionId: connection.id,
@@ -59,18 +63,27 @@ export async function syncConnection(connectionId: string) {
         accountName: pa.display_name,
         accountType: pa.account_type,
         currency: pa.currency,
+        status: "active",
       },
       update: {
         accountName: pa.display_name,
         accountType: pa.account_type,
         currency: pa.currency,
+        status: "active",
       },
     });
+    accounts.push(account);
   }
 
-  // Reload accounts after upsert
-  const accounts = await prisma.account.findMany({
-    where: { connectionId: connection.id },
+  const currentProviderAccountIds = providerAccounts.map((account) => account.account_id);
+  await prisma.account.updateMany({
+    where: {
+      connectionId: connection.id,
+      ...(currentProviderAccountIds.length > 0
+        ? { providerAccountId: { notIn: currentProviderAccountIds } }
+        : {}),
+    },
+    data: { status: "inactive" },
   });
 
   let totalSynced = 0;

@@ -20,19 +20,18 @@ export function addMonthsToKey(month: string, delta: number): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 /** The pay cycle whose date range contains today, or the most recent past one. */
 export function findActiveCycle(cycles: PayCycleSummary[]): PayCycleSummary | null {
   if (cycles.length === 0) return null;
-  const today = todayIso();
-  const containing = cycles.find((c) => c.startInclusive <= today && today < c.endExclusive);
+  const now = Date.now();
+  const startTime = (cycle: PayCycleSummary) => new Date(cycle.startInclusive).getTime();
+  const endTime = (cycle: PayCycleSummary) => new Date(cycle.endExclusive).getTime();
+
+  const containing = cycles.find((cycle) => startTime(cycle) <= now && now < endTime(cycle));
   if (containing) return containing;
   const past = cycles
-    .filter((c) => c.startInclusive <= today)
-    .sort((a, b) => b.startInclusive.localeCompare(a.startInclusive));
+    .filter((cycle) => startTime(cycle) <= now)
+    .sort((a, b) => startTime(b) - startTime(a));
   return past[0] ?? cycles[cycles.length - 1] ?? null;
 }
 
