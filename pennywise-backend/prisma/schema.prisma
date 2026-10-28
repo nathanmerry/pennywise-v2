@@ -354,3 +354,16 @@ model BudgetRecommendationRun {
   @@index([month])
   @@map("budget_recommendation_runs")
 }
+
+model PushSubscription {
+  id              String   @id @default(cuid())
+  endpoint        String   @unique
+  p256dh          String
+  auth            String
+  lastAttemptDate String?  @map("last_attempt_date")
+  lastSentDate    String?  @map("last_sent_date")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("push_subscriptions")
+}

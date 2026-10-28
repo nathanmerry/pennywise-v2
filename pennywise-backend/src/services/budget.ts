@@ -109,6 +109,7 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     },
     select: {
       amount: true,
+      updatedTransactionAmount: true,
       categories: {
         where: { source: { not: "inherited" } },
         select: { categoryId: true },
@@ -121,7 +122,7 @@ export async function getBudgetOverview(month: string): Promise<BudgetOverview |
     where: {
       transactionDate: { gte: cycle.startInclusive, lt: cycle.endExclusive },
     },
-    select: { amount: true, isIgnored: true },
+    select: { amount: true, updatedTransactionAmount: true, isIgnored: true },
   });
 
   // Calculate totals

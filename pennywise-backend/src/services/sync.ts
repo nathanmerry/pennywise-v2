@@ -144,7 +144,7 @@ async function syncAccount(
     }
     if (!fetched) {
       logger.error({ accountId }, "All fetch windows failed due to SCA restrictions");
-      return 0;
+      throw new Error("Initial transaction sync incomplete: all fetch windows failed");
     }
   } else {
     logger.info({ accountId, providerAccountId, from: fromStr, to: toStr }, "Fetching transactions");

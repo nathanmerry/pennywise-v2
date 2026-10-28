@@ -19,6 +19,8 @@ import {
 } from "@/shared/hooks/use-connections";
 import { getAuthUrl, getReauthUrl } from "@/shared/lib/api";
 
+import { NotificationSettings } from "./components/notification-settings";
+
 export function ConnectionsPage() {
   const { data: connections = [], isLoading, refetch } = useConnections();
   const deleteConn = useDeleteConnection();
@@ -53,6 +55,8 @@ export function ConnectionsPage() {
           <ExternalLink className="ml-2 h-3 w-3" />
         </Button>
       </div>
+
+      <NotificationSettings />
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center text-muted-foreground">

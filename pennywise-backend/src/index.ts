@@ -13,6 +13,8 @@ import syncRoutes from "./routes/sync.js";
 import budgetRoutes from "./routes/budget.js";
 import adminRoutes from "./routes/admin.js";
 
+import pushRoutes from "./routes/push.js";
+
 const app = express();
 
 app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
@@ -27,6 +29,7 @@ app.use("/api/rules", ruleRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/budget", budgetRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/push", pushRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, timestamp: new Date().toISOString() });

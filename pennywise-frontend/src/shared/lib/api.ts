@@ -8,7 +8,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`API error ${res.status}: ${body}`);
+    throw Object.assign(new Error(`API error ${res.status}: ${body}`), { status: res.status });
   }
 
   return res.json() as Promise<T>;
@@ -1284,3 +1284,12 @@ export function applyBudgetRecommendations(
     body: JSON.stringify({ runId, selections }),
   });
 }
+
+// Push subscriptions are scoped to this browser/device.
+export const fetchPushPublicKey = () => request<{ publicKey: string }>("/push/public-key");
+export const registerPushSubscription = (subscription: PushSubscriptionJSON) =>
+  request<{ ok: boolean }>("/push/subscriptions", { method: "POST", body: JSON.stringify(subscription) });
+export const removePushSubscription = (endpoint: string) =>
+  request<{ ok: boolean }>("/push/subscriptions", { method: "DELETE", body: JSON.stringify({ endpoint }) });
+export const sendPushTest = (subscription: PushSubscriptionJSON) =>
+  request<{ ok: boolean }>("/push/test", { method: "POST", body: JSON.stringify(subscription) });

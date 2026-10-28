@@ -12,7 +12,11 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "cleanup:old-categories": "tsx scripts/cleanup-old-categories.ts",
-    "cleanup:posted-duplicates": "tsx scripts/remove-posted-duplicates.ts"
+    "cleanup:posted-duplicates": "tsx scripts/remove-posted-duplicates.ts",
+    "test": "node --import tsx --import ./test/setup.cjs --test test/*.test.ts",
+    "notifications:daily": "node dist/scripts/send-daily-notifications.js",
+    "test:integration": "node --import tsx --test test/push.integration.ts",
+    "pretest": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -28,12 +32,14 @@
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "prisma": "^7.6.0",
+    "web-push": "^3.6.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
+    "@types/web-push": "^3.6.4",
     "pino-pretty": "^13.1.3",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"

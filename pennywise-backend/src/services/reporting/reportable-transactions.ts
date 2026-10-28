@@ -74,7 +74,10 @@ async function fetchRawOutflows(filters: CategoryResolvedOutflowFilters): Promis
   return prisma.transaction.findMany({
     where: {
       transactionDate: { gte: filters.startDate, lte: filters.endDate },
-      amount: { lt: 0 },
+      OR: [
+        { updatedTransactionAmount: { lt: 0 } },
+        { updatedTransactionAmount: null, amount: { lt: 0 } },
+      ],
       ...(filters.includeIgnored ? {} : { isIgnored: false }),
       ...(filters.accountId ? { accountId: filters.accountId } : {}),
     },
