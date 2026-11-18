@@ -1,0 +1,264 @@
+{
+  "platform": "Pennywise",
+  "domain": "Personal finance: bank sync, transactions, budgeting, spending analysis, notifications and MCP",
+  "stack": "Node.js + TypeScript",
+  "depth": "balanced",
+  "current": "M02",
+  "phases": {
+    "1": "Foundations",
+    "2": "Building Blocks",
+    "3": "Design Problems",
+    "4": "Mastery"
+  },
+  "modules": [
+    {
+      "id": "M01",
+      "title": "Interview Reality",
+      "phase": 1,
+      "status": "skipped"
+    },
+    {
+      "id": "M02",
+      "title": "RPC, Consistency & Failure",
+      "phase": 1,
+      "status": "in_progress"
+    },
+    {
+      "id": "M03",
+      "title": "Non-Functional Characteristics",
+      "phase": 1,
+      "status": "todo"
+    },
+    {
+      "id": "M04",
+      "title": "Back-of-the-Envelope Estimation",
+      "phase": 1,
+      "status": "todo"
+    },
+    {
+      "id": "M05",
+      "title": "Building Blocks Intro + DNS",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M06",
+      "title": "Load Balancers",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M07",
+      "title": "Databases",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M08",
+      "title": "Key-Value Store",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M09",
+      "title": "CDN & Edge Caching",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M10",
+      "title": "Sequencer / Unique IDs",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M11",
+      "title": "Observability",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M12",
+      "title": "Distributed Cache",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M13",
+      "title": "Messaging Queue + Pub/Sub",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M14",
+      "title": "Rate Limiter",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M15",
+      "title": "Blob Store",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M16",
+      "title": "Distributed Search",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M17",
+      "title": "Task Scheduler",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M18",
+      "title": "Sharded Counters",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M19",
+      "title": "RESHADED + Wrap-up",
+      "phase": 2,
+      "status": "todo"
+    },
+    {
+      "id": "M20",
+      "title": "Design YouTube (media/streaming)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M21",
+      "title": "Design Quora (read-heavy Q&A)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M22",
+      "title": "Geospatial (Maps + Yelp + Uber)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M23",
+      "title": "Feeds & Fan-out (Twitter + Newsfeed + Instagram)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M24",
+      "title": "Mini-designs (TinyURL + Crawler + Typeahead)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M25",
+      "title": "Messaging (WhatsApp)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M26",
+      "title": "Collaboration (Google Docs)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M27",
+      "title": "Infra & Payments (Deployment + Payments)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M28",
+      "title": "AI Systems (ChatGPT + Data Infra + LLM bot + Code assistant)",
+      "phase": 3,
+      "status": "todo"
+    },
+    {
+      "id": "M29",
+      "title": "Lessons from Failures",
+      "phase": 4,
+      "status": "todo"
+    },
+    {
+      "id": "M30",
+      "title": "Case Studies + Interview Drills",
+      "phase": 4,
+      "status": "todo"
+    }
+  ],
+  "log": [
+    {
+      "date": "2026-07-07",
+      "module": "M01",
+      "note": "Skipped \u2014 Nathan already fluent in interview structure after 2 months interviewing."
+    },
+    {
+      "date": "2026-11-04",
+      "module": "M02",
+      "note": "Started fresh with Pennywise MCP manual transaction creation and a hypothetical lost HTTP response; inspected client, route, schema, tests and available deployment examples. Awaiting first reasoning attempt."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan proposed a GET to check whether the write was saved, returning success if found and retrying if absent, with a maximum of 3. Next: examine how the caller identifies the attempted write when the server-generated ID was not received."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan recognised that without a specific ID the caller cannot confidently identify its write; filtering could give a best guess, but is not reliable."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan proposed an idempotency key carried on the request, plus a table tracking processing steps so a retry with the same key can resume. Next challenge: atomicity between the business write and progress tracking."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan proposed commit/rollback so a failed step leaves no partial progress. Clarified that the expense insert and idempotency/progress update must share one database transaction: both commit or neither does. A committed transaction is not undone by losing its HTTP response."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan said to return the previously created expense if all business work has committed; if work remains, resume from the recorded point. Clarified that a checkpoint must represent committed work and any repeated remaining step must be safe. Next: concurrent attempts sharing a key."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "After a hint about a unique database constraint, Nathan proposed an atomic conditional insert on the expense using a predetermined key shared by both attempts. Clarification: insert only if no row with that key exists, not if the key is NULL; the database must enforce uniqueness atomically rather than a separate application check followed by insert. Retries reuse the key; separate intended expenses need different keys."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan concluded that a retry finding an existing expense should return that expense. For the same key with different input, he proposed storing core properties against the key and rejecting mismatches. Clarified that comparison should cover all inputs affecting the operation, using consistent normalisation. Ready to specify a focused lost-response regression test; implementation has not started."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan confirmed the lost-response retry should leave one saved expense (clarified: two requests, one expense). Test expectations discussed: one database expense and the retry returning its ID. Nathan concluded that a preliminary GET is unnecessary because the idempotent POST can be retried safely with the same key and input. This is a proposed design, not implemented or verified."
+    },
+    {
+      "date": "2026-11-12",
+      "module": "M02",
+      "note": "Nathan proposed returning an error after all attempts receive no response, without choosing a specific error. Explained that this is an unconfirmed outcome, not proof that the expense was not saved. Suggested user-facing wording: We could not confirm whether your expense was saved. Later retries must preserve the original key and input."
+    }
+  ],
+  "cloud_context": {
+    "provider": "AWS",
+    "status": "Integration starting; inspect current configuration before teaching related lessons",
+    "reported_at": "2026-11-04"
+  },
+  "session": {
+    "module": "M02",
+    "started_at": "2026-11-04",
+    "last_discussion": "Nathan proposed returning an error after all attempts receive no response, without choosing a specific error. Explained that this is an unconfirmed outcome, not proof that the expense was not saved. Suggested user-facing wording: We could not confirm whether your expense was saved. Later retries must preserve the original key and input.",
+    "next_unanswered_question": "Can you sketch the server handler in pseudocode, covering a new key, an existing key with matching input, and an existing key with different input, and showing the database transaction boundary?",
+    "module_path": "learning/modules/02-rpc-consistency-failure"
+  }
+}
